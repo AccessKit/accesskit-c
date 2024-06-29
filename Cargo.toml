@@ -13,6 +13,7 @@ crate-type = ["cdylib", "staticlib"]
 doc = false
 
 [features]
+capi = []
 cbindgen = []
 
 [dependencies]
@@ -34,3 +35,9 @@ opt-level = "z"
 codegen-units = 1
 panic = "abort"
 debug = true
+
+[package.metadata.capi.header]
+generation = false
+
+[package.metadata.capi.install.include]
+asset = [{from = "include/accesskit.h"}]
