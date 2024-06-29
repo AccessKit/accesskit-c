@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(accesskit_c)
+project(accesskit-c)
 
 option(ACCESSKIT_BUILD_HEADERS "Whether to build header files" OFF)
 option(ACCESSKIT_BUILD_LIBRARIES "Whether to build libraries" ON)
@@ -27,7 +27,7 @@ if (ACCESSKIT_BUILD_HEADERS)
     find_program(CLANG_FORMAT clang-format)
 
     add_custom_target(headers ALL
-        COMMAND ${RUSTUP} run nightly ${CBINDGEN} --crate accesskit_c --output accesskit.hpp "${CMAKE_SOURCE_DIR}"
+        COMMAND ${RUSTUP} run nightly ${CBINDGEN} --crate accesskit-c --output accesskit.hpp "${CMAKE_SOURCE_DIR}"
         COMMAND ${CLANG_FORMAT} -i accesskit.hpp
         COMMAND ${CMAKE_COMMAND} -E rename accesskit.hpp accesskit.h
         BYPRODUCTS accesskit.h

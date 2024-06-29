@@ -81,5 +81,5 @@ parse_deps = true
 include = ["accesskit"]
 
 [parse.expand]
-crates = ["accesskit_c"]
+crates = ["accesskit-c"]
 features = ["cbindgen"]

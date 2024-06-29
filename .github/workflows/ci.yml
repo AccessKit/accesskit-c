@@ -1,0 +1,105 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+name: CI
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    name: Check formatting
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install stable toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: cargo fmt
+        run: cargo fmt -- --check
+
+      - name: clang-format
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: 15
+
+  cargo-deny:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: EmbarkStudios/cargo-deny-action@v1
+
+  clippy:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest, windows-2019, ubuntu-latest]
+    name: cargo clippy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: restore cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: cargo clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+  find-msrv:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.step2.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: step2
+        run: echo "version=`cat Cargo.toml | sed -n 's/rust-version = "\(.*\)"/\1/p'`" >> "$GITHUB_OUTPUT"
+
+  test:
+    runs-on: ${{ matrix.os }}
+    needs: find-msrv
+    strategy:
+      matrix:
+        os: [macOS-latest, windows-2019, ubuntu-latest]
+    name: cargo test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install stable toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ needs.find-msrv.outputs.version }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: restore cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: cargo test
+        run: cargo test
+
+  check-c-header:
+    runs-on: ubuntu-latest
+    name: Check committed C header
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: install nightly toolchain
+      uses: dtolnay/rust-toolchain@nightly
+
+    - uses: dtolnay/install@master
+      with:
+        crate: cbindgen
+    - run: cmake -S . -B build -DACCESSKIT_BUILD_HEADERS=ON -DACCESSKIT_BUILD_LIBRARIES=OFF
+    - run: cmake --build build
+    - run: cmp build/accesskit.h include/accesskit.h
