@@ -23,8 +23,8 @@ py = import('python')
 
 python = py.find_installation()
 
-foundation_dep = dependency('appleframeworks', modules: 'Foundation',
-                            required: host_system in ['darwin', 'ios'])
+appkit_dep = dependency('appleframeworks', modules: 'AppKit',
+                        required: host_system == 'darwin')
 m_dep = cc.find_library('m', required: false)
 uiautomationcore_dep = cc.find_library('uiautomationcore',
                                        required: host_system == 'windows')
@@ -179,7 +179,7 @@ if host_system == 'windows'
   endforeach
 endif
 
-private_dependencies += [m_dep, foundation_dep, uiautomationcore_dep]
+private_dependencies += [m_dep, appkit_dep, uiautomationcore_dep]
 library_dependencies += other_library_dependencies
 library_dependencies += private_dependencies
 
