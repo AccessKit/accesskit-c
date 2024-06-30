@@ -1,0 +1,9 @@
+option('triplet',
+       type: 'string',
+       value: '',
+       description : 'Rust target triplet (if needed)')
+
+option('rustc-version',
+       type: 'string',
+       value: '',
+       description: 'Installed RustC version to use (if needed; currently only supported for Windows builds)')
