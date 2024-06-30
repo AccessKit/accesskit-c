@@ -26,6 +26,8 @@ python = py.find_installation()
 foundation_dep = dependency('appleframeworks', modules: 'Foundation',
                             required: host_system in ['darwin', 'ios'])
 m_dep = cc.find_library('m', required: false)
+uiautomationcore_dep = cc.find_library('uiautomationcore',
+                                       required: host_system == 'windows')
 
 library_dependencies_sole = []
 library_dependencies = library_dependencies_sole
@@ -177,7 +179,7 @@ if host_system == 'windows'
   endforeach
 endif
 
-private_dependencies += [m_dep, foundation_dep]
+private_dependencies += [m_dep, foundation_dep, uiautomationcore_dep]
 library_dependencies += other_library_dependencies
 library_dependencies += private_dependencies
 
@@ -372,18 +374,32 @@ else
 endif
 
 if get_option('default_library') in ['shared', 'both']
-  accesskit_c_shared_lib = shared_library(
-    accesskit_c_lib_name,
-    accesskit_c_dummy,
-    link_whole: accesskit_c_lib_internal,
-    link_args: link_args,
-    link_depends: symbol_list,
-    dependencies: library_dependencies,
-    include_directories: [includeinc],
-    vs_module_defs: symbol_list,
-    install: true,
-    version: project_version,
-  )
+  if host_system == 'windows'
+    accesskit_c_shared_lib = shared_library(
+      accesskit_c_lib_name,
+      accesskit_c_dummy,
+      link_with: accesskit_c_lib_internal,
+      link_args: link_args,
+      link_depends: symbol_list,
+      dependencies: library_dependencies,
+      include_directories: [includeinc],
+      vs_module_defs: symbol_list,
+      install: true,
+    )
+  else
+    accesskit_c_shared_lib = shared_library(
+      accesskit_c_lib_name,
+      accesskit_c_dummy,
+      link_whole: accesskit_c_lib_internal,
+      link_args: link_args,
+      link_depends: symbol_list,
+      dependencies: library_dependencies,
+      include_directories: [includeinc],
+      vs_module_defs: symbol_list,
+      install: true,
+      version: project_version,
+    )
+  endif
   if get_option('default_library') == 'shared'
     accesskit_c_lib = accesskit_c_shared_lib
   endif
@@ -394,7 +410,7 @@ if get_option('default_library') in ['static', 'both']
   accesskit_c_lib = custom_target(
     'accesskit-c-static',
     input: accesskit_c_lib_internal,
-    output: '@0@@1@.@2@'.format(lib_prefix, accesskit_c_lib_name, ext_static),
+    output: '@0@@1@.@2@'.format(lib_prefix, accesskit_c_lib_name, 'a'),
     command: [
       python,
       '-c',
