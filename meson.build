@@ -23,9 +23,6 @@ py = import('python')
 
 python = py.find_installation()
 
-# Extra env to pass to cargo
-extra_env = environment()
-
 foundation_dep = dependency('appleframeworks', modules: 'Foundation',
                             required: host_system in ['darwin', 'ios'])
 m_dep = cc.find_library('m', required: false)
@@ -205,59 +202,6 @@ endif
 
 accesskit_c_lib_name = 'accesskit-c-@0@'.format(api_version)
 
-if get_option('default_library') == 'static'
-  # Tell the pkg-config crate to think of all libraries as static
-  extra_env.set('PKG_CONFIG_ALL_STATIC', '1')
-  # Tell the system-deps crate to process linker flag for static deps
-  extra_env.set('SYSTEM_DEPS_LINK', 'static')
-  # Allow cross-compilation
-  extra_env.set('PKG_CONFIG_ALLOW_CROSS', 'static')
-endif
-
-pkg_config = find_program('pkgconfig', 'pkg-config', 'pkgconf', required: true)
-extra_env.set('PKG_CONFIG', pkg_config.full_path())
-
-pkg_config_path = get_option('pkg_config_path')
-if pkg_config_path.length() > 0
-  extra_env.set('PKG_CONFIG_PATH', pkg_config_path)
-endif
-
-# Make sure dependencies provided by the superproject are propagated
-# (or ours, if there are wraps within this tree)
-if meson.is_subproject()
-  extra_env.prepend('PKG_CONFIG_PATH', meson.global_build_root() / 'meson-uninstalled')
-endif
-
-# Set up the environment that will be fed to the build
-if host_system in ['darwin', 'ios']
-  var = 'DYLD_LIBRARY_PATH'
-elif host_system in ['windows', 'cygwin']
-  var = 'PATH'
-else
-  var = 'LD_LIBRARY_PATH'
-endif
-
-current_library_path = run_command(
-  [
-    python,
-    '-c',
-    'import os; print(os.environ["@0@"]) if "@0@" in os.environ else ""'.format(var)
-  ],
-  capture: true,
-  check: true,
-)
-
-extra_env.set(var, current_library_path.stdout().strip())
-extra_env.prepend(var, meson.project_build_root())
-if host_system == 'windows'
-  foreach i: library_dependencies_sole
-    x = i.get_variable(pkgconfig: 'bindir', default_value: '')
-    if x != ''
-      extra_env.prepend('PATH', x)
-    endif
-  endforeach
-endif
-
 includeinc = include_directories('include')
 
 # Set the suffixes up
@@ -322,7 +266,6 @@ rust_artifacts = custom_target(
   output: '@0@accesskit.@1@'.format(lib_prefix, ext_static),
   console: true,
   depend_files: library_sources,
-  env: extra_env,
   command: [
     cargo_wrapper,
     cargo_wrapper_args,
