@@ -4,7 +4,7 @@ These are the bindings to use AccessKit from other languages through FFI such as
 
 ## How to use in a CMake project
 
-Decompress an accesskit_c release and place the resulting folder somewhere either:
+Decompress an accesskit-c release and place the resulting folder somewhere either:
 
 - already known by CMake,
 - listed in your `CMAKE_PREFIX_PATH`,
@@ -22,7 +22,7 @@ Finally, link the library to your executable:
 target_link_libraries(hello_world PUBLIC accesskit)
 ```
 
-See [the `examples` directory](https://github.com/AccessKit/accesskit/tree/main/bindings/c/examples) for project integration examples.
+See [the `examples` directory](https://github.com/AccessKit/accesskit-c/tree/main/examples) for project integration examples.
 
 ## Building from source
 
@@ -31,7 +31,7 @@ Prerequisites:
 - [Rust](https://rustup.rs/)
 - [CMake](https://cmake.org/), version 3.20 or higher
 
-Once inside the `bindings/c` directory, CMake can be used like this to build the project:
+In the root directory of this repository, CMake can be used like this to build the project:
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -68,3 +68,13 @@ cmake -S . -B build -DACCESSKIT_BUILD_HEADERS=ON -DACCESSKIT_BUILD_LIBRARIES=OFF
 cmake --build build
 cmake --install build
 ```
+
+## License
+
+AccessKit is licensed under the [Apache License, Version 2.0](LICENSE-APACHE) or the [MIT license](LICENSE-MIT), at your option.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in AccessKit by you, as defined in the Apache License, shall be dual-licensed as above, without any additional terms or conditions.
+
+The list of authors for copyright purposes is in the [AUTHORS](AUTHORS) file.
+
+Significant portions of AccessKit are derived from Chromium and are covered by its [BSD-style license](LICENSE.chromium).
