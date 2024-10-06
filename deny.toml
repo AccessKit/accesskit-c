@@ -41,7 +41,11 @@ wildcards = "deny"
 highlight = "all"
 allow = []
 deny = []
-skip = []
+skip = [
+    "async-channel",
+    "event-listener",
+    "syn"
+]
 skip-tree = []
 
 [sources]
