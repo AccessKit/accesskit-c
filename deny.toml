@@ -42,9 +42,9 @@ highlight = "all"
 allow = []
 deny = []
 skip = [
-    "async-channel",
     "event-listener",
-    "syn"
+    "event-listener-strategy",
+    "syn",
 ]
 skip-tree = []
 
