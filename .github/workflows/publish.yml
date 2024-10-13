@@ -70,7 +70,7 @@ jobs:
           cmake --install build ${{ contains(matrix.target, 'msvc') && '--config Release' || '' }}
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
           path: lib
@@ -82,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           path: artifacts
 
@@ -98,7 +98,7 @@ jobs:
           mv accesskit-c accesskit-c-${{ github.ref_name }}
           zip -r accesskit-c-${{ github.ref_name }}.zip accesskit-c-${{ github.ref_name }}
 
-      - uses: AButler/upload-release-assets@v2.0
+      - uses: AButler/upload-release-assets@v3.0
         with:
           files: accesskit-c-${{ github.ref_name }}.zip
           repo-token: ${{ secrets.GITHUB_TOKEN }}
