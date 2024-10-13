@@ -27,12 +27,6 @@ jobs:
         with:
           clang-format-version: 15
 
-  cargo-deny:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: EmbarkStudios/cargo-deny-action@v1
-
   clippy:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -61,6 +55,33 @@ jobs:
       - uses: actions/checkout@v4
       - id: step2
         run: echo "version=`cat Cargo.toml | sed -n 's/rust-version = "\(.*\)"/\1/p'`" >> "$GITHUB_OUTPUT"
+
+  cargo-deny:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+          - target: i686-pc-windows-gnu
+          - target: i686-pc-windows-msvc
+          - target: i686-unknown-linux-gnu
+          - target: x86_64-apple-darwin
+          - target: x86_64-pc-windows-gnu
+          - target: x86_64-pc-windows-msvc
+          - target: x86_64-unknown-linux-gnu
+          - target: x86_64-unknown-linux-musl
+
+    name: cargo-deny ${{ matrix.target }}
+    runs-on: ubuntu-22.04
+    needs: find-msrv
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v1
+        with:
+          rust-version: ${{ needs.find-msrv.outputs.version }}
+          log-level: error
+          command: check
+          arguments: --target  ${{ matrix.target }}
 
   test:
     runs-on: ${{ matrix.os }}
