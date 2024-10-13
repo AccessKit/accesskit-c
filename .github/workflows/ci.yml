@@ -23,7 +23,7 @@ jobs:
         run: cargo fmt -- --check
 
       - name: clang-format
-        uses: jidicula/clang-format-action@v4.11.0
+        uses: jidicula/clang-format-action@v4.13.0
         with:
           clang-format-version: 15
 
@@ -76,7 +76,7 @@ jobs:
     needs: find-msrv
     steps:
       - uses: actions/checkout@v4
-      - uses: EmbarkStudios/cargo-deny-action@v1
+      - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           rust-version: ${{ needs.find-msrv.outputs.version }}
           log-level: error
