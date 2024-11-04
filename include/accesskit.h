@@ -19,9 +19,6 @@
 
 /**
  * An action to be taken on an accessibility node.
- *
- * In contrast to [`DefaultActionVerb`], these describe what happens to the
- * object, e.g. "focus".
  */
 enum accesskit_action
 #ifdef __cplusplus
@@ -29,9 +26,9 @@ enum accesskit_action
 #endif  // __cplusplus
 {
   /**
-   * Do the default action for an object, typically this means "click".
+   * Do the equivalent of a single click or tap.
    */
-  ACCESSKIT_ACTION_DEFAULT,
+  ACCESSKIT_ACTION_CLICK,
   ACCESSKIT_ACTION_FOCUS,
   ACCESSKIT_ACTION_BLUR,
   ACCESSKIT_ACTION_COLLAPSE,
@@ -130,40 +127,6 @@ enum accesskit_auto_complete
 };
 #ifndef __cplusplus
 typedef uint8_t accesskit_auto_complete;
-#endif  // __cplusplus
-
-/**
- * Describes the action that will be performed on a given node when
- * executing the default action, which is a click.
- *
- * In contrast to [`Action`], these describe what the user can do on the
- * object, e.g. "press", not what happens to the object as a result.
- * Only one verb can be used at a time to describe the default action.
- */
-enum accesskit_default_action_verb
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_DEFAULT_ACTION_VERB_CLICK,
-  ACCESSKIT_DEFAULT_ACTION_VERB_FOCUS,
-  ACCESSKIT_DEFAULT_ACTION_VERB_CHECK,
-  ACCESSKIT_DEFAULT_ACTION_VERB_UNCHECK,
-  /**
-   * A click will be performed on one of the node's ancestors.
-   * This happens when the node itself is not clickable, but one of its
-   * ancestors has click handlers attached which are able to capture the click
-   * as it bubbles up.
-   */
-  ACCESSKIT_DEFAULT_ACTION_VERB_CLICK_ANCESTOR,
-  ACCESSKIT_DEFAULT_ACTION_VERB_JUMP,
-  ACCESSKIT_DEFAULT_ACTION_VERB_OPEN,
-  ACCESSKIT_DEFAULT_ACTION_VERB_PRESS,
-  ACCESSKIT_DEFAULT_ACTION_VERB_SELECT,
-  ACCESSKIT_DEFAULT_ACTION_VERB_UNSELECT,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_default_action_verb;
 #endif  // __cplusplus
 
 enum accesskit_has_popup
@@ -269,7 +232,7 @@ enum accesskit_role
 #endif  // __cplusplus
 {
   ACCESSKIT_ROLE_UNKNOWN,
-  ACCESSKIT_ROLE_INLINE_TEXT_BOX,
+  ACCESSKIT_ROLE_TEXT_RUN,
   ACCESSKIT_ROLE_CELL,
   ACCESSKIT_ROLE_LABEL,
   ACCESSKIT_ROLE_IMAGE,
@@ -573,8 +536,6 @@ typedef struct accesskit_macos_subclassing_adapter
 
 typedef struct accesskit_node accesskit_node;
 
-typedef struct accesskit_node_builder accesskit_node_builder;
-
 typedef struct accesskit_tree accesskit_tree;
 
 typedef struct accesskit_tree_update accesskit_tree_update;
@@ -704,16 +665,6 @@ typedef struct accesskit_opt_live {
   bool has_value;
   accesskit_live value;
 } accesskit_opt_live;
-
-/**
- * Represents an optional value.
- *
- * If `has_value` is false, do not read the `value` field.
- */
-typedef struct accesskit_opt_default_action_verb {
-  bool has_value;
-  accesskit_default_action_verb value;
-} accesskit_opt_default_action_verb;
 
 /**
  * Represents an optional value.
@@ -1017,485 +968,308 @@ typedef struct accesskit_opt_lresult {
 extern "C" {
 #endif  // __cplusplus
 
-void accesskit_node_free(struct accesskit_node *node);
-
 accesskit_role accesskit_node_role(const struct accesskit_node *node);
 
-accesskit_role accesskit_node_builder_role(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_role(struct accesskit_node_builder *builder,
-                                     accesskit_role value);
+void accesskit_node_set_role(struct accesskit_node *node, accesskit_role value);
 
 bool accesskit_node_supports_action(const struct accesskit_node *node,
                                     accesskit_action action);
 
-bool accesskit_node_builder_supports_action(
-    const struct accesskit_node_builder *builder, accesskit_action action);
+void accesskit_node_add_action(struct accesskit_node *node,
+                               accesskit_action action);
 
-void accesskit_node_builder_add_action(struct accesskit_node_builder *builder,
-                                       accesskit_action action);
+void accesskit_node_remove_action(struct accesskit_node *node,
+                                  accesskit_action action);
 
-void accesskit_node_builder_remove_action(
-    struct accesskit_node_builder *builder, accesskit_action action);
-
-void accesskit_node_builder_clear_actions(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_is_hovered(const struct accesskit_node *node);
+void accesskit_node_clear_actions(struct accesskit_node *node);
 
 bool accesskit_node_is_hidden(const struct accesskit_node *node);
 
+void accesskit_node_set_hidden(struct accesskit_node *node);
+
+void accesskit_node_clear_hidden(struct accesskit_node *node);
+
 bool accesskit_node_is_linked(const struct accesskit_node *node);
+
+void accesskit_node_set_linked(struct accesskit_node *node);
+
+void accesskit_node_clear_linked(struct accesskit_node *node);
 
 bool accesskit_node_is_multiselectable(const struct accesskit_node *node);
 
+void accesskit_node_set_multiselectable(struct accesskit_node *node);
+
+void accesskit_node_clear_multiselectable(struct accesskit_node *node);
+
 bool accesskit_node_is_required(const struct accesskit_node *node);
+
+void accesskit_node_set_required(struct accesskit_node *node);
+
+void accesskit_node_clear_required(struct accesskit_node *node);
 
 bool accesskit_node_is_visited(const struct accesskit_node *node);
 
+void accesskit_node_set_visited(struct accesskit_node *node);
+
+void accesskit_node_clear_visited(struct accesskit_node *node);
+
 bool accesskit_node_is_busy(const struct accesskit_node *node);
+
+void accesskit_node_set_busy(struct accesskit_node *node);
+
+void accesskit_node_clear_busy(struct accesskit_node *node);
 
 bool accesskit_node_is_live_atomic(const struct accesskit_node *node);
 
+void accesskit_node_set_live_atomic(struct accesskit_node *node);
+
+void accesskit_node_clear_live_atomic(struct accesskit_node *node);
+
 bool accesskit_node_is_modal(const struct accesskit_node *node);
+
+void accesskit_node_set_modal(struct accesskit_node *node);
+
+void accesskit_node_clear_modal(struct accesskit_node *node);
 
 bool accesskit_node_is_touch_transparent(const struct accesskit_node *node);
 
+void accesskit_node_set_touch_transparent(struct accesskit_node *node);
+
+void accesskit_node_clear_touch_transparent(struct accesskit_node *node);
+
 bool accesskit_node_is_read_only(const struct accesskit_node *node);
+
+void accesskit_node_set_read_only(struct accesskit_node *node);
+
+void accesskit_node_clear_read_only(struct accesskit_node *node);
 
 bool accesskit_node_is_disabled(const struct accesskit_node *node);
 
+void accesskit_node_set_disabled(struct accesskit_node *node);
+
+void accesskit_node_clear_disabled(struct accesskit_node *node);
+
 bool accesskit_node_is_bold(const struct accesskit_node *node);
+
+void accesskit_node_set_bold(struct accesskit_node *node);
+
+void accesskit_node_clear_bold(struct accesskit_node *node);
 
 bool accesskit_node_is_italic(const struct accesskit_node *node);
 
+void accesskit_node_set_italic(struct accesskit_node *node);
+
+void accesskit_node_clear_italic(struct accesskit_node *node);
+
 bool accesskit_node_clips_children(const struct accesskit_node *node);
+
+void accesskit_node_set_clips_children(struct accesskit_node *node);
+
+void accesskit_node_clear_clips_children(struct accesskit_node *node);
 
 bool accesskit_node_is_line_breaking_object(const struct accesskit_node *node);
 
+void accesskit_node_set_is_line_breaking_object(struct accesskit_node *node);
+
+void accesskit_node_clear_is_line_breaking_object(struct accesskit_node *node);
+
 bool accesskit_node_is_page_breaking_object(const struct accesskit_node *node);
+
+void accesskit_node_set_is_page_breaking_object(struct accesskit_node *node);
+
+void accesskit_node_clear_is_page_breaking_object(struct accesskit_node *node);
 
 bool accesskit_node_is_spelling_error(const struct accesskit_node *node);
 
+void accesskit_node_set_is_spelling_error(struct accesskit_node *node);
+
+void accesskit_node_clear_is_spelling_error(struct accesskit_node *node);
+
 bool accesskit_node_is_grammar_error(const struct accesskit_node *node);
+
+void accesskit_node_set_is_grammar_error(struct accesskit_node *node);
+
+void accesskit_node_clear_is_grammar_error(struct accesskit_node *node);
 
 bool accesskit_node_is_search_match(const struct accesskit_node *node);
 
+void accesskit_node_set_is_search_match(struct accesskit_node *node);
+
+void accesskit_node_clear_is_search_match(struct accesskit_node *node);
+
 bool accesskit_node_is_suggestion(const struct accesskit_node *node);
 
-bool accesskit_node_builder_is_hovered(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_is_suggestion(struct accesskit_node *node);
 
-void accesskit_node_builder_set_hovered(struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_hovered(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_hidden(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_hidden(struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_hidden(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_linked(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_linked(struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_linked(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_multiselectable(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_multiselectable(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_multiselectable(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_required(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_required(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_required(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_visited(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_visited(struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_visited(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_busy(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_busy(struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_busy(struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_live_atomic(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_live_atomic(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_live_atomic(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_modal(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_modal(struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_modal(struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_touch_transparent(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_touch_transparent(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_touch_transparent(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_read_only(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_read_only(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_read_only(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_disabled(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_disabled(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_disabled(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_bold(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_bold(struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_bold(struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_italic(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_italic(struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_italic(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_clips_children(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_clips_children(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_clips_children(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_line_breaking_object(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_is_line_breaking_object(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_is_line_breaking_object(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_page_breaking_object(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_is_page_breaking_object(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_is_page_breaking_object(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_spelling_error(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_is_spelling_error(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_is_spelling_error(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_grammar_error(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_is_grammar_error(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_is_grammar_error(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_search_match(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_is_search_match(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_is_search_match(
-    struct accesskit_node_builder *builder);
-
-bool accesskit_node_builder_is_suggestion(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_is_suggestion(
-    struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_clear_is_suggestion(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_is_suggestion(struct accesskit_node *node);
 
 struct accesskit_node_ids accesskit_node_children(
     const struct accesskit_node *node);
 
-struct accesskit_node_ids accesskit_node_builder_children(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_children(struct accesskit_node_builder *builder,
-                                         size_t length,
-                                         const accesskit_node_id *values);
+void accesskit_node_set_children(struct accesskit_node *node, size_t length,
+                                 const accesskit_node_id *values);
 
-void accesskit_node_builder_push_child(struct accesskit_node_builder *builder,
-                                       accesskit_node_id item);
+void accesskit_node_push_child(struct accesskit_node *node,
+                               accesskit_node_id item);
 
-void accesskit_node_builder_clear_children(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_children(struct accesskit_node *node);
 
 struct accesskit_node_ids accesskit_node_controls(
     const struct accesskit_node *node);
 
-struct accesskit_node_ids accesskit_node_builder_controls(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_controls(struct accesskit_node_builder *builder,
-                                         size_t length,
-                                         const accesskit_node_id *values);
+void accesskit_node_set_controls(struct accesskit_node *node, size_t length,
+                                 const accesskit_node_id *values);
 
-void accesskit_node_builder_push_controlled(
-    struct accesskit_node_builder *builder, accesskit_node_id item);
+void accesskit_node_push_controlled(struct accesskit_node *node,
+                                    accesskit_node_id item);
 
-void accesskit_node_builder_clear_controls(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_controls(struct accesskit_node *node);
 
 struct accesskit_node_ids accesskit_node_details(
     const struct accesskit_node *node);
 
-struct accesskit_node_ids accesskit_node_builder_details(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_details(struct accesskit_node_builder *builder,
-                                        size_t length,
-                                        const accesskit_node_id *values);
+void accesskit_node_set_details(struct accesskit_node *node, size_t length,
+                                const accesskit_node_id *values);
 
-void accesskit_node_builder_push_detail(struct accesskit_node_builder *builder,
-                                        accesskit_node_id item);
+void accesskit_node_push_detail(struct accesskit_node *node,
+                                accesskit_node_id item);
 
-void accesskit_node_builder_clear_details(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_details(struct accesskit_node *node);
 
 struct accesskit_node_ids accesskit_node_described_by(
     const struct accesskit_node *node);
 
-struct accesskit_node_ids accesskit_node_builder_described_by(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_described_by(
-    struct accesskit_node_builder *builder, size_t length,
-    const accesskit_node_id *values);
+void accesskit_node_set_described_by(struct accesskit_node *node, size_t length,
+                                     const accesskit_node_id *values);
 
-void accesskit_node_builder_push_described_by(
-    struct accesskit_node_builder *builder, accesskit_node_id item);
+void accesskit_node_push_described_by(struct accesskit_node *node,
+                                      accesskit_node_id item);
 
-void accesskit_node_builder_clear_described_by(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_described_by(struct accesskit_node *node);
 
 struct accesskit_node_ids accesskit_node_flow_to(
     const struct accesskit_node *node);
 
-struct accesskit_node_ids accesskit_node_builder_flow_to(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_flow_to(struct accesskit_node_builder *builder,
-                                        size_t length,
-                                        const accesskit_node_id *values);
+void accesskit_node_set_flow_to(struct accesskit_node *node, size_t length,
+                                const accesskit_node_id *values);
 
-void accesskit_node_builder_push_flow_to(struct accesskit_node_builder *builder,
-                                         accesskit_node_id item);
+void accesskit_node_push_flow_to(struct accesskit_node *node,
+                                 accesskit_node_id item);
 
-void accesskit_node_builder_clear_flow_to(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_flow_to(struct accesskit_node *node);
 
 struct accesskit_node_ids accesskit_node_labelled_by(
     const struct accesskit_node *node);
 
-struct accesskit_node_ids accesskit_node_builder_labelled_by(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_labelled_by(
-    struct accesskit_node_builder *builder, size_t length,
-    const accesskit_node_id *values);
+void accesskit_node_set_labelled_by(struct accesskit_node *node, size_t length,
+                                    const accesskit_node_id *values);
 
-void accesskit_node_builder_push_labelled_by(
-    struct accesskit_node_builder *builder, accesskit_node_id item);
+void accesskit_node_push_labelled_by(struct accesskit_node *node,
+                                     accesskit_node_id item);
 
-void accesskit_node_builder_clear_labelled_by(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_labelled_by(struct accesskit_node *node);
 
 struct accesskit_node_ids accesskit_node_owns(
     const struct accesskit_node *node);
 
-struct accesskit_node_ids accesskit_node_builder_owns(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_owns(struct accesskit_node_builder *builder,
-                                     size_t length,
-                                     const accesskit_node_id *values);
+void accesskit_node_set_owns(struct accesskit_node *node, size_t length,
+                             const accesskit_node_id *values);
 
-void accesskit_node_builder_push_owned(struct accesskit_node_builder *builder,
-                                       accesskit_node_id item);
+void accesskit_node_push_owned(struct accesskit_node *node,
+                               accesskit_node_id item);
 
-void accesskit_node_builder_clear_owns(struct accesskit_node_builder *builder);
+void accesskit_node_clear_owns(struct accesskit_node *node);
 
 struct accesskit_node_ids accesskit_node_radio_group(
     const struct accesskit_node *node);
 
-struct accesskit_node_ids accesskit_node_builder_radio_group(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_radio_group(
-    struct accesskit_node_builder *builder, size_t length,
-    const accesskit_node_id *values);
+void accesskit_node_set_radio_group(struct accesskit_node *node, size_t length,
+                                    const accesskit_node_id *values);
 
-void accesskit_node_builder_push_to_radio_group(
-    struct accesskit_node_builder *builder, accesskit_node_id item);
+void accesskit_node_push_to_radio_group(struct accesskit_node *node,
+                                        accesskit_node_id item);
 
-void accesskit_node_builder_clear_radio_group(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_radio_group(struct accesskit_node *node);
 
 struct accesskit_opt_node_id accesskit_node_active_descendant(
     const struct accesskit_node *node);
 
-struct accesskit_opt_node_id accesskit_node_builder_active_descendant(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_active_descendant(struct accesskit_node *node,
+                                          accesskit_node_id value);
 
-void accesskit_node_builder_set_active_descendant(
-    struct accesskit_node_builder *builder, accesskit_node_id value);
-
-void accesskit_node_builder_clear_active_descendant(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_active_descendant(struct accesskit_node *node);
 
 struct accesskit_opt_node_id accesskit_node_error_message(
     const struct accesskit_node *node);
 
-struct accesskit_opt_node_id accesskit_node_builder_error_message(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_error_message(struct accesskit_node *node,
+                                      accesskit_node_id value);
 
-void accesskit_node_builder_set_error_message(
-    struct accesskit_node_builder *builder, accesskit_node_id value);
-
-void accesskit_node_builder_clear_error_message(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_error_message(struct accesskit_node *node);
 
 struct accesskit_opt_node_id accesskit_node_in_page_link_target(
     const struct accesskit_node *node);
 
-struct accesskit_opt_node_id accesskit_node_builder_in_page_link_target(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_in_page_link_target(struct accesskit_node *node,
+                                            accesskit_node_id value);
 
-void accesskit_node_builder_set_in_page_link_target(
-    struct accesskit_node_builder *builder, accesskit_node_id value);
-
-void accesskit_node_builder_clear_in_page_link_target(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_in_page_link_target(struct accesskit_node *node);
 
 struct accesskit_opt_node_id accesskit_node_member_of(
     const struct accesskit_node *node);
 
-struct accesskit_opt_node_id accesskit_node_builder_member_of(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_member_of(struct accesskit_node *node,
+                                  accesskit_node_id value);
 
-void accesskit_node_builder_set_member_of(
-    struct accesskit_node_builder *builder, accesskit_node_id value);
-
-void accesskit_node_builder_clear_member_of(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_member_of(struct accesskit_node *node);
 
 struct accesskit_opt_node_id accesskit_node_next_on_line(
     const struct accesskit_node *node);
 
-struct accesskit_opt_node_id accesskit_node_builder_next_on_line(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_next_on_line(struct accesskit_node *node,
+                                     accesskit_node_id value);
 
-void accesskit_node_builder_set_next_on_line(
-    struct accesskit_node_builder *builder, accesskit_node_id value);
-
-void accesskit_node_builder_clear_next_on_line(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_next_on_line(struct accesskit_node *node);
 
 struct accesskit_opt_node_id accesskit_node_previous_on_line(
     const struct accesskit_node *node);
 
-struct accesskit_opt_node_id accesskit_node_builder_previous_on_line(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_previous_on_line(struct accesskit_node *node,
+                                         accesskit_node_id value);
 
-void accesskit_node_builder_set_previous_on_line(
-    struct accesskit_node_builder *builder, accesskit_node_id value);
-
-void accesskit_node_builder_clear_previous_on_line(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_previous_on_line(struct accesskit_node *node);
 
 struct accesskit_opt_node_id accesskit_node_popup_for(
     const struct accesskit_node *node);
 
-struct accesskit_opt_node_id accesskit_node_builder_popup_for(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_popup_for(struct accesskit_node *node,
+                                  accesskit_node_id value);
 
-void accesskit_node_builder_set_popup_for(
-    struct accesskit_node_builder *builder, accesskit_node_id value);
-
-void accesskit_node_builder_clear_popup_for(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_popup_for(struct accesskit_node *node);
 
 /**
  * Only call this function with a string that originated from AccessKit.
@@ -1505,921 +1279,617 @@ void accesskit_string_free(char *string);
 /**
  * Caller must call `accesskit_string_free` with the return value.
  */
-char *accesskit_node_name(const struct accesskit_node *node);
+char *accesskit_node_label(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_label(struct accesskit_node *node, const char *value);
+
+void accesskit_node_clear_label(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_description(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_description(struct accesskit_node *node,
+                                    const char *value);
+
+void accesskit_node_clear_description(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_value(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_value(struct accesskit_node *node, const char *value);
+
+void accesskit_node_clear_value(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_access_key(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_access_key(struct accesskit_node *node,
+                                   const char *value);
+
+void accesskit_node_clear_access_key(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_author_id(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_author_id(struct accesskit_node *node,
+                                  const char *value);
+
+void accesskit_node_clear_author_id(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_class_name(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_class_name(struct accesskit_node *node,
+                                   const char *value);
+
+void accesskit_node_clear_class_name(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_font_family(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_font_family(struct accesskit_node *node,
+                                    const char *value);
+
+void accesskit_node_clear_font_family(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_html_tag(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_html_tag(struct accesskit_node *node,
+                                 const char *value);
+
+void accesskit_node_clear_html_tag(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_inner_html(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_inner_html(struct accesskit_node *node,
+                                   const char *value);
+
+void accesskit_node_clear_inner_html(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_keyboard_shortcut(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_keyboard_shortcut(struct accesskit_node *node,
+                                          const char *value);
+
+void accesskit_node_clear_keyboard_shortcut(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_language(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_language(struct accesskit_node *node,
+                                 const char *value);
+
+void accesskit_node_clear_language(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_placeholder(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_placeholder(struct accesskit_node *node,
+                                    const char *value);
+
+void accesskit_node_clear_placeholder(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_role_description(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_role_description(struct accesskit_node *node,
+                                         const char *value);
+
+void accesskit_node_clear_role_description(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_state_description(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_state_description(struct accesskit_node *node,
+                                          const char *value);
+
+void accesskit_node_clear_state_description(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_tooltip(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_tooltip(struct accesskit_node *node, const char *value);
+
+void accesskit_node_clear_tooltip(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_url(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_url(struct accesskit_node *node, const char *value);
+
+void accesskit_node_clear_url(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_row_index_text(const struct accesskit_node *node);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_row_index_text(struct accesskit_node *node,
+                                       const char *value);
+
+void accesskit_node_clear_row_index_text(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_column_index_text(const struct accesskit_node *node);
 
 /**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_name(const struct accesskit_node_builder *builder);
-
-/**
  * Caller is responsible for freeing the memory pointed by `value`.
  */
-void accesskit_node_builder_set_name(struct accesskit_node_builder *builder,
-                                     const char *value);
+void accesskit_node_set_column_index_text(struct accesskit_node *node,
+                                          const char *value);
 
-void accesskit_node_builder_clear_name(struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_description(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_description(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_description(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_value(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_value(struct accesskit_node_builder *builder,
-                                      const char *value);
-
-void accesskit_node_builder_clear_value(struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_access_key(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_access_key(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_access_key(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_author_id(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_author_id(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_author_id(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_class_name(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_class_name(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_class_name(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_font_family(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_font_family(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_font_family(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_html_tag(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_html_tag(struct accesskit_node_builder *builder,
-                                         const char *value);
-
-void accesskit_node_builder_clear_html_tag(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_inner_html(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_inner_html(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_inner_html(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_keyboard_shortcut(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_keyboard_shortcut(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_keyboard_shortcut(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_language(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_language(struct accesskit_node_builder *builder,
-                                         const char *value);
-
-void accesskit_node_builder_clear_language(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_placeholder(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_placeholder(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_placeholder(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_role_description(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_role_description(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_role_description(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_state_description(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_state_description(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_state_description(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_tooltip(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_tooltip(struct accesskit_node_builder *builder,
-                                        const char *value);
-
-void accesskit_node_builder_clear_tooltip(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_url(const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_url(struct accesskit_node_builder *builder,
-                                    const char *value);
-
-void accesskit_node_builder_clear_url(struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_row_index_text(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_row_index_text(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_row_index_text(
-    struct accesskit_node_builder *builder);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
-char *accesskit_node_builder_column_index_text(
-    const struct accesskit_node_builder *builder);
-
-/**
- * Caller is responsible for freeing the memory pointed by `value`.
- */
-void accesskit_node_builder_set_column_index_text(
-    struct accesskit_node_builder *builder, const char *value);
-
-void accesskit_node_builder_clear_column_index_text(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_column_index_text(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_scroll_x(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_scroll_x(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_scroll_x(struct accesskit_node *node, double value);
 
-void accesskit_node_builder_set_scroll_x(struct accesskit_node_builder *builder,
-                                         double value);
-
-void accesskit_node_builder_clear_scroll_x(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_scroll_x(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_scroll_x_min(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_scroll_x_min(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_scroll_x_min(struct accesskit_node *node, double value);
 
-void accesskit_node_builder_set_scroll_x_min(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_scroll_x_min(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_scroll_x_min(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_scroll_x_max(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_scroll_x_max(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_scroll_x_max(struct accesskit_node *node, double value);
 
-void accesskit_node_builder_set_scroll_x_max(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_scroll_x_max(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_scroll_x_max(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_scroll_y(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_scroll_y(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_scroll_y(struct accesskit_node *node, double value);
 
-void accesskit_node_builder_set_scroll_y(struct accesskit_node_builder *builder,
-                                         double value);
-
-void accesskit_node_builder_clear_scroll_y(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_scroll_y(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_scroll_y_min(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_scroll_y_min(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_scroll_y_min(struct accesskit_node *node, double value);
 
-void accesskit_node_builder_set_scroll_y_min(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_scroll_y_min(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_scroll_y_min(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_scroll_y_max(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_scroll_y_max(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_scroll_y_max(struct accesskit_node *node, double value);
 
-void accesskit_node_builder_set_scroll_y_max(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_scroll_y_max(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_scroll_y_max(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_numeric_value(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_numeric_value(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_numeric_value(struct accesskit_node *node,
+                                      double value);
 
-void accesskit_node_builder_set_numeric_value(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_numeric_value(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_numeric_value(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_min_numeric_value(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_min_numeric_value(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_min_numeric_value(struct accesskit_node *node,
+                                          double value);
 
-void accesskit_node_builder_set_min_numeric_value(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_min_numeric_value(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_min_numeric_value(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_max_numeric_value(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_max_numeric_value(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_max_numeric_value(struct accesskit_node *node,
+                                          double value);
 
-void accesskit_node_builder_set_max_numeric_value(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_max_numeric_value(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_max_numeric_value(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_numeric_value_step(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_numeric_value_step(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_numeric_value_step(struct accesskit_node *node,
+                                           double value);
 
-void accesskit_node_builder_set_numeric_value_step(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_numeric_value_step(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_numeric_value_step(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_numeric_value_jump(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_numeric_value_jump(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_numeric_value_jump(struct accesskit_node *node,
+                                           double value);
 
-void accesskit_node_builder_set_numeric_value_jump(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_numeric_value_jump(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_numeric_value_jump(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_font_size(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_font_size(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_font_size(struct accesskit_node *node, double value);
 
-void accesskit_node_builder_set_font_size(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_font_size(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_font_size(struct accesskit_node *node);
 
 struct accesskit_opt_double accesskit_node_font_weight(
     const struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_builder_font_weight(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_font_weight(struct accesskit_node *node, double value);
 
-void accesskit_node_builder_set_font_weight(
-    struct accesskit_node_builder *builder, double value);
-
-void accesskit_node_builder_clear_font_weight(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_font_weight(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_row_count(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_row_count(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_row_count(struct accesskit_node *node, size_t value);
 
-void accesskit_node_builder_set_row_count(
-    struct accesskit_node_builder *builder, size_t value);
-
-void accesskit_node_builder_clear_row_count(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_row_count(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_column_count(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_column_count(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_column_count(struct accesskit_node *node, size_t value);
 
-void accesskit_node_builder_set_column_count(
-    struct accesskit_node_builder *builder, size_t value);
-
-void accesskit_node_builder_clear_column_count(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_column_count(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_row_index(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_row_index(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_row_index(struct accesskit_node *node, size_t value);
 
-void accesskit_node_builder_set_row_index(
-    struct accesskit_node_builder *builder, size_t value);
-
-void accesskit_node_builder_clear_row_index(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_row_index(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_column_index(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_column_index(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_column_index(struct accesskit_node *node, size_t value);
 
-void accesskit_node_builder_set_column_index(
-    struct accesskit_node_builder *builder, size_t value);
-
-void accesskit_node_builder_clear_column_index(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_column_index(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_row_span(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_row_span(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_row_span(struct accesskit_node *node, size_t value);
 
-void accesskit_node_builder_set_row_span(struct accesskit_node_builder *builder,
-                                         size_t value);
-
-void accesskit_node_builder_clear_row_span(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_row_span(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_column_span(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_column_span(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_column_span(struct accesskit_node *node, size_t value);
 
-void accesskit_node_builder_set_column_span(
-    struct accesskit_node_builder *builder, size_t value);
-
-void accesskit_node_builder_clear_column_span(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_column_span(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_level(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_level(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_level(struct accesskit_node *node, size_t value);
 
-void accesskit_node_builder_set_level(struct accesskit_node_builder *builder,
-                                      size_t value);
-
-void accesskit_node_builder_clear_level(struct accesskit_node_builder *builder);
+void accesskit_node_clear_level(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_size_of_set(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_size_of_set(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_size_of_set(struct accesskit_node *node, size_t value);
 
-void accesskit_node_builder_set_size_of_set(
-    struct accesskit_node_builder *builder, size_t value);
-
-void accesskit_node_builder_clear_size_of_set(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_size_of_set(struct accesskit_node *node);
 
 struct accesskit_opt_index accesskit_node_position_in_set(
     const struct accesskit_node *node);
 
-struct accesskit_opt_index accesskit_node_builder_position_in_set(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_position_in_set(struct accesskit_node *node,
+                                        size_t value);
 
-void accesskit_node_builder_set_position_in_set(
-    struct accesskit_node_builder *builder, size_t value);
-
-void accesskit_node_builder_clear_position_in_set(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_position_in_set(struct accesskit_node *node);
 
 struct accesskit_opt_color accesskit_node_color_value(
     const struct accesskit_node *node);
 
-struct accesskit_opt_color accesskit_node_builder_color_value(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_color_value(struct accesskit_node *node,
+                                    uint32_t value);
 
-void accesskit_node_builder_set_color_value(
-    struct accesskit_node_builder *builder, uint32_t value);
-
-void accesskit_node_builder_clear_color_value(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_color_value(struct accesskit_node *node);
 
 struct accesskit_opt_color accesskit_node_background_color(
     const struct accesskit_node *node);
 
-struct accesskit_opt_color accesskit_node_builder_background_color(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_background_color(struct accesskit_node *node,
+                                         uint32_t value);
 
-void accesskit_node_builder_set_background_color(
-    struct accesskit_node_builder *builder, uint32_t value);
-
-void accesskit_node_builder_clear_background_color(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_background_color(struct accesskit_node *node);
 
 struct accesskit_opt_color accesskit_node_foreground_color(
     const struct accesskit_node *node);
 
-struct accesskit_opt_color accesskit_node_builder_foreground_color(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_foreground_color(struct accesskit_node *node,
+                                         uint32_t value);
 
-void accesskit_node_builder_set_foreground_color(
-    struct accesskit_node_builder *builder, uint32_t value);
-
-void accesskit_node_builder_clear_foreground_color(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_foreground_color(struct accesskit_node *node);
 
 struct accesskit_opt_text_decoration accesskit_node_overline(
     const struct accesskit_node *node);
 
-struct accesskit_opt_text_decoration accesskit_node_builder_overline(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_overline(struct accesskit_node *node,
+                                 accesskit_text_decoration value);
 
-void accesskit_node_builder_set_overline(struct accesskit_node_builder *builder,
-                                         accesskit_text_decoration value);
-
-void accesskit_node_builder_clear_overline(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_overline(struct accesskit_node *node);
 
 struct accesskit_opt_text_decoration accesskit_node_strikethrough(
     const struct accesskit_node *node);
 
-struct accesskit_opt_text_decoration accesskit_node_builder_strikethrough(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_strikethrough(struct accesskit_node *node,
+                                      accesskit_text_decoration value);
 
-void accesskit_node_builder_set_strikethrough(
-    struct accesskit_node_builder *builder, accesskit_text_decoration value);
-
-void accesskit_node_builder_clear_strikethrough(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_strikethrough(struct accesskit_node *node);
 
 struct accesskit_opt_text_decoration accesskit_node_underline(
     const struct accesskit_node *node);
 
-struct accesskit_opt_text_decoration accesskit_node_builder_underline(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_underline(struct accesskit_node *node,
+                                  accesskit_text_decoration value);
 
-void accesskit_node_builder_set_underline(
-    struct accesskit_node_builder *builder, accesskit_text_decoration value);
-
-void accesskit_node_builder_clear_underline(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_underline(struct accesskit_node *node);
 
 struct accesskit_lengths accesskit_node_character_lengths(
     const struct accesskit_node *node);
 
-struct accesskit_lengths accesskit_node_builder_character_lengths(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_character_lengths(
-    struct accesskit_node_builder *builder, size_t length,
-    const uint8_t *values);
+void accesskit_node_set_character_lengths(struct accesskit_node *node,
+                                          size_t length, const uint8_t *values);
 
-void accesskit_node_builder_clear_character_lengths(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_character_lengths(struct accesskit_node *node);
 
 struct accesskit_lengths accesskit_node_word_lengths(
     const struct accesskit_node *node);
 
-struct accesskit_lengths accesskit_node_builder_word_lengths(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_word_lengths(
-    struct accesskit_node_builder *builder, size_t length,
-    const uint8_t *values);
+void accesskit_node_set_word_lengths(struct accesskit_node *node, size_t length,
+                                     const uint8_t *values);
 
-void accesskit_node_builder_clear_word_lengths(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_word_lengths(struct accesskit_node *node);
 
 struct accesskit_opt_coords accesskit_node_character_positions(
     const struct accesskit_node *node);
 
-struct accesskit_opt_coords accesskit_node_builder_character_positions(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_character_positions(
-    struct accesskit_node_builder *builder, size_t length, const float *values);
+void accesskit_node_set_character_positions(struct accesskit_node *node,
+                                            size_t length, const float *values);
 
-void accesskit_node_builder_clear_character_positions(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_character_positions(struct accesskit_node *node);
 
 struct accesskit_opt_coords accesskit_node_character_widths(
     const struct accesskit_node *node);
 
-struct accesskit_opt_coords accesskit_node_builder_character_widths(
-    const struct accesskit_node_builder *builder);
-
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_character_widths(
-    struct accesskit_node_builder *builder, size_t length, const float *values);
+void accesskit_node_set_character_widths(struct accesskit_node *node,
+                                         size_t length, const float *values);
 
-void accesskit_node_builder_clear_character_widths(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_character_widths(struct accesskit_node *node);
 
 struct accesskit_opt_bool accesskit_node_is_expanded(
     const struct accesskit_node *node);
 
-struct accesskit_opt_bool accesskit_node_builder_is_expanded(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_expanded(struct accesskit_node *node, bool value);
 
-void accesskit_node_builder_set_expanded(struct accesskit_node_builder *builder,
-                                         bool value);
-
-void accesskit_node_builder_clear_expanded(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_expanded(struct accesskit_node *node);
 
 struct accesskit_opt_bool accesskit_node_is_selected(
     const struct accesskit_node *node);
 
-struct accesskit_opt_bool accesskit_node_builder_is_selected(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_selected(struct accesskit_node *node, bool value);
 
-void accesskit_node_builder_set_selected(struct accesskit_node_builder *builder,
-                                         bool value);
-
-void accesskit_node_builder_clear_selected(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_selected(struct accesskit_node *node);
 
 struct accesskit_opt_invalid accesskit_node_invalid(
     const struct accesskit_node *node);
 
-struct accesskit_opt_invalid accesskit_node_builder_invalid(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_invalid(struct accesskit_node *node,
+                                accesskit_invalid value);
 
-void accesskit_node_builder_set_invalid(struct accesskit_node_builder *builder,
-                                        accesskit_invalid value);
-
-void accesskit_node_builder_clear_invalid(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_invalid(struct accesskit_node *node);
 
 struct accesskit_opt_toggled accesskit_node_toggled(
     const struct accesskit_node *node);
 
-struct accesskit_opt_toggled accesskit_node_builder_toggled(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_toggled(struct accesskit_node *node,
+                                accesskit_toggled value);
 
-void accesskit_node_builder_set_toggled(struct accesskit_node_builder *builder,
-                                        accesskit_toggled value);
-
-void accesskit_node_builder_clear_toggled(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_toggled(struct accesskit_node *node);
 
 struct accesskit_opt_live accesskit_node_live(
     const struct accesskit_node *node);
 
-struct accesskit_opt_live accesskit_node_builder_live(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_live(struct accesskit_node *node, accesskit_live value);
 
-void accesskit_node_builder_set_live(struct accesskit_node_builder *builder,
-                                     accesskit_live value);
-
-void accesskit_node_builder_clear_live(struct accesskit_node_builder *builder);
-
-struct accesskit_opt_default_action_verb accesskit_node_default_action_verb(
-    const struct accesskit_node *node);
-
-struct accesskit_opt_default_action_verb
-accesskit_node_builder_default_action_verb(
-    const struct accesskit_node_builder *builder);
-
-void accesskit_node_builder_set_default_action_verb(
-    struct accesskit_node_builder *builder,
-    accesskit_default_action_verb value);
-
-void accesskit_node_builder_clear_default_action_verb(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_live(struct accesskit_node *node);
 
 struct accesskit_opt_text_direction accesskit_node_text_direction(
     const struct accesskit_node *node);
 
-struct accesskit_opt_text_direction accesskit_node_builder_text_direction(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_text_direction(struct accesskit_node *node,
+                                       accesskit_text_direction value);
 
-void accesskit_node_builder_set_text_direction(
-    struct accesskit_node_builder *builder, accesskit_text_direction value);
-
-void accesskit_node_builder_clear_text_direction(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_text_direction(struct accesskit_node *node);
 
 struct accesskit_opt_orientation accesskit_node_orientation(
     const struct accesskit_node *node);
 
-struct accesskit_opt_orientation accesskit_node_builder_orientation(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_orientation(struct accesskit_node *node,
+                                    accesskit_orientation value);
 
-void accesskit_node_builder_set_orientation(
-    struct accesskit_node_builder *builder, accesskit_orientation value);
-
-void accesskit_node_builder_clear_orientation(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_orientation(struct accesskit_node *node);
 
 struct accesskit_opt_sort_direction accesskit_node_sort_direction(
     const struct accesskit_node *node);
 
-struct accesskit_opt_sort_direction accesskit_node_builder_sort_direction(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_sort_direction(struct accesskit_node *node,
+                                       accesskit_sort_direction value);
 
-void accesskit_node_builder_set_sort_direction(
-    struct accesskit_node_builder *builder, accesskit_sort_direction value);
-
-void accesskit_node_builder_clear_sort_direction(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_sort_direction(struct accesskit_node *node);
 
 struct accesskit_opt_aria_current accesskit_node_aria_current(
     const struct accesskit_node *node);
 
-struct accesskit_opt_aria_current accesskit_node_builder_aria_current(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_aria_current(struct accesskit_node *node,
+                                     accesskit_aria_current value);
 
-void accesskit_node_builder_set_aria_current(
-    struct accesskit_node_builder *builder, accesskit_aria_current value);
-
-void accesskit_node_builder_clear_aria_current(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_aria_current(struct accesskit_node *node);
 
 struct accesskit_opt_auto_complete accesskit_node_auto_complete(
     const struct accesskit_node *node);
 
-struct accesskit_opt_auto_complete accesskit_node_builder_auto_complete(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_auto_complete(struct accesskit_node *node,
+                                      accesskit_auto_complete value);
 
-void accesskit_node_builder_set_auto_complete(
-    struct accesskit_node_builder *builder, accesskit_auto_complete value);
-
-void accesskit_node_builder_clear_auto_complete(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_auto_complete(struct accesskit_node *node);
 
 struct accesskit_opt_has_popup accesskit_node_has_popup(
     const struct accesskit_node *node);
 
-struct accesskit_opt_has_popup accesskit_node_builder_has_popup(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_has_popup(struct accesskit_node *node,
+                                  accesskit_has_popup value);
 
-void accesskit_node_builder_set_has_popup(
-    struct accesskit_node_builder *builder, accesskit_has_popup value);
-
-void accesskit_node_builder_clear_has_popup(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_has_popup(struct accesskit_node *node);
 
 struct accesskit_opt_list_style accesskit_node_list_style(
     const struct accesskit_node *node);
 
-struct accesskit_opt_list_style accesskit_node_builder_list_style(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_list_style(struct accesskit_node *node,
+                                   accesskit_list_style value);
 
-void accesskit_node_builder_set_list_style(
-    struct accesskit_node_builder *builder, accesskit_list_style value);
-
-void accesskit_node_builder_clear_list_style(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_list_style(struct accesskit_node *node);
 
 struct accesskit_opt_text_align accesskit_node_text_align(
     const struct accesskit_node *node);
 
-struct accesskit_opt_text_align accesskit_node_builder_text_align(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_text_align(struct accesskit_node *node,
+                                   accesskit_text_align value);
 
-void accesskit_node_builder_set_text_align(
-    struct accesskit_node_builder *builder, accesskit_text_align value);
-
-void accesskit_node_builder_clear_text_align(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_text_align(struct accesskit_node *node);
 
 struct accesskit_opt_vertical_offset accesskit_node_vertical_offset(
     const struct accesskit_node *node);
 
-struct accesskit_opt_vertical_offset accesskit_node_builder_vertical_offset(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_vertical_offset(struct accesskit_node *node,
+                                        accesskit_vertical_offset value);
 
-void accesskit_node_builder_set_vertical_offset(
-    struct accesskit_node_builder *builder, accesskit_vertical_offset value);
-
-void accesskit_node_builder_clear_vertical_offset(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_vertical_offset(struct accesskit_node *node);
 
 const struct accesskit_affine *accesskit_node_transform(
     const struct accesskit_node *node);
 
-const struct accesskit_affine *accesskit_node_builder_transform(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_transform(struct accesskit_node *node,
+                                  struct accesskit_affine value);
 
-void accesskit_node_builder_set_transform(
-    struct accesskit_node_builder *builder, struct accesskit_affine value);
-
-void accesskit_node_builder_clear_transform(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_transform(struct accesskit_node *node);
 
 struct accesskit_opt_rect accesskit_node_bounds(
     const struct accesskit_node *node);
 
-struct accesskit_opt_rect accesskit_node_builder_bounds(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_bounds(struct accesskit_node *node,
+                               struct accesskit_rect value);
 
-void accesskit_node_builder_set_bounds(struct accesskit_node_builder *builder,
-                                       struct accesskit_rect value);
-
-void accesskit_node_builder_clear_bounds(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_bounds(struct accesskit_node *node);
 
 struct accesskit_opt_text_selection accesskit_node_text_selection(
     const struct accesskit_node *node);
 
-struct accesskit_opt_text_selection accesskit_node_builder_text_selection(
-    const struct accesskit_node_builder *builder);
+void accesskit_node_set_text_selection(struct accesskit_node *node,
+                                       struct accesskit_text_selection value);
 
-void accesskit_node_builder_set_text_selection(
-    struct accesskit_node_builder *builder,
-    struct accesskit_text_selection value);
-
-void accesskit_node_builder_clear_text_selection(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_text_selection(struct accesskit_node *node);
 
 struct accesskit_custom_action accesskit_custom_action_new(
     int32_t id, const char *description);
@@ -2429,44 +1899,24 @@ void accesskit_custom_actions_free(struct accesskit_custom_actions *value);
 /**
  * Caller is responsible for freeing the returned value.
  */
-struct accesskit_custom_actions *accesskit_node_custom_actions(
+const struct accesskit_custom_actions *accesskit_node_custom_actions(
     const struct accesskit_node *node);
-
-/**
- * Caller is responsible for freeing the returned value.
- */
-const struct accesskit_custom_actions *accesskit_node_builder_custom_actions(
-    const struct accesskit_node_builder *builder);
 
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_builder_set_custom_actions(
-    struct accesskit_node_builder *builder, size_t length,
+void accesskit_node_set_custom_actions(
+    struct accesskit_node *node, size_t length,
     const struct accesskit_custom_action *values);
 
-void accesskit_node_builder_push_custom_action(
-    struct accesskit_node_builder *builder,
-    struct accesskit_custom_action item);
+void accesskit_node_push_custom_action(struct accesskit_node *node,
+                                       struct accesskit_custom_action item);
 
-void accesskit_node_builder_clear_custom_actions(
-    struct accesskit_node_builder *builder);
+void accesskit_node_clear_custom_actions(struct accesskit_node *node);
 
-struct accesskit_node_builder *accesskit_node_builder_new(accesskit_role role);
+struct accesskit_node *accesskit_node_new(accesskit_role role);
 
-/**
- * Converts an `accesskit_node_builder` to an `accesskit_node`, freeing the
- * memory in the process.
- */
-struct accesskit_node *accesskit_node_builder_build(
-    struct accesskit_node_builder *builder);
-
-/**
- * Only call this function if you have to abort the building of a node.
- *
- * If you called `accesskit_node_builder_build`, don't call this function.
- */
-void accesskit_node_builder_free(struct accesskit_node_builder *builder);
+void accesskit_node_free(struct accesskit_node *node);
 
 struct accesskit_tree *accesskit_tree_new(accesskit_node_id root);
 
@@ -2538,8 +1988,6 @@ struct accesskit_affine accesskit_affine_scale(double s);
 
 struct accesskit_affine accesskit_affine_scale_non_uniform(double s_x,
                                                            double s_y);
-
-struct accesskit_affine accesskit_affine_rotate(double th);
 
 struct accesskit_affine accesskit_affine_translate(struct accesskit_vec2 p);
 

@@ -32,11 +32,6 @@ pub const extern "C" fn accesskit_affine_scale_non_uniform(s_x: f64, s_y: f64) -
 }
 
 #[no_mangle]
-pub extern "C" fn accesskit_affine_rotate(th: f64) -> Affine {
-    Affine::rotate(th)
-}
-
-#[no_mangle]
 pub extern "C" fn accesskit_affine_translate(p: Vec2) -> Affine {
     Affine::translate(p)
 }
