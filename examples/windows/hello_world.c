@@ -20,7 +20,7 @@ const accesskit_rect BUTTON_2_RECT = {20.0, 60.0, 100.0, 100.0};
 const uint32_t SET_FOCUS_MSG = WM_USER;
 const uint32_t DO_DEFAULT_ACTION_MSG = WM_USER + 1;
 
-accesskit_node *build_button(accesskit_node_id id, const char *name) {
+accesskit_node *build_button(accesskit_node_id id, const char *label) {
   accesskit_rect rect;
   if (id == BUTTON_1_ID) {
     rect = BUTTON_1_RECT;
@@ -28,22 +28,19 @@ accesskit_node *build_button(accesskit_node_id id, const char *name) {
     rect = BUTTON_2_RECT;
   }
 
-  accesskit_node_builder *builder =
-      accesskit_node_builder_new(ACCESSKIT_ROLE_BUTTON);
-  accesskit_node_builder_set_bounds(builder, rect);
-  accesskit_node_builder_set_name(builder, name);
-  accesskit_node_builder_add_action(builder, ACCESSKIT_ACTION_FOCUS);
-  accesskit_node_builder_set_default_action_verb(
-      builder, ACCESSKIT_DEFAULT_ACTION_VERB_CLICK);
-  return accesskit_node_builder_build(builder);
+  accesskit_node *node = accesskit_node_new(ACCESSKIT_ROLE_BUTTON);
+  accesskit_node_set_bounds(node, rect);
+  accesskit_node_set_label(node, label);
+  accesskit_node_add_action(node, ACCESSKIT_ACTION_FOCUS);
+  accesskit_node_add_action(node, ACCESSKIT_ACTION_CLICK);
+  return node;
 }
 
 accesskit_node *build_announcement(const char *text) {
-  accesskit_node_builder *builder =
-      accesskit_node_builder_new(ACCESSKIT_ROLE_LABEL);
-  accesskit_node_builder_set_name(builder, text);
-  accesskit_node_builder_set_live(builder, ACCESSKIT_LIVE_POLITE);
-  return accesskit_node_builder_build(builder);
+  accesskit_node *node = accesskit_node_new(ACCESSKIT_ROLE_LABEL);
+  accesskit_node_set_value(node, text);
+  accesskit_node_set_live(node, ACCESSKIT_LIVE_POLITE);
+  return node;
 }
 
 struct window_state {
@@ -58,14 +55,13 @@ void window_state_free(struct window_state *state) {
 }
 
 accesskit_node *window_state_build_root(struct window_state *state) {
-  accesskit_node_builder *builder =
-      accesskit_node_builder_new(ACCESSKIT_ROLE_WINDOW);
-  accesskit_node_builder_push_child(builder, BUTTON_1_ID);
-  accesskit_node_builder_push_child(builder, BUTTON_2_ID);
+  accesskit_node *node = accesskit_node_new(ACCESSKIT_ROLE_WINDOW);
+  accesskit_node_push_child(node, BUTTON_1_ID);
+  accesskit_node_push_child(node, BUTTON_2_ID);
   if (state->announcement != NULL) {
-    accesskit_node_builder_push_child(builder, ANNOUNCEMENT_ID);
+    accesskit_node_push_child(node, ANNOUNCEMENT_ID);
   }
-  return accesskit_node_builder_build(builder);
+  return node;
 }
 
 accesskit_tree_update *build_initial_tree(void *userdata) {
@@ -93,7 +89,7 @@ void do_action(accesskit_action_request *request, void *userdata) {
   if (request->action == ACCESSKIT_ACTION_FOCUS) {
     LPARAM lparam = (LPARAM)(request->target);
     PostMessage((HWND)window, SET_FOCUS_MSG, 0, lparam);
-  } else if (request->action == ACCESSKIT_ACTION_DEFAULT) {
+  } else if (request->action == ACCESSKIT_ACTION_CLICK) {
     LPARAM lparam = (LPARAM)(request->target);
     PostMessage((HWND)window, DO_DEFAULT_ACTION_MSG, 0, lparam);
   }

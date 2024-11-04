@@ -23,31 +23,14 @@ impl CastPtr for node {
 
 impl BoxCastPtr for node {}
 
-impl node {
-    #[no_mangle]
-    pub extern "C" fn accesskit_node_free(node: *mut node) {
-        drop(box_from_ptr(node));
-    }
-}
-
-pub struct node_builder {
-    _private: [u8; 0],
-}
-
-impl CastPtr for node_builder {
-    type RustType = NodeBuilder;
-}
-
-impl BoxCastPtr for node_builder {}
-
 macro_rules! clearer {
     ($clearer:ident) => {
         paste! {
-            impl node_builder {
+            impl node {
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $clearer>](builder: *mut node_builder) {
-                    let builder = mut_from_ptr(builder);
-                    builder.$clearer()
+                pub extern "C" fn [<accesskit_node_ $clearer>](node: *mut node) {
+                    let node = mut_from_ptr(node);
+                    node.$clearer()
                 }
             }
         }
@@ -57,23 +40,16 @@ macro_rules! clearer {
 macro_rules! flag_methods {
     ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
         paste! {
-            impl node {
-                $(#[no_mangle]
+            $(impl node {
+                #[no_mangle]
                 pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> bool {
                     let node = ref_from_ptr(node);
                     node.$getter()
-                })*
-            }
-            $(impl node_builder {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $getter>](builder: *const node_builder) -> bool {
-                    let builder = ref_from_ptr(builder);
-                    builder.$getter()
                 }
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $setter>](builder: *mut node_builder) {
-                    let builder = mut_from_ptr(builder);
-                    builder.$setter()
+                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node) {
+                    let node = mut_from_ptr(node);
+                    node.$setter()
                 }
             }
             clearer! { $clearer })*
@@ -84,11 +60,11 @@ macro_rules! flag_methods {
 macro_rules! array_setter {
     ($setter:ident, $ffi_type:ty, $rust_type:ty) => {
         paste! {
-            impl node_builder {
+            impl node {
                 /// Caller is responsible for freeing `values`.
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $setter>](builder: *mut node_builder, length: usize, values: *const $ffi_type) {
-                    let builder = mut_from_ptr(builder);
+                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node, length: usize, values: *const $ffi_type) {
+                    let node = mut_from_ptr(node);
                     let values = unsafe {
                         slice::from_raw_parts(values, length)
                             .iter()
@@ -96,7 +72,7 @@ macro_rules! array_setter {
                             .map(From::from)
                             .collect::<Vec<$rust_type>>()
                     };
-                    builder.$setter(values);
+                    node.$setter(values);
                 }
             }
         }
@@ -116,16 +92,6 @@ macro_rules! property_getters {
                     }
                 }
             }
-            impl node_builder {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $getter>](builder: *const node_builder) -> *const $getter_result {
-                    let builder = ref_from_ptr(builder);
-                    match builder.$getter() {
-                        Some(value) => value as *const _,
-                        None => ptr::null(),
-                    }
-                }
-            }
         }
     };
     ($getter:ident, *mut $getter_result:tt) => {
@@ -133,17 +99,9 @@ macro_rules! property_getters {
             impl node {
                 /// Caller is responsible for freeing the returned value.
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> *mut $getter_result {
+                pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> *const $getter_result {
                     let node = ref_from_ptr(node);
                     BoxCastPtr::to_mut_ptr(node.$getter().into())
-                }
-            }
-            impl node_builder {
-                /// Caller is responsible for freeing the returned value.
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $getter>](builder: *const node_builder) -> *const $getter_result {
-                    let builder = ref_from_ptr(builder);
-                    BoxCastPtr::to_mut_ptr(builder.$getter().into())
                 }
             }
         }
@@ -157,13 +115,6 @@ macro_rules! property_getters {
                     node.$getter().into()
                 }
             }
-            impl node_builder {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $getter>](builder: *const node_builder) -> $getter_result {
-                    let builder = ref_from_ptr(builder);
-                    builder.$getter().into()
-                }
-            }
         }
     }
 }
@@ -172,11 +123,11 @@ macro_rules! simple_property_methods {
     ($getter:ident, $getter_result:tt, $setter:ident, $setter_param:tt, $clearer:ident) => {
         paste! {
             property_getters! { $getter, $getter_result }
-            impl node_builder {
+            impl node {
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $setter>](builder: *mut node_builder, value: $setter_param) {
-                    let builder = mut_from_ptr(builder);
-                    builder.$setter(value.into());
+                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node, value: $setter_param) {
+                    let node = mut_from_ptr(node);
+                    node.$setter(value.into());
                 }
             }
             clearer! { $clearer }
@@ -185,11 +136,11 @@ macro_rules! simple_property_methods {
     ($getter:ident, *const $getter_result:tt, $setter:ident, $setter_param:tt, $clearer:ident) => {
         paste! {
             property_getters! { $getter, *const $getter_result }
-            impl node_builder {
+            impl node {
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $setter>](builder: *mut node_builder, value: $setter_param) {
-                    let builder = mut_from_ptr(builder);
-                    builder.$setter(Box::new(value));
+                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node, value: $setter_param) {
+                    let node = mut_from_ptr(node);
+                    node.$setter(Box::new(value));
                 }
             }
             clearer! { $clearer }
@@ -268,11 +219,11 @@ macro_rules! vec_property_methods {
         paste! {
             $(property_getters! { $getter, *mut $getter_result }
             array_setter! { $setter, $setter_param, $item_type }
-            impl node_builder {
+            impl node {
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $pusher>](builder: *mut node_builder, item: $setter_param) {
-                    let builder = mut_from_ptr(builder);
-                    builder.$pusher(item.into());
+                pub extern "C" fn [<accesskit_node_ $pusher>](node: *mut node, item: $setter_param) {
+                    let node = mut_from_ptr(node);
+                    node.$pusher(item.into());
                 }
             }
             clearer! { $clearer })*
@@ -282,11 +233,11 @@ macro_rules! vec_property_methods {
         paste! {
             $(property_getters! { $getter, $getter_result }
             array_setter! { $setter, $setter_param, $item_type }
-            impl node_builder {
+            impl node {
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $pusher>](builder: *mut node_builder, item: $setter_param) {
-                    let builder = mut_from_ptr(builder);
-                    builder.$pusher(item.into());
+                pub extern "C" fn [<accesskit_node_ $pusher>](node: *mut node, item: $setter_param) {
+                    let node = mut_from_ptr(node);
+                    node.$pusher(item.into());
                 }
             }
             clearer! { $clearer })*
@@ -318,33 +269,22 @@ macro_rules! node_id_property_methods {
 macro_rules! string_property_methods {
     ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
         paste! {
-            impl node {
+            $(impl node {
                 /// Caller must call `accesskit_string_free` with the return value.
-                $(#[no_mangle]
+                #[no_mangle]
                 pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> *mut c_char {
                     let node = ref_from_ptr(node);
                     match node.$getter() {
                         Some(value) => CString::new(value).unwrap().into_raw(),
                         None => ptr::null_mut()
                     }
-                })*
-            }
-            $(impl node_builder {
-                /// Caller must call `accesskit_string_free` with the return value.
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $getter>](builder: *const node_builder) -> *mut c_char {
-                    let builder = ref_from_ptr(builder);
-                    match builder.$getter() {
-                        Some(value) => CString::new(value).unwrap().into_raw(),
-                        None => ptr::null_mut()
-                    }
                 }
                 /// Caller is responsible for freeing the memory pointed by `value`.
                 #[no_mangle]
-                pub extern "C" fn [<accesskit_node_builder_ $setter>](builder: *mut node_builder, value: *const c_char) {
-                    let builder = mut_from_ptr(builder);
+                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node, value: *const c_char) {
+                    let node = mut_from_ptr(node);
                     let value = unsafe { CStr::from_ptr(value) };
-                    builder.$setter(value.to_string_lossy());
+                    node.$setter(value.to_string_lossy());
                 }
             }
             clearer! { $clearer })*
@@ -459,11 +399,11 @@ macro_rules! unique_enum_property_methods {
 }
 
 property_getters! { role, Role }
-impl node_builder {
+impl node {
     #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_set_role(builder: *mut node_builder, value: Role) {
-        let builder = mut_from_ptr(builder);
-        builder.set_role(value);
+    pub extern "C" fn accesskit_node_set_role(node: *mut node, value: Role) {
+        let node = mut_from_ptr(node);
+        node.set_role(value);
     }
 }
 
@@ -473,45 +413,27 @@ impl node {
         let node = ref_from_ptr(node);
         node.supports_action(action)
     }
-}
 
-impl node_builder {
     #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_supports_action(
-        builder: *const node_builder,
-        action: Action,
-    ) -> bool {
-        let builder = ref_from_ptr(builder);
-        builder.supports_action(action)
+    pub extern "C" fn accesskit_node_add_action(node: *mut node, action: Action) {
+        let node = mut_from_ptr(node);
+        node.add_action(action);
     }
 
     #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_add_action(
-        builder: *mut node_builder,
-        action: Action,
-    ) {
-        let builder = mut_from_ptr(builder);
-        builder.add_action(action);
+    pub extern "C" fn accesskit_node_remove_action(node: *mut node, action: Action) {
+        let node = mut_from_ptr(node);
+        node.remove_action(action);
     }
 
     #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_remove_action(
-        builder: *mut node_builder,
-        action: Action,
-    ) {
-        let builder = mut_from_ptr(builder);
-        builder.remove_action(action);
-    }
-
-    #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_clear_actions(builder: *mut node_builder) {
-        let builder = mut_from_ptr(builder);
-        builder.clear_actions();
+    pub extern "C" fn accesskit_node_clear_actions(node: *mut node) {
+        let node = mut_from_ptr(node);
+        node.clear_actions();
     }
 }
 
 flag_methods! {
-    (is_hovered, set_hovered, clear_hovered),
     (is_hidden, set_hidden, clear_hidden),
     (is_linked, set_linked, clear_linked),
     (is_multiselectable, set_multiselectable, clear_multiselectable),
@@ -563,7 +485,7 @@ pub extern "C" fn accesskit_string_free(string: *mut c_char) {
 }
 
 string_property_methods! {
-    (name, set_name, clear_name),
+    (label, set_label, clear_label),
     (description, set_description, clear_description),
     (value, set_value, clear_value),
     (access_key, set_access_key, clear_access_key),
@@ -642,7 +564,6 @@ unique_enum_property_methods! {
     (Invalid, invalid, set_invalid, clear_invalid),
     (Toggled, toggled, set_toggled, clear_toggled),
     (Live, live, set_live, clear_live),
-    (DefaultActionVerb, default_action_verb, set_default_action_verb, clear_default_action_verb),
     (TextDirection, text_direction, set_text_direction, clear_text_direction),
     (Orientation, orientation, set_orientation, clear_orientation),
     (SortDirection, sort_direction, set_sort_direction, clear_sort_direction),
@@ -721,14 +642,11 @@ impl From<&TextSelection> for text_selection {
 
 opt_struct! { opt_text_selection, text_selection }
 property_getters! { text_selection, opt_text_selection }
-impl node_builder {
+impl node {
     #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_set_text_selection(
-        builder: *mut node_builder,
-        value: text_selection,
-    ) {
-        let builder = mut_from_ptr(builder);
-        builder.set_text_selection(Box::new(value.into()));
+    pub extern "C" fn accesskit_node_set_text_selection(node: *mut node, value: text_selection) {
+        let node = mut_from_ptr(node);
+        node.set_text_selection(Box::new(value.into()));
     }
 }
 clearer! { clear_text_selection }
@@ -799,27 +717,16 @@ vec_property_methods! {
     (CustomAction, custom_actions, *mut custom_actions, set_custom_actions, custom_action, push_custom_action, clear_custom_actions)
 }
 
-impl node_builder {
+impl node {
     #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_new(role: Role) -> *mut node_builder {
-        let builder = NodeBuilder::new(role);
-        BoxCastPtr::to_mut_ptr(builder)
-    }
-
-    /// Converts an `accesskit_node_builder` to an `accesskit_node`, freeing the memory in the process.
-    #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_build(builder: *mut node_builder) -> *mut node {
-        let builder = box_from_ptr(builder);
-        let node = builder.build();
+    pub extern "C" fn accesskit_node_new(role: Role) -> *mut node {
+        let node = Node::new(role);
         BoxCastPtr::to_mut_ptr(node)
     }
 
-    /// Only call this function if you have to abort the building of a node.
-    ///
-    /// If you called `accesskit_node_builder_build`, don't call this function.
     #[no_mangle]
-    pub extern "C" fn accesskit_node_builder_free(builder: *mut node_builder) {
-        drop(box_from_ptr(builder));
+    pub extern "C" fn accesskit_node_free(node: *mut node) {
+        drop(box_from_ptr(node));
     }
 }
 
