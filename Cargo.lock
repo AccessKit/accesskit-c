@@ -26,21 +26,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c5dd55e6e94949498698daf4d48fb5659e824d7abec0d394089656ceaf99d4f"
 dependencies = [
  "accesskit",
- "accesskit_consumer 0.26.0",
+ "accesskit_consumer",
  "atspi-common",
  "serde",
  "thiserror",
  "zvariant",
-]
-
-[[package]]
-name = "accesskit_consumer"
-version = "0.25.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa3a17950ce0d911f132387777b9b3d05eddafb59b773ccaa53fceefaeb0228e"
-dependencies = [
- "accesskit",
- "immutable-chunkmap",
 ]
 
 [[package]]
@@ -56,23 +46,23 @@ dependencies = [
 
 [[package]]
 name = "accesskit_macos"
-version = "0.18.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8d94b7544775dddce398e2500a8b3cc2be3655190879071ce6a9e5610195be4"
+checksum = "7329821f3bd1101e03a7d2e03bd339e3ac0dc64c70b4c9f9ae1949e3ba8dece1"
 dependencies = [
  "accesskit",
- "accesskit_consumer 0.25.0",
+ "accesskit_consumer",
+ "hashbrown",
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",
- "once_cell",
 ]
 
 [[package]]
 name = "accesskit_unix"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a88d913b144104dd825f75db1b82c63d754b01c53c2f9b7545dcdfae63bb0ed"
+checksum = "fcee751cc20d88678c33edaf9c07e8b693cd02819fe89053776f5313492273f5"
 dependencies = [
  "accesskit",
  "accesskit_atspi_common",
@@ -88,12 +78,13 @@ dependencies = [
 
 [[package]]
 name = "accesskit_windows"
-version = "0.24.0"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0aaa870a5d047338f03707706141f22c98c20e79d5403bf3c9b195549e6cdeea"
+checksum = "24fcd5d23d70670992b823e735e859374d694a3d12bfd8dd32bd3bd8bedb5d81"
 dependencies = [
  "accesskit",
- "accesskit_consumer 0.25.0",
+ "accesskit_consumer",
+ "hashbrown",
  "paste",
  "static_assertions",
  "windows",
