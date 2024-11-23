@@ -76,6 +76,18 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.14.0](https://github.com/AccessKit/accesskit-c/compare/0.13.1...0.14.0) (2024-11-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* Bump Rust dependencies and handle breaking changes ([#20](https://github.com/AccessKit/accesskit-c/issues/20))
+
+### Bug Fixes
+
+* Bump Rust dependencies and handle breaking changes ([#20](https://github.com/AccessKit/accesskit-c/issues/20)) ([6220309](https://github.com/AccessKit/accesskit-c/commit/622030924d3f226413eb5911728da71fea65a165))
+* Declare libraries required by the Windows platform adapter in debug builds ([#17](https://github.com/AccessKit/accesskit-c/issues/17)) ([29d8b2e](https://github.com/AccessKit/accesskit-c/commit/29d8b2ec94730c4a323bc89b50d720b15c211504))
+
 ## [0.13.1](https://github.com/AccessKit/accesskit-c/compare/0.13.0...0.13.1) (2024-10-13)
 
 
