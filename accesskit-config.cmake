@@ -17,7 +17,7 @@ if (_accesskit_os STREQUAL "macos")
 elseif (_accesskit_os STREQUAL "linux")
     target_link_libraries(accesskit-static INTERFACE -static-libgcc m)
 elseif (_accesskit_os STREQUAL "windows")
-    target_link_libraries(accesskit-static INTERFACE bcrypt ntdll uiautomationcore userenv ws2_32)
+    target_link_libraries(accesskit-static INTERFACE bcrypt ntdll propsys runtimeobject uiautomationcore userenv ws2_32)
 endif()
 
 add_library(accesskit-shared SHARED IMPORTED GLOBAL)
