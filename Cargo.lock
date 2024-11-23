@@ -10,7 +10,7 @@ checksum = "d3d3b8f9bae46a948369bc4a03e815d4ed6d616bd00de4051133a5019dc31c5a"
 
 [[package]]
 name = "accesskit-c"
-version = "0.13.1"
+version = "0.14.0"
 dependencies = [
  "accesskit",
  "accesskit_macos",
