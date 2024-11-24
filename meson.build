@@ -16,7 +16,7 @@
 
 project('accesskit-c',
         'c',
-        meson_version: '>= 1.2.0',
+        meson_version: '>= 1.3.0',
         default_options: [
           'pkgconfig.relocatable=true',
         ]
@@ -344,9 +344,11 @@ symbol_list_target = custom_target(
 symbol_list = symbol_list_target[0]
 
 if host_system in ['darwin', 'ios']
-  vflag = '-Wl,-exported_symbols_list,@0@'.format(symbol_list)
+  vflags = ['-Wl,-exported_symbols_list,@0@'.format(symbol_list_target.full_path())]
+elif is_msvc_style
+  vflags = []
 else
-  vflag = '-Wl,--version-script,@0@'.format(symbol_list)
+  vflags = ['-Wl,--version-script,@0@'.format(symbol_list_target.full_path())]
 endif
 
 # This is not strictly needed, but since we are telling Cargo to build a staticlib, it puts in
@@ -361,7 +363,7 @@ strip_link_args = cc.get_supported_link_arguments(
   '-Wl,-Bsymbolic-functions',
 )
 
-link_args = cc.get_supported_link_arguments([vflag]) + strip_link_args
+link_args = vflags + strip_link_args
 
 # Some systems, reportedly OpenBSD and macOS, refuse
 # to create libraries without any object files. Compiling
