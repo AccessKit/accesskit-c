@@ -345,7 +345,7 @@ symbol_list = symbol_list_target[0]
 
 if host_system in ['darwin', 'ios']
   vflags = ['-Wl,-exported_symbols_list,@0@'.format(symbol_list_target.full_path())]
-elif is_msvc_style
+elif host_system == 'windows'
   vflags = []
 else
   vflags = ['-Wl,--version-script,@0@'.format(symbol_list_target.full_path())]
