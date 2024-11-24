@@ -44,6 +44,10 @@ appkit_dep = dependency('appleframeworks', modules: 'AppKit',
 m_dep = cc.find_library('m', required: false)
 uiautomationcore_dep = cc.find_library('uiautomationcore',
                                        required: host_system == 'windows')
+runtimeobject_dep = cc.find_library('runtimeobject',
+                                    required: host_system == 'windows')
+propsys_dep = cc.find_library('propsys',
+                              required: host_system == 'windows')
 
 library_dependencies_sole = []
 library_dependencies = library_dependencies_sole
@@ -195,7 +199,7 @@ if host_system == 'windows'
   endforeach
 endif
 
-private_dependencies += [m_dep, appkit_dep, uiautomationcore_dep]
+private_dependencies += [m_dep, appkit_dep, uiautomationcore_dep, runtimeobject_dep, propsys_dep]
 library_dependencies += other_library_dependencies
 library_dependencies += private_dependencies
 
