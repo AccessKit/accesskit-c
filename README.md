@@ -78,3 +78,5 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 The list of authors for copyright purposes is in the [AUTHORS](AUTHORS) file.
 
 Significant portions of AccessKit are derived from Chromium and are covered by its [BSD-style license](LICENSE.chromium).
+
+The Meson build system for accesskit-c is licensed under the [GNU Lesser General Public License, Version 2.1](COPYING.LIB). Note that this license applies only to the build system, not to the accesskit-c library itself.
