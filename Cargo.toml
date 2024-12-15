@@ -1,6 +1,6 @@
 [package]
 name = "accesskit-c"
-version = "0.14.0"
+version = "0.15.0"
 authors = ["The AccessKit contributors"]
 license = "MIT OR Apache-2.0"
 publish = false

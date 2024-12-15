@@ -76,6 +76,18 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.15.0](https://github.com/AccessKit/accesskit-c/compare/0.14.0...0.15.0) (2024-12-15)
+
+
+### Features
+
+* Add Meson as a build option ([#2](https://github.com/AccessKit/accesskit-c/issues/2)) ([ab4c9ac](https://github.com/AccessKit/accesskit-c/commit/ab4c9acaa24cbd5c5a7c1f1c15cfde02cd2772d7))
+
+
+### Bug Fixes
+
+* Update some dependencies to fix potential vulnerabilities ([#22](https://github.com/AccessKit/accesskit-c/issues/22)) ([7a3bb5f](https://github.com/AccessKit/accesskit-c/commit/7a3bb5f2acef89272aeba88abf75aaaa2092f90a))
+
 ## [0.14.0](https://github.com/AccessKit/accesskit-c/compare/0.13.1...0.14.0) (2024-11-23)
 
 
