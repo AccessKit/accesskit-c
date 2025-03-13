@@ -1925,16 +1925,6 @@ void accesskit_tree_free(struct accesskit_tree *tree);
 /**
  * Caller must call `accesskit_string_free` with the return value.
  */
-char *accesskit_tree_get_app_name(const struct accesskit_tree *tree);
-
-void accesskit_tree_set_app_name(struct accesskit_tree *tree,
-                                 const char *app_name);
-
-void accesskit_tree_clear_app_name(struct accesskit_tree *tree);
-
-/**
- * Caller must call `accesskit_string_free` with the return value.
- */
 char *accesskit_tree_get_toolkit_name(const struct accesskit_tree *tree);
 
 void accesskit_tree_set_toolkit_name(struct accesskit_tree *tree,
