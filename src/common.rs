@@ -5,7 +5,6 @@
 
 use crate::{box_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, BoxCastPtr, CastPtr};
 use accesskit::*;
-use paste::paste;
 use std::{
     ffi::{CStr, CString},
     mem,
@@ -24,133 +23,117 @@ impl CastPtr for node {
 impl BoxCastPtr for node {}
 
 macro_rules! clearer {
-    ($clearer:ident) => {
-        paste! {
-            impl node {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $clearer>](node: *mut node) {
-                    let node = mut_from_ptr(node);
-                    node.$clearer()
-                }
+    ($c_clearer:ident, $clearer:ident) => {
+        impl node {
+            #[no_mangle]
+            pub extern "C" fn $c_clearer(node: *mut node) {
+                let node = mut_from_ptr(node);
+                node.$clearer()
             }
         }
     };
 }
 
 macro_rules! flag_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
-        paste! {
-            $(impl node {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> bool {
-                    let node = ref_from_ptr(node);
-                    node.$getter()
-                }
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node) {
-                    let node = mut_from_ptr(node);
-                    node.$setter()
-                }
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
+        $(impl node {
+            #[no_mangle]
+            pub extern "C" fn $c_getter(node: *const node) -> bool {
+                let node = ref_from_ptr(node);
+                node.$getter()
             }
-            clearer! { $clearer })*
+            #[no_mangle]
+            pub extern "C" fn $c_setter(node: *mut node) {
+                let node = mut_from_ptr(node);
+                node.$setter()
+            }
         }
+        clearer! { $c_clearer, $clearer })*
     }
 }
 
 macro_rules! array_setter {
-    ($setter:ident, $ffi_type:ty, $rust_type:ty) => {
-        paste! {
-            impl node {
-                /// Caller is responsible for freeing `values`.
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node, length: usize, values: *const $ffi_type) {
-                    let node = mut_from_ptr(node);
-                    let values = unsafe {
-                        slice::from_raw_parts(values, length)
-                            .iter()
-                            .cloned()
-                            .map(From::from)
-                            .collect::<Vec<$rust_type>>()
-                    };
-                    node.$setter(values);
-                }
+    ($c_setter:ident, $setter:ident, $ffi_type:ty, $rust_type:ty) => {
+        impl node {
+            /// Caller is responsible for freeing `values`.
+            #[no_mangle]
+            pub extern "C" fn $c_setter(node: *mut node, length: usize, values: *const $ffi_type) {
+                let node = mut_from_ptr(node);
+                let values = unsafe {
+                    slice::from_raw_parts(values, length)
+                        .iter()
+                        .cloned()
+                        .map(From::from)
+                        .collect::<Vec<$rust_type>>()
+                };
+                node.$setter(values);
             }
         }
-    }
+    };
 }
 
 macro_rules! property_getters {
-    ($getter:ident, *const $getter_result:tt) => {
-        paste! {
-            impl node {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> *const $getter_result {
-                    let node = ref_from_ptr(node);
-                    match node.$getter() {
-                        Some(value) => value as *const _,
-                        None => ptr::null(),
-                    }
+    ($c_getter:ident, $getter:ident, *const $getter_result:tt) => {
+        impl node {
+            #[no_mangle]
+            pub extern "C" fn $c_getter(node: *const node) -> *const $getter_result {
+                let node = ref_from_ptr(node);
+                match node.$getter() {
+                    Some(value) => value as *const _,
+                    None => ptr::null(),
                 }
             }
         }
     };
-    ($getter:ident, *mut $getter_result:tt) => {
-        paste! {
-            impl node {
-                /// Caller is responsible for freeing the returned value.
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> *const $getter_result {
-                    let node = ref_from_ptr(node);
-                    BoxCastPtr::to_mut_ptr(node.$getter().into())
-                }
+    ($c_getter:ident, $getter:ident, *mut $getter_result:tt) => {
+        impl node {
+            /// Caller is responsible for freeing the returned value.
+            #[no_mangle]
+            pub extern "C" fn $c_getter(node: *const node) -> *const $getter_result {
+                let node = ref_from_ptr(node);
+                BoxCastPtr::to_mut_ptr(node.$getter().into())
             }
         }
     };
-    ($getter:ident, $getter_result:tt) => {
-        paste! {
-            impl node {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> $getter_result {
-                    let node = ref_from_ptr(node);
-                    node.$getter().into()
-                }
+    ($c_getter:ident, $getter:ident, $getter_result:tt) => {
+        impl node {
+            #[no_mangle]
+            pub extern "C" fn $c_getter(node: *const node) -> $getter_result {
+                let node = ref_from_ptr(node);
+                node.$getter().into()
             }
         }
-    }
+    };
 }
 
 macro_rules! simple_property_methods {
-    ($getter:ident, $getter_result:tt, $setter:ident, $setter_param:tt, $clearer:ident) => {
-        paste! {
-            property_getters! { $getter, $getter_result }
-            impl node {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node, value: $setter_param) {
-                    let node = mut_from_ptr(node);
-                    node.$setter(value.into());
-                }
+    ($c_getter:ident, $getter:ident, $getter_result:tt, $c_setter:ident, $setter:ident, $setter_param:tt, $c_clearer:ident, $clearer:ident) => {
+        property_getters! { $c_getter, $getter, $getter_result }
+        impl node {
+            #[no_mangle]
+            pub extern "C" fn $c_setter(node: *mut node, value: $setter_param) {
+                let node = mut_from_ptr(node);
+                node.$setter(value.into());
             }
-            clearer! { $clearer }
         }
+        clearer! { $c_clearer, $clearer }
     };
-    ($getter:ident, *const $getter_result:tt, $setter:ident, $setter_param:tt, $clearer:ident) => {
-        paste! {
-            property_getters! { $getter, *const $getter_result }
-            impl node {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node, value: $setter_param) {
-                    let node = mut_from_ptr(node);
-                    node.$setter(Box::new(value));
-                }
+    ($c_getter:ident, $getter:ident, *const $getter_result:tt, $c_setter:ident, $setter:ident, $setter_param:tt, $c_clearer:ident, $clearer:ident) => {
+        property_getters! { $c_getter, $getter, *const $getter_result }
+        impl node {
+            #[no_mangle]
+            pub extern "C" fn $c_setter(node: *mut node, value: $setter_param) {
+                let node = mut_from_ptr(node);
+                node.$setter(Box::new(value));
             }
-            clearer! { $clearer }
         }
+        clearer! { $c_clearer, $clearer }
     };
-    ($getter:ident, $getter_result:tt, $setter:ident, *const $setter_param:tt, $clearer:ident) => {
-        property_getters! { $getter, $getter_result }
-        array_setter! { $setter, $setter_param, $setter_param }
-        clearer! { $clearer }
-    }
+    ($c_getter:ident, $getter:ident, $getter_result:tt, $c_setter:ident, $setter:ident, *const $setter_param:tt, $c_clearer:ident, $clearer:ident) => {
+        property_getters! { $c_getter, $getter, $getter_result }
+        array_setter! { $c_setter, $setter, $setter_param, $setter_param }
+        clearer! { $c_clearer, $clearer }
+    };
 }
 
 macro_rules! slice_struct {
@@ -179,7 +162,7 @@ macro_rules! slice_struct {
 }
 
 macro_rules! array_struct {
-    ($struct_name:ident, $rust_type:ty, $ffi_type:ty) => {
+    ($struct_name:ident, $rust_type:ty, $ffi_type:ty, $c_free_fn:ident) => {
         #[repr(C)]
         pub struct $struct_name {
             pub length: usize,
@@ -189,14 +172,12 @@ macro_rules! array_struct {
             type RustType = $struct_name;
         }
         impl BoxCastPtr for $struct_name {}
-        paste! {
-            impl $struct_name {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_ $struct_name _free>](value: *mut $struct_name) {
-                    let array = box_from_ptr(value);
-                    unsafe { Vec::from_raw_parts(array.values, array.length, array.length) };
-                    drop(array);
-                }
+        impl $struct_name {
+            #[no_mangle]
+            pub extern "C" fn $c_free_fn(value: *mut $struct_name) {
+                let array = box_from_ptr(value);
+                unsafe { Vec::from_raw_parts(array.values, array.length, array.length) };
+                drop(array);
             }
         }
         impl From<&[$rust_type]> for $struct_name {
@@ -215,33 +196,29 @@ macro_rules! array_struct {
 }
 
 macro_rules! vec_property_methods {
-    ($(($item_type:ty, $getter:ident, *mut $getter_result:ty, $setter:ident, $setter_param:ty, $pusher:ident, $clearer:ident)),+) => {
-        paste! {
-            $(property_getters! { $getter, *mut $getter_result }
-            array_setter! { $setter, $setter_param, $item_type }
-            impl node {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $pusher>](node: *mut node, item: $setter_param) {
-                    let node = mut_from_ptr(node);
-                    node.$pusher(item.into());
-                }
+    ($(($item_type:ty, $c_getter:ident, $getter:ident, *mut $getter_result:ty, $c_setter:ident, $setter:ident, $setter_param:ty, $c_pusher:ident, $pusher:ident, $c_clearer:ident, $clearer:ident)),+) => {
+        $(property_getters! { $c_getter, $getter, *mut $getter_result }
+        array_setter! { $c_setter, $setter, $setter_param, $item_type }
+        impl node {
+            #[no_mangle]
+            pub extern "C" fn $c_pusher(node: *mut node, item: $setter_param) {
+                let node = mut_from_ptr(node);
+                node.$pusher(item.into());
             }
-            clearer! { $clearer })*
         }
+        clearer! { $c_clearer, $clearer })*
     };
-    ($(($item_type:ty, $getter:ident, $getter_result:ty, $setter:ident, $setter_param:ty, $pusher:ident, $clearer:ident)),+) => {
-        paste! {
-            $(property_getters! { $getter, $getter_result }
-            array_setter! { $setter, $setter_param, $item_type }
-            impl node {
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $pusher>](node: *mut node, item: $setter_param) {
-                    let node = mut_from_ptr(node);
-                    node.$pusher(item.into());
-                }
+    ($(($item_type:ty, $c_getter:ident, $getter:ident, $getter_result:ty, $c_setter:ident, $setter:ident, $setter_param:ty, $c_pusher:ident, $pusher:ident, $c_clearer:ident, $clearer:ident)),+) => {
+        $(property_getters! { $c_getter, $getter, $getter_result }
+        array_setter! { $c_setter, $setter, $setter_param, $item_type }
+        impl node {
+            #[no_mangle]
+            pub extern "C" fn $c_pusher(node: *mut node, item: $setter_param) {
+                let node = mut_from_ptr(node);
+                node.$pusher(item.into());
             }
-            clearer! { $clearer })*
         }
+        clearer! { $c_clearer, $clearer })*
     }
 }
 
@@ -250,80 +227,78 @@ pub type node_id = u64;
 slice_struct! { node_ids, NodeId, node_id }
 
 macro_rules! node_id_vec_property_methods {
-    ($(($getter:ident, $setter:ident, $pusher:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_pusher:ident, $pusher:ident, $c_clearer:ident, $clearer:ident)),+) => {
         $(vec_property_methods! {
-            (NodeId, $getter, node_ids, $setter, node_id, $pusher, $clearer)
+            (NodeId, $c_getter, $getter, node_ids, $c_setter, $setter, node_id, $c_pusher, $pusher, $c_clearer, $clearer)
         })*
     }
 }
 
 macro_rules! node_id_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         opt_struct! { opt_node_id, node_id }
         $(simple_property_methods! {
-            $getter, opt_node_id, $setter, node_id, $clearer
+            $c_getter, $getter, opt_node_id, $c_setter, $setter, node_id, $c_clearer, $clearer
         })*
     }
 }
 
 macro_rules! string_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
-        paste! {
-            $(impl node {
-                /// Caller must call `accesskit_string_free` with the return value.
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $getter>](node: *const node) -> *mut c_char {
-                    let node = ref_from_ptr(node);
-                    match node.$getter() {
-                        Some(value) => CString::new(value).unwrap().into_raw(),
-                        None => ptr::null_mut()
-                    }
-                }
-                /// Caller is responsible for freeing the memory pointed by `value`.
-                #[no_mangle]
-                pub extern "C" fn [<accesskit_node_ $setter>](node: *mut node, value: *const c_char) {
-                    let node = mut_from_ptr(node);
-                    let value = unsafe { CStr::from_ptr(value) };
-                    node.$setter(value.to_string_lossy());
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
+        $(impl node {
+            /// Caller must call `accesskit_string_free` with the return value.
+            #[no_mangle]
+            pub extern "C" fn $c_getter(node: *const node) -> *mut c_char {
+                let node = ref_from_ptr(node);
+                match node.$getter() {
+                    Some(value) => CString::new(value).unwrap().into_raw(),
+                    None => ptr::null_mut()
                 }
             }
-            clearer! { $clearer })*
+            /// Caller is responsible for freeing the memory pointed by `value`.
+            #[no_mangle]
+            pub extern "C" fn $c_setter(node: *mut node, value: *const c_char) {
+                let node = mut_from_ptr(node);
+                let value = unsafe { CStr::from_ptr(value) };
+                node.$setter(value.to_string_lossy());
+            }
         }
+        clearer! { $c_clearer, $clearer })*
     }
 }
 
 macro_rules! f64_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         opt_struct! { opt_double, f64 }
         $(simple_property_methods! {
-            $getter, opt_double, $setter, f64, $clearer
+            $c_getter, $getter, opt_double, $c_setter, $setter, f64, $c_clearer, $clearer
         })*
     }
 }
 
 macro_rules! usize_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         opt_struct! { opt_index, usize }
         $(simple_property_methods! {
-            $getter, opt_index, $setter, usize, $clearer
+            $c_getter, $getter, opt_index, $c_setter, $setter, usize, $c_clearer, $clearer
         })*
     }
 }
 
 macro_rules! color_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         opt_struct! { opt_color, u32 }
         $(simple_property_methods! {
-            $getter, opt_color, $setter, u32, $clearer
+            $c_getter, $getter, opt_color, $c_setter, $setter, u32, $c_clearer, $clearer
         })*
     }
 }
 
 macro_rules! text_decoration_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         opt_struct! { opt_text_decoration, TextDecoration }
         $(simple_property_methods! {
-            $getter, opt_text_decoration, $setter, TextDecoration, $clearer
+            $c_getter, $getter, opt_text_decoration, $c_setter, $setter, TextDecoration, $c_clearer, $clearer
         })*
     }
 }
@@ -361,44 +336,42 @@ macro_rules! opt_slice_struct {
 }
 
 macro_rules! length_slice_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         slice_struct! { lengths, u8, u8 }
         $(simple_property_methods! {
-            $getter, lengths, $setter, *const u8, $clearer
+            $c_getter, $getter, lengths, $c_setter, $setter, *const u8, $c_clearer, $clearer
         })*
     }
 }
 
 macro_rules! coord_slice_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         opt_slice_struct! { opt_coords, f32, f32 }
         $(simple_property_methods! {
-            $getter, opt_coords, $setter, *const f32, $clearer
+            $c_getter, $getter, opt_coords, $c_setter, $setter, *const f32, $c_clearer, $clearer
         })*
     }
 }
 
 macro_rules! bool_property_methods {
-    ($(($getter:ident, $setter:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         opt_struct! { opt_bool, bool }
         $(simple_property_methods! {
-            $getter, opt_bool, $setter, bool, $clearer
+            $c_getter, $getter, opt_bool, $c_setter, $setter, bool, $c_clearer, $clearer
         })*
     }
 }
 
 macro_rules! unique_enum_property_methods {
-    ($(($prop_type:ty, $getter:ident, $setter:ident, $clearer:ident)),+) => {
-        $(paste! {
-            opt_struct! { [<opt_ $prop_type >], $prop_type }
-            simple_property_methods! {
-                $getter, [<opt_ $prop_type >], $setter, $prop_type, $clearer
-            }
+    ($(($opt_struct_name:ident, $prop_type:ty, $c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
+        $(opt_struct! { $opt_struct_name, $prop_type }
+        simple_property_methods! {
+            $c_getter, $getter, $opt_struct_name, $c_setter, $setter, $prop_type, $c_clearer, $clearer
         })*
     }
 }
 
-property_getters! { role, Role }
+property_getters! { accesskit_node_role, role, Role }
 impl node {
     #[no_mangle]
     pub extern "C" fn accesskit_node_set_role(node: *mut node, value: Role) {
@@ -434,47 +407,47 @@ impl node {
 }
 
 flag_methods! {
-    (is_hidden, set_hidden, clear_hidden),
-    (is_linked, set_linked, clear_linked),
-    (is_multiselectable, set_multiselectable, clear_multiselectable),
-    (is_required, set_required, clear_required),
-    (is_visited, set_visited, clear_visited),
-    (is_busy, set_busy, clear_busy),
-    (is_live_atomic, set_live_atomic, clear_live_atomic),
-    (is_modal, set_modal, clear_modal),
-    (is_touch_transparent, set_touch_transparent, clear_touch_transparent),
-    (is_read_only, set_read_only, clear_read_only),
-    (is_disabled, set_disabled, clear_disabled),
-    (is_bold, set_bold, clear_bold),
-    (is_italic, set_italic, clear_italic),
-    (clips_children, set_clips_children, clear_clips_children),
-    (is_line_breaking_object, set_is_line_breaking_object, clear_is_line_breaking_object),
-    (is_page_breaking_object, set_is_page_breaking_object, clear_is_page_breaking_object),
-    (is_spelling_error, set_is_spelling_error, clear_is_spelling_error),
-    (is_grammar_error, set_is_grammar_error, clear_is_grammar_error),
-    (is_search_match, set_is_search_match, clear_is_search_match),
-    (is_suggestion, set_is_suggestion, clear_is_suggestion)
+    (accesskit_node_is_hidden, is_hidden, accesskit_node_set_hidden, set_hidden, accesskit_node_clear_hidden, clear_hidden),
+    (accesskit_node_is_linked, is_linked, accesskit_node_set_linked, set_linked, accesskit_node_clear_linked, clear_linked),
+    (accesskit_node_is_multiselectable, is_multiselectable, accesskit_node_set_multiselectable, set_multiselectable, accesskit_node_clear_multiselectable, clear_multiselectable),
+    (accesskit_node_is_required, is_required, accesskit_node_set_required, set_required, accesskit_node_clear_required, clear_required),
+    (accesskit_node_is_visited, is_visited, accesskit_node_set_visited, set_visited, accesskit_node_clear_visited, clear_visited),
+    (accesskit_node_is_busy, is_busy, accesskit_node_set_busy, set_busy, accesskit_node_clear_busy, clear_busy),
+    (accesskit_node_is_live_atomic, is_live_atomic, accesskit_node_set_live_atomic, set_live_atomic, accesskit_node_clear_live_atomic, clear_live_atomic),
+    (accesskit_node_is_modal, is_modal, accesskit_node_set_modal, set_modal, accesskit_node_clear_modal, clear_modal),
+    (accesskit_node_is_touch_transparent, is_touch_transparent, accesskit_node_set_touch_transparent, set_touch_transparent, accesskit_node_clear_touch_transparent, clear_touch_transparent),
+    (accesskit_node_is_read_only, is_read_only, accesskit_node_set_read_only, set_read_only, accesskit_node_clear_read_only, clear_read_only),
+    (accesskit_node_is_disabled, is_disabled, accesskit_node_set_disabled, set_disabled, accesskit_node_clear_disabled, clear_disabled),
+    (accesskit_node_is_bold, is_bold, accesskit_node_set_bold, set_bold, accesskit_node_clear_bold, clear_bold),
+    (accesskit_node_is_italic, is_italic, accesskit_node_set_italic, set_italic, accesskit_node_clear_italic, clear_italic),
+    (accesskit_node_clips_children, clips_children, accesskit_node_set_clips_children, set_clips_children, accesskit_node_clear_clips_children, clear_clips_children),
+    (accesskit_node_is_line_breaking_object, is_line_breaking_object, accesskit_node_set_is_line_breaking_object, set_is_line_breaking_object, accesskit_node_clear_is_line_breaking_object, clear_is_line_breaking_object),
+    (accesskit_node_is_page_breaking_object, is_page_breaking_object, accesskit_node_set_is_page_breaking_object, set_is_page_breaking_object, accesskit_node_clear_is_page_breaking_object, clear_is_page_breaking_object),
+    (accesskit_node_is_spelling_error, is_spelling_error, accesskit_node_set_is_spelling_error, set_is_spelling_error, accesskit_node_clear_is_spelling_error, clear_is_spelling_error),
+    (accesskit_node_is_grammar_error, is_grammar_error, accesskit_node_set_is_grammar_error, set_is_grammar_error, accesskit_node_clear_is_grammar_error, clear_is_grammar_error),
+    (accesskit_node_is_search_match, is_search_match, accesskit_node_set_is_search_match, set_is_search_match, accesskit_node_clear_is_search_match, clear_is_search_match),
+    (accesskit_node_is_suggestion, is_suggestion, accesskit_node_set_is_suggestion, set_is_suggestion, accesskit_node_clear_is_suggestion, clear_is_suggestion)
 }
 
 node_id_vec_property_methods! {
-    (children, set_children, push_child, clear_children),
-    (controls, set_controls, push_controlled, clear_controls),
-    (details, set_details, push_detail, clear_details),
-    (described_by, set_described_by, push_described_by, clear_described_by),
-    (flow_to, set_flow_to, push_flow_to, clear_flow_to),
-    (labelled_by, set_labelled_by, push_labelled_by, clear_labelled_by),
-    (owns, set_owns, push_owned, clear_owns),
-    (radio_group, set_radio_group, push_to_radio_group, clear_radio_group)
+    (accesskit_node_children, children, accesskit_node_set_children, set_children, accesskit_node_push_child, push_child, accesskit_node_clear_children, clear_children),
+    (accesskit_node_controls, controls, accesskit_node_set_controls, set_controls, accesskit_node_push_controlled, push_controlled, accesskit_node_clear_controls, clear_controls),
+    (accesskit_node_details, details, accesskit_node_set_details, set_details, accesskit_node_push_detail, push_detail, accesskit_node_clear_details, clear_details),
+    (accesskit_node_described_by, described_by, accesskit_node_set_described_by, set_described_by, accesskit_node_push_described_by, push_described_by, accesskit_node_clear_described_by, clear_described_by),
+    (accesskit_node_flow_to, flow_to, accesskit_node_set_flow_to, set_flow_to, accesskit_node_push_flow_to, push_flow_to, accesskit_node_clear_flow_to, clear_flow_to),
+    (accesskit_node_labelled_by, labelled_by, accesskit_node_set_labelled_by, set_labelled_by, accesskit_node_push_labelled_by, push_labelled_by, accesskit_node_clear_labelled_by, clear_labelled_by),
+    (accesskit_node_owns, owns, accesskit_node_set_owns, set_owns, accesskit_node_push_owned, push_owned, accesskit_node_clear_owns, clear_owns),
+    (accesskit_node_radio_group, radio_group, accesskit_node_set_radio_group, set_radio_group, accesskit_node_push_to_radio_group, push_to_radio_group, accesskit_node_clear_radio_group, clear_radio_group)
 }
 
 node_id_property_methods! {
-    (active_descendant, set_active_descendant, clear_active_descendant),
-    (error_message, set_error_message, clear_error_message),
-    (in_page_link_target, set_in_page_link_target, clear_in_page_link_target),
-    (member_of, set_member_of, clear_member_of),
-    (next_on_line, set_next_on_line, clear_next_on_line),
-    (previous_on_line, set_previous_on_line, clear_previous_on_line),
-    (popup_for, set_popup_for, clear_popup_for)
+    (accesskit_node_active_descendant, active_descendant, accesskit_node_set_active_descendant, set_active_descendant, accesskit_node_clear_active_descendant, clear_active_descendant),
+    (accesskit_node_error_message, error_message, accesskit_node_set_error_message, set_error_message, accesskit_node_clear_error_message, clear_error_message),
+    (accesskit_node_in_page_link_target, in_page_link_target, accesskit_node_set_in_page_link_target, set_in_page_link_target, accesskit_node_clear_in_page_link_target, clear_in_page_link_target),
+    (accesskit_node_member_of, member_of, accesskit_node_set_member_of, set_member_of, accesskit_node_clear_member_of, clear_member_of),
+    (accesskit_node_next_on_line, next_on_line, accesskit_node_set_next_on_line, set_next_on_line, accesskit_node_clear_next_on_line, clear_next_on_line),
+    (accesskit_node_previous_on_line, previous_on_line, accesskit_node_set_previous_on_line, set_previous_on_line, accesskit_node_clear_previous_on_line, clear_previous_on_line),
+    (accesskit_node_popup_for, popup_for, accesskit_node_set_popup_for, set_popup_for, accesskit_node_clear_popup_for, clear_popup_for)
 }
 
 /// Only call this function with a string that originated from AccessKit.
@@ -485,102 +458,102 @@ pub extern "C" fn accesskit_string_free(string: *mut c_char) {
 }
 
 string_property_methods! {
-    (label, set_label, clear_label),
-    (description, set_description, clear_description),
-    (value, set_value, clear_value),
-    (access_key, set_access_key, clear_access_key),
-    (author_id, set_author_id, clear_author_id),
-    (class_name, set_class_name, clear_class_name),
-    (font_family, set_font_family, clear_font_family),
-    (html_tag, set_html_tag, clear_html_tag),
-    (inner_html, set_inner_html, clear_inner_html),
-    (keyboard_shortcut, set_keyboard_shortcut, clear_keyboard_shortcut),
-    (language, set_language, clear_language),
-    (placeholder, set_placeholder, clear_placeholder),
-    (role_description, set_role_description, clear_role_description),
-    (state_description, set_state_description, clear_state_description),
-    (tooltip, set_tooltip, clear_tooltip),
-    (url, set_url, clear_url),
-    (row_index_text, set_row_index_text, clear_row_index_text),
-    (column_index_text, set_column_index_text, clear_column_index_text)
+    (accesskit_node_label, label, accesskit_node_set_label, set_label, accesskit_node_clear_label, clear_label),
+    (accesskit_node_description, description, accesskit_node_set_description, set_description, accesskit_node_clear_description, clear_description),
+    (accesskit_node_value, value, accesskit_node_set_value, set_value, accesskit_node_clear_value, clear_value),
+    (accesskit_node_access_key, access_key, accesskit_node_set_access_key, set_access_key, accesskit_node_clear_access_key, clear_access_key),
+    (accesskit_node_author_id, author_id, accesskit_node_set_author_id, set_author_id, accesskit_node_clear_author_id, clear_author_id),
+    (accesskit_node_class_name, class_name, accesskit_node_set_class_name, set_class_name, accesskit_node_clear_class_name, clear_class_name),
+    (accesskit_node_font_family, font_family, accesskit_node_set_font_family, set_font_family, accesskit_node_clear_font_family, clear_font_family),
+    (accesskit_node_html_tag, html_tag, accesskit_node_set_html_tag, set_html_tag, accesskit_node_clear_html_tag, clear_html_tag),
+    (accesskit_node_inner_html, inner_html, accesskit_node_set_inner_html, set_inner_html, accesskit_node_clear_inner_html, clear_inner_html),
+    (accesskit_node_keyboard_shortcut, keyboard_shortcut, accesskit_node_set_keyboard_shortcut, set_keyboard_shortcut, accesskit_node_clear_keyboard_shortcut, clear_keyboard_shortcut),
+    (accesskit_node_language, language, accesskit_node_set_language, set_language, accesskit_node_clear_language, clear_language),
+    (accesskit_node_placeholder, placeholder, accesskit_node_set_placeholder, set_placeholder, accesskit_node_clear_placeholder, clear_placeholder),
+    (accesskit_node_role_description, role_description, accesskit_node_set_role_description, set_role_description, accesskit_node_clear_role_description, clear_role_description),
+    (accesskit_node_state_description, state_description, accesskit_node_set_state_description, set_state_description, accesskit_node_clear_state_description, clear_state_description),
+    (accesskit_node_tooltip, tooltip, accesskit_node_set_tooltip, set_tooltip, accesskit_node_clear_tooltip, clear_tooltip),
+    (accesskit_node_url, url, accesskit_node_set_url, set_url, accesskit_node_clear_url, clear_url),
+    (accesskit_node_row_index_text, row_index_text, accesskit_node_set_row_index_text, set_row_index_text, accesskit_node_clear_row_index_text, clear_row_index_text),
+    (accesskit_node_column_index_text, column_index_text, accesskit_node_set_column_index_text, set_column_index_text, accesskit_node_clear_column_index_text, clear_column_index_text)
 }
 
 f64_property_methods! {
-    (scroll_x, set_scroll_x, clear_scroll_x),
-    (scroll_x_min, set_scroll_x_min, clear_scroll_x_min),
-    (scroll_x_max, set_scroll_x_max, clear_scroll_x_max),
-    (scroll_y, set_scroll_y, clear_scroll_y),
-    (scroll_y_min, set_scroll_y_min, clear_scroll_y_min),
-    (scroll_y_max, set_scroll_y_max, clear_scroll_y_max),
-    (numeric_value, set_numeric_value, clear_numeric_value),
-    (min_numeric_value, set_min_numeric_value, clear_min_numeric_value),
-    (max_numeric_value, set_max_numeric_value, clear_max_numeric_value),
-    (numeric_value_step, set_numeric_value_step, clear_numeric_value_step),
-    (numeric_value_jump, set_numeric_value_jump, clear_numeric_value_jump),
-    (font_size, set_font_size, clear_font_size),
-    (font_weight, set_font_weight, clear_font_weight)
+    (accesskit_node_scroll_x, scroll_x, accesskit_node_set_scroll_x, set_scroll_x, accesskit_node_clear_scroll_x, clear_scroll_x),
+    (accesskit_node_scroll_x_min, scroll_x_min, accesskit_node_set_scroll_x_min, set_scroll_x_min, accesskit_node_clear_scroll_x_min, clear_scroll_x_min),
+    (accesskit_node_scroll_x_max, scroll_x_max, accesskit_node_set_scroll_x_max, set_scroll_x_max, accesskit_node_clear_scroll_x_max, clear_scroll_x_max),
+    (accesskit_node_scroll_y, scroll_y, accesskit_node_set_scroll_y, set_scroll_y, accesskit_node_clear_scroll_y, clear_scroll_y),
+    (accesskit_node_scroll_y_min, scroll_y_min, accesskit_node_set_scroll_y_min, set_scroll_y_min, accesskit_node_clear_scroll_y_min, clear_scroll_y_min),
+    (accesskit_node_scroll_y_max, scroll_y_max, accesskit_node_set_scroll_y_max, set_scroll_y_max, accesskit_node_clear_scroll_y_max, clear_scroll_y_max),
+    (accesskit_node_numeric_value, numeric_value, accesskit_node_set_numeric_value, set_numeric_value, accesskit_node_clear_numeric_value, clear_numeric_value),
+    (accesskit_node_min_numeric_value, min_numeric_value, accesskit_node_set_min_numeric_value, set_min_numeric_value, accesskit_node_clear_min_numeric_value, clear_min_numeric_value),
+    (accesskit_node_max_numeric_value, max_numeric_value, accesskit_node_set_max_numeric_value, set_max_numeric_value, accesskit_node_clear_max_numeric_value, clear_max_numeric_value),
+    (accesskit_node_numeric_value_step, numeric_value_step, accesskit_node_set_numeric_value_step, set_numeric_value_step, accesskit_node_clear_numeric_value_step, clear_numeric_value_step),
+    (accesskit_node_numeric_value_jump, numeric_value_jump, accesskit_node_set_numeric_value_jump, set_numeric_value_jump, accesskit_node_clear_numeric_value_jump, clear_numeric_value_jump),
+    (accesskit_node_font_size, font_size, accesskit_node_set_font_size, set_font_size, accesskit_node_clear_font_size, clear_font_size),
+    (accesskit_node_font_weight, font_weight, accesskit_node_set_font_weight, set_font_weight, accesskit_node_clear_font_weight, clear_font_weight)
 }
 
 usize_property_methods! {
-    (row_count, set_row_count, clear_row_count),
-    (column_count, set_column_count, clear_column_count),
-    (row_index, set_row_index, clear_row_index),
-    (column_index, set_column_index, clear_column_index),
-    (row_span, set_row_span, clear_row_span),
-    (column_span, set_column_span, clear_column_span),
-    (level, set_level, clear_level),
-    (size_of_set, set_size_of_set, clear_size_of_set),
-    (position_in_set, set_position_in_set, clear_position_in_set)
+    (accesskit_node_row_count, row_count, accesskit_node_set_row_count, set_row_count, accesskit_node_clear_row_count, clear_row_count),
+    (accesskit_node_column_count, column_count, accesskit_node_set_column_count, set_column_count, accesskit_node_clear_column_count, clear_column_count),
+    (accesskit_node_row_index, row_index, accesskit_node_set_row_index, set_row_index, accesskit_node_clear_row_index, clear_row_index),
+    (accesskit_node_column_index, column_index, accesskit_node_set_column_index, set_column_index, accesskit_node_clear_column_index, clear_column_index),
+    (accesskit_node_row_span, row_span, accesskit_node_set_row_span, set_row_span, accesskit_node_clear_row_span, clear_row_span),
+    (accesskit_node_column_span, column_span, accesskit_node_set_column_span, set_column_span, accesskit_node_clear_column_span, clear_column_span),
+    (accesskit_node_level, level, accesskit_node_set_level, set_level, accesskit_node_clear_level, clear_level),
+    (accesskit_node_size_of_set, size_of_set, accesskit_node_set_size_of_set, set_size_of_set, accesskit_node_clear_size_of_set, clear_size_of_set),
+    (accesskit_node_position_in_set, position_in_set, accesskit_node_set_position_in_set, set_position_in_set, accesskit_node_clear_position_in_set, clear_position_in_set)
 }
 
 color_property_methods! {
-    (color_value, set_color_value, clear_color_value),
-    (background_color, set_background_color, clear_background_color),
-    (foreground_color, set_foreground_color, clear_foreground_color)
+    (accesskit_node_color_value, color_value, accesskit_node_set_color_value, set_color_value, accesskit_node_clear_color_value, clear_color_value),
+    (accesskit_node_background_color, background_color, accesskit_node_set_background_color, set_background_color, accesskit_node_clear_background_color, clear_background_color),
+    (accesskit_node_foreground_color, foreground_color, accesskit_node_set_foreground_color, set_foreground_color, accesskit_node_clear_foreground_color, clear_foreground_color)
 }
 
 text_decoration_property_methods! {
-    (overline, set_overline, clear_overline),
-    (strikethrough, set_strikethrough, clear_strikethrough),
-    (underline, set_underline, clear_underline)
+    (accesskit_node_overline, overline, accesskit_node_set_overline, set_overline, accesskit_node_clear_overline, clear_overline),
+    (accesskit_node_strikethrough, strikethrough, accesskit_node_set_strikethrough, set_strikethrough, accesskit_node_clear_strikethrough, clear_strikethrough),
+    (accesskit_node_underline, underline, accesskit_node_set_underline, set_underline, accesskit_node_clear_underline, clear_underline)
 }
 
 length_slice_property_methods! {
-    (character_lengths, set_character_lengths, clear_character_lengths),
-    (word_lengths, set_word_lengths, clear_word_lengths)
+    (accesskit_node_character_lengths, character_lengths, accesskit_node_set_character_lengths, set_character_lengths, accesskit_node_clear_character_lengths, clear_character_lengths),
+    (accesskit_node_word_lengths, word_lengths, accesskit_node_set_word_lengths, set_word_lengths, accesskit_node_clear_word_lengths, clear_word_lengths)
 }
 
 coord_slice_property_methods! {
-    (character_positions, set_character_positions, clear_character_positions),
-    (character_widths, set_character_widths, clear_character_widths)
+    (accesskit_node_character_positions, character_positions, accesskit_node_set_character_positions, set_character_positions, accesskit_node_clear_character_positions, clear_character_positions),
+    (accesskit_node_character_widths, character_widths, accesskit_node_set_character_widths, set_character_widths, accesskit_node_clear_character_widths, clear_character_widths)
 }
 
 bool_property_methods! {
-    (is_expanded, set_expanded, clear_expanded),
-    (is_selected, set_selected, clear_selected)
+    (accesskit_node_is_expanded, is_expanded, accesskit_node_set_expanded, set_expanded, accesskit_node_clear_expanded, clear_expanded),
+    (accesskit_node_is_selected, is_selected, accesskit_node_set_selected, set_selected, accesskit_node_clear_selected, clear_selected)
 }
 
 unique_enum_property_methods! {
-    (Invalid, invalid, set_invalid, clear_invalid),
-    (Toggled, toggled, set_toggled, clear_toggled),
-    (Live, live, set_live, clear_live),
-    (TextDirection, text_direction, set_text_direction, clear_text_direction),
-    (Orientation, orientation, set_orientation, clear_orientation),
-    (SortDirection, sort_direction, set_sort_direction, clear_sort_direction),
-    (AriaCurrent, aria_current, set_aria_current, clear_aria_current),
-    (AutoComplete, auto_complete, set_auto_complete, clear_auto_complete),
-    (HasPopup, has_popup, set_has_popup, clear_has_popup),
-    (ListStyle, list_style, set_list_style, clear_list_style),
-    (TextAlign, text_align, set_text_align, clear_text_align),
-    (VerticalOffset, vertical_offset, set_vertical_offset, clear_vertical_offset)
+    (opt_Invalid, Invalid, accesskit_node_invalid, invalid, accesskit_node_set_invalid, set_invalid, accesskit_node_clear_invalid, clear_invalid),
+    (opt_Toggled, Toggled, accesskit_node_toggled, toggled, accesskit_node_set_toggled, set_toggled, accesskit_node_clear_toggled, clear_toggled),
+    (opt_Live, Live, accesskit_node_live, live, accesskit_node_set_live, set_live, accesskit_node_clear_live, clear_live),
+    (opt_TextDirection, TextDirection, accesskit_node_text_direction, text_direction, accesskit_node_set_text_direction, set_text_direction, accesskit_node_clear_text_direction, clear_text_direction),
+    (opt_Orientation, Orientation, accesskit_node_orientation, orientation, accesskit_node_set_orientation, set_orientation, accesskit_node_clear_orientation, clear_orientation),
+    (opt_SortDirection, SortDirection, accesskit_node_sort_direction, sort_direction, accesskit_node_set_sort_direction, set_sort_direction, accesskit_node_clear_sort_direction, clear_sort_direction),
+    (opt_AriaCurrent, AriaCurrent, accesskit_node_aria_current, aria_current, accesskit_node_set_aria_current, set_aria_current, accesskit_node_clear_aria_current, clear_aria_current),
+    (opt_AutoComplete, AutoComplete, accesskit_node_auto_complete, auto_complete, accesskit_node_set_auto_complete, set_auto_complete, accesskit_node_clear_auto_complete, clear_auto_complete),
+    (opt_HasPopup, HasPopup, accesskit_node_has_popup, has_popup, accesskit_node_set_has_popup, set_has_popup, accesskit_node_clear_has_popup, clear_has_popup),
+    (opt_ListStyle, ListStyle, accesskit_node_list_style, list_style, accesskit_node_set_list_style, set_list_style, accesskit_node_clear_list_style, clear_list_style),
+    (opt_TextAlign, TextAlign, accesskit_node_text_align, text_align, accesskit_node_set_text_align, set_text_align, accesskit_node_clear_text_align, clear_text_align),
+    (opt_VerticalOffset, VerticalOffset, accesskit_node_vertical_offset, vertical_offset, accesskit_node_set_vertical_offset, set_vertical_offset, accesskit_node_clear_vertical_offset, clear_vertical_offset)
 }
 
 simple_property_methods! {
-    transform, *const Affine, set_transform, Affine, clear_transform
+    accesskit_node_transform, transform, *const Affine, accesskit_node_set_transform, set_transform, Affine, accesskit_node_clear_transform, clear_transform
 }
 opt_struct! { opt_rect, Rect }
 simple_property_methods! {
-    bounds, opt_rect, set_bounds, Rect, clear_bounds
+    accesskit_node_bounds, bounds, opt_rect, accesskit_node_set_bounds, set_bounds, Rect, accesskit_node_clear_bounds, clear_bounds
 }
 
 #[repr(C)]
@@ -641,7 +614,7 @@ impl From<&TextSelection> for text_selection {
 }
 
 opt_struct! { opt_text_selection, text_selection }
-property_getters! { text_selection, opt_text_selection }
+property_getters! { accesskit_node_text_selection, text_selection, opt_text_selection }
 impl node {
     #[no_mangle]
     pub extern "C" fn accesskit_node_set_text_selection(node: *mut node, value: text_selection) {
@@ -649,7 +622,7 @@ impl node {
         node.set_text_selection(Box::new(value.into()));
     }
 }
-clearer! { clear_text_selection }
+clearer! { accesskit_node_clear_text_selection, clear_text_selection }
 
 /// Use `accesskit_custom_action_new` to create this struct. Do not reallocate `description`.
 ///
@@ -711,10 +684,10 @@ impl From<&CustomAction> for custom_action {
     }
 }
 
-array_struct! { custom_actions, CustomAction, custom_action }
+array_struct! { custom_actions, CustomAction, custom_action, accesskit_custom_actions_free }
 
 vec_property_methods! {
-    (CustomAction, custom_actions, *mut custom_actions, set_custom_actions, custom_action, push_custom_action, clear_custom_actions)
+    (CustomAction, accesskit_node_custom_actions, custom_actions, *mut custom_actions, accesskit_node_set_custom_actions, set_custom_actions, custom_action, accesskit_node_push_custom_action, push_custom_action, accesskit_node_clear_custom_actions, clear_custom_actions)
 }
 
 impl node {
