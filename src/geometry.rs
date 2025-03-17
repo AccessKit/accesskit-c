@@ -4,7 +4,6 @@
 // the LICENSE-MIT file), at your option.
 
 use accesskit::{Affine, Point, Rect, Size, Vec2};
-use paste::paste;
 
 #[no_mangle]
 pub const extern "C" fn accesskit_affine_identity() -> Affine {
@@ -100,32 +99,30 @@ pub extern "C" fn accesskit_rect_with_size(rect: Rect, size: Size) -> Rect {
 }
 
 macro_rules! rect_getter_methods {
-    ($(($getter:ident, $getter_result:ty, $default_value:expr)),+) => {
-        paste! {
-            $(#[no_mangle]
-            pub extern "C" fn [<accesskit_rect_ $getter>](rect: *const Rect) -> $getter_result {
-                if rect.is_null() {
-                    $default_value
-                } else {
-                    unsafe { Box::from_raw(rect as *mut Rect).$getter() }
-                }
-            })*
-        }
+    ($(($c_getter:ident, $getter:ident, $getter_result:ty, $default_value:expr)),+) => {
+        $(#[no_mangle]
+        pub extern "C" fn $c_getter(rect: *const Rect) -> $getter_result {
+            if rect.is_null() {
+                $default_value
+            } else {
+                unsafe { Box::from_raw(rect as *mut Rect).$getter() }
+            }
+        })*
     }
 }
 
 rect_getter_methods! {
-    (width, f64, 0.),
-    (height, f64, 0.),
-    (min_x, f64, 0.),
-    (max_x, f64, 0.),
-    (min_y, f64, 0.),
-    (max_y, f64, 0.),
-    (origin, Point, Point::ZERO),
-    (size, Size, Size::ZERO),
-    (abs, Rect, Rect::ZERO),
-    (area, f64, 0.),
-    (is_empty, bool, true)
+    (accesskit_rect_width, width, f64, 0.),
+    (accesskit_rect_height, height, f64, 0.),
+    (accesskit_rect_min_x, min_x, f64, 0.),
+    (accesskit_rect_max_x, max_x, f64, 0.),
+    (accesskit_rect_min_y, min_y, f64, 0.),
+    (accesskit_rect_max_y, max_y, f64, 0.),
+    (accesskit_rect_origin, origin, Point, Point::ZERO),
+    (accesskit_rect_size, size, Size, Size::ZERO),
+    (accesskit_rect_abs, abs, Rect, Rect::ZERO),
+    (accesskit_rect_area, area, f64, 0.),
+    (accesskit_rect_is_empty, is_empty, bool, true)
 }
 
 #[no_mangle]
