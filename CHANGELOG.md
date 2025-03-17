@@ -76,6 +76,28 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.15.0](https://github.com/AccessKit/accesskit-c/compare/0.14.0...0.15.0) (2025-03-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update accesskit_windows and add documentation for the subclassing adapter constructor ([#28](https://github.com/AccessKit/accesskit-c/issues/28))
+* Update to new AccessKit crate versions
+
+### Features
+
+* Add Meson as a build option ([#2](https://github.com/AccessKit/accesskit-c/issues/2)) ([ab4c9ac](https://github.com/AccessKit/accesskit-c/commit/ab4c9acaa24cbd5c5a7c1f1c15cfde02cd2772d7))
+
+
+### Bug Fixes
+
+* Eliminate the dependency on `paste` ([#27](https://github.com/AccessKit/accesskit-c/issues/27)) ([e512230](https://github.com/AccessKit/accesskit-c/commit/e512230ebf3447fc9bd706c2e33731df6338d5b6))
+* Update accesskit_windows and add documentation for the subclassing adapter constructor ([#28](https://github.com/AccessKit/accesskit-c/issues/28)) ([0e13160](https://github.com/AccessKit/accesskit-c/commit/0e131608a417591070dae1a8a53c5a549f991470))
+* Update minimum supported Rust version to 1.77.2 ([#26](https://github.com/AccessKit/accesskit-c/issues/26)) ([b86ed76](https://github.com/AccessKit/accesskit-c/commit/b86ed764485c8b6370bb2de6ef2567200e0e8378))
+* Update some dependencies to fix potential vulnerabilities ([#22](https://github.com/AccessKit/accesskit-c/issues/22)) ([7a3bb5f](https://github.com/AccessKit/accesskit-c/commit/7a3bb5f2acef89272aeba88abf75aaaa2092f90a))
+* Update to new AccessKit crate versions ([beccab7](https://github.com/AccessKit/accesskit-c/commit/beccab72c55bb9406224d2c44d10a22e7fb1a90c))
+* Update toml_edit ([#29](https://github.com/AccessKit/accesskit-c/issues/29)) ([0ed8053](https://github.com/AccessKit/accesskit-c/commit/0ed80534cdb430944e09ad8d137f729a34673458))
+
 ## [0.14.0](https://github.com/AccessKit/accesskit-c/compare/0.13.1...0.14.0) (2024-11-23)
 
 
