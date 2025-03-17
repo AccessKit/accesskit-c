@@ -2307,6 +2307,19 @@ struct accesskit_opt_lresult accesskit_windows_adapter_handle_wm_getobject(
 #endif
 
 #if defined(_WIN32)
+/**
+ * Creates a new Windows platform adapter using window subclassing.
+ * This must be done before the window is shown or focused
+ * for the first time.
+ *
+ * This must be called on the thread that owns the window. The activation
+ * handler will always be called on that thread. The action handler
+ * may or may not be called on that thread.
+ *
+ * # Panics
+ *
+ * Panics if the window is already visible.
+ */
 struct accesskit_windows_subclassing_adapter *
 accesskit_windows_subclassing_adapter_new(
     HWND hwnd, accesskit_activation_handler_callback activation_handler,

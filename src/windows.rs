@@ -115,6 +115,17 @@ impl CastPtr for windows_subclassing_adapter {
 impl BoxCastPtr for windows_subclassing_adapter {}
 
 impl windows_subclassing_adapter {
+    /// Creates a new Windows platform adapter using window subclassing.
+    /// This must be done before the window is shown or focused
+    /// for the first time.
+    ///
+    /// This must be called on the thread that owns the window. The activation
+    /// handler will always be called on that thread. The action handler
+    /// may or may not be called on that thread.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the window is already visible.
     #[no_mangle]
     pub extern "C" fn accesskit_windows_subclassing_adapter_new(
         hwnd: HWND,
