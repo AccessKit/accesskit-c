@@ -76,6 +76,15 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.15.1](https://github.com/AccessKit/accesskit-c/compare/0.15.0...0.15.1) (2025-03-18)
+
+
+### Bug Fixes
+
+* Remove calls to `accesskit_tree_set_app_name` in examples ([#31](https://github.com/AccessKit/accesskit-c/issues/31)) ([1f493a9](https://github.com/AccessKit/accesskit-c/commit/1f493a933c69436bf9eb2bafc353a3a63070cbe8))
+* Remove paste from Cargo.lock ([#30](https://github.com/AccessKit/accesskit-c/issues/30)) ([0623e08](https://github.com/AccessKit/accesskit-c/commit/0623e083ce659b18ea456d069bd8b9017b3efae0))
+* Update Corrosion to 0.5.1 ([#32](https://github.com/AccessKit/accesskit-c/issues/32)) ([015a981](https://github.com/AccessKit/accesskit-c/commit/015a981c389d3cc3bc4b336e5fe1cbf79dfefdc5))
+
 ## [0.15.0](https://github.com/AccessKit/accesskit-c/compare/0.14.0...0.15.0) (2025-03-17)
 
 
