@@ -27,7 +27,7 @@ if (ACCESSKIT_BUILD_HEADERS)
     find_program(CLANG_FORMAT clang-format)
 
     add_custom_target(headers ALL
-        COMMAND ${RUSTUP} run nightly ${CBINDGEN} --crate accesskit-c --output accesskit.hpp "${CMAKE_SOURCE_DIR}"
+        COMMAND ${RUSTUP} run nightly-2025-03-27 ${CBINDGEN} --crate accesskit-c --output accesskit.hpp "${CMAKE_SOURCE_DIR}"
         COMMAND ${CLANG_FORMAT} -i accesskit.hpp
         COMMAND ${CMAKE_COMMAND} -E rename accesskit.hpp accesskit.h
         BYPRODUCTS accesskit.h
