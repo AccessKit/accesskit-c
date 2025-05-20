@@ -408,7 +408,6 @@ impl node {
 
 flag_methods! {
     (accesskit_node_is_hidden, is_hidden, accesskit_node_set_hidden, set_hidden, accesskit_node_clear_hidden, clear_hidden),
-    (accesskit_node_is_linked, is_linked, accesskit_node_set_linked, set_linked, accesskit_node_clear_linked, clear_linked),
     (accesskit_node_is_multiselectable, is_multiselectable, accesskit_node_set_multiselectable, set_multiselectable, accesskit_node_clear_multiselectable, clear_multiselectable),
     (accesskit_node_is_required, is_required, accesskit_node_set_required, set_required, accesskit_node_clear_required, clear_required),
     (accesskit_node_is_visited, is_visited, accesskit_node_set_visited, set_visited, accesskit_node_clear_visited, clear_visited),

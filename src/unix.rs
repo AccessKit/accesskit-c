@@ -47,6 +47,13 @@ impl unix_adapter {
         drop(box_from_ptr(adapter));
     }
 
+    /// Set the bounds of the top-level window. The outer bounds contain any
+    /// window decoration and borders.
+    ///
+    /// # Caveats
+    ///
+    /// Since an application can not get the position of its window under
+    /// Wayland, calling this method only makes sense under X11.
     #[no_mangle]
     pub extern "C" fn accesskit_unix_adapter_set_root_window_bounds(
         adapter: *mut unix_adapter,
