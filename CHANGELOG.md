@@ -76,6 +76,17 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.16.0](https://github.com/AccessKit/accesskit-c/compare/0.15.1...0.16.0) (2025-05-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update the AccessKit crates ([#37](https://github.com/AccessKit/accesskit-c/issues/37))
+
+### Bug Fixes
+
+* Update the AccessKit crates ([#37](https://github.com/AccessKit/accesskit-c/issues/37)) ([768173d](https://github.com/AccessKit/accesskit-c/commit/768173d1a81972a6757d76dc183bd7d037175195))
+
 ## [0.15.1](https://github.com/AccessKit/accesskit-c/compare/0.15.0...0.15.1) (2025-03-18)
 
 
