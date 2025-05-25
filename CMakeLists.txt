@@ -60,7 +60,7 @@ if (ACCESSKIT_BUILD_LIBRARIES)
     )
     install(FILES
         "$<$<NOT:$<STREQUAL:$<TARGET_PROPERTY:accesskit-shared,IMPORTED_IMPLIB>,>>:$<TARGET_PROPERTY:accesskit-shared,IMPORTED_IMPLIB>>"
-        RENAME "libaccesskit.a"
+        RENAME "$<IF:$<STREQUAL:${_accesskit_toolchain},msvc>,accesskit.lib,libaccesskit.a>"
         DESTINATION "${ACCESSKIT_LIBRARIES_DIR}/shared"
     )
 endif()
