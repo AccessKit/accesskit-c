@@ -76,6 +76,18 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.16.0](https://github.com/AccessKit/accesskit-c/compare/0.15.1...0.16.0) (2025-05-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update the AccessKit crates ([#37](https://github.com/AccessKit/accesskit-c/issues/37))
+
+### Bug Fixes
+
+* Rename import library for MSVC toolchain ([#43](https://github.com/AccessKit/accesskit-c/issues/43)) ([8ae58b1](https://github.com/AccessKit/accesskit-c/commit/8ae58b1f335482b0bdad0509d095cf58e0e97731))
+* Update the AccessKit crates ([#37](https://github.com/AccessKit/accesskit-c/issues/37)) ([768173d](https://github.com/AccessKit/accesskit-c/commit/768173d1a81972a6757d76dc183bd7d037175195))
+
 ## [0.15.1](https://github.com/AccessKit/accesskit-c/compare/0.15.0...0.15.1) (2025-03-18)
 
 
