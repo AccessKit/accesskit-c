@@ -19,19 +19,19 @@ jobs:
             target: x86_64-apple-darwin
             cmake-options: -DCMAKE_OSX_ARCHITECTURES=x86_64
             path: macos/x86_64
-          - os: windows-2019
+          - os: windows-2025
             target: aarch64-pc-windows-msvc
-            setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsamd64_x86.bat" `& powershell'
+            setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsamd64_x86.bat" `& powershell'
             cmake-options: -A ARM64
             path: windows/arm64/msvc
-          - os: windows-2019
+          - os: windows-2025
             target: i686-pc-windows-msvc
-            setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat" `& powershell'
+            setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat" `& powershell'
             cmake-options: -A Win32
             path: windows/x86/msvc
-          - os: windows-2019
+          - os: windows-2025
             target: x86_64-pc-windows-msvc
-            setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat" `& powershell'
+            setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" `& powershell'
             path: windows/x86_64/msvc
           - os: ubuntu-latest
             target: i686-pc-windows-gnu
