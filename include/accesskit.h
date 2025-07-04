@@ -453,7 +453,7 @@ typedef uint8_t accesskit_role;
  * The amount by which to scroll in the direction specified by one of the
  * `Scroll` actions.
  */
-enum accesskit_ScrollUnit
+enum accesskit_scroll_unit
 #ifdef __cplusplus
     : uint8_t
 #endif  // __cplusplus
@@ -470,7 +470,7 @@ enum accesskit_ScrollUnit
   ACCESSKIT_SCROLL_UNIT_PAGE,
 };
 #ifndef __cplusplus
-typedef uint8_t accesskit_ScrollUnit;
+typedef uint8_t accesskit_scroll_unit;
 #endif  // __cplusplus
 
 enum accesskit_sort_direction
@@ -903,7 +903,7 @@ typedef struct accesskit_action_data {
       double numeric_value;
     };
     struct {
-      accesskit_ScrollUnit scroll_unit;
+      accesskit_scroll_unit scroll_unit;
     };
     struct {
       struct accesskit_rect scroll_target_rect;
