@@ -53,11 +53,21 @@ enum accesskit_action
    * Requires [`ActionRequest::data`] to be set to [`ActionData::Value`].
    */
   ACCESSKIT_ACTION_REPLACE_SELECTED_TEXT,
-  ACCESSKIT_ACTION_SCROLL_BACKWARD,
+  /**
+   * Scroll down by the specified unit.
+   */
   ACCESSKIT_ACTION_SCROLL_DOWN,
-  ACCESSKIT_ACTION_SCROLL_FORWARD,
+  /**
+   * Scroll left by the specified unit.
+   */
   ACCESSKIT_ACTION_SCROLL_LEFT,
+  /**
+   * Scroll right by the specified unit.
+   */
   ACCESSKIT_ACTION_SCROLL_RIGHT,
+  /**
+   * Scroll up by the specified unit.
+   */
   ACCESSKIT_ACTION_SCROLL_UP,
   /**
    * Scroll any scrollable containers to make the target object visible
@@ -437,6 +447,30 @@ enum accesskit_role
 };
 #ifndef __cplusplus
 typedef uint8_t accesskit_role;
+#endif  // __cplusplus
+
+/**
+ * The amount by which to scroll in the direction specified by one of the
+ * `Scroll` actions.
+ */
+enum accesskit_scroll_unit
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  /**
+   * A single item of a list, line of text (for vertical scrolling),
+   * character (for horizontal scrolling), or an approximation of
+   * one of these.
+   */
+  ACCESSKIT_SCROLL_UNIT_ITEM,
+  /**
+   * The amount of content that fits in the viewport.
+   */
+  ACCESSKIT_SCROLL_UNIT_PAGE,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_scroll_unit;
 #endif  // __cplusplus
 
 enum accesskit_sort_direction
@@ -849,6 +883,7 @@ typedef enum accesskit_action_data_Tag {
   ACCESSKIT_ACTION_DATA_CUSTOM_ACTION,
   ACCESSKIT_ACTION_DATA_VALUE,
   ACCESSKIT_ACTION_DATA_NUMERIC_VALUE,
+  ACCESSKIT_ACTION_DATA_SCROLL_UNIT,
   ACCESSKIT_ACTION_DATA_SCROLL_TARGET_RECT,
   ACCESSKIT_ACTION_DATA_SCROLL_TO_POINT,
   ACCESSKIT_ACTION_DATA_SET_SCROLL_OFFSET,
@@ -866,6 +901,9 @@ typedef struct accesskit_action_data {
     };
     struct {
       double numeric_value;
+    };
+    struct {
+      accesskit_scroll_unit scroll_unit;
     };
     struct {
       struct accesskit_rect scroll_target_rect;

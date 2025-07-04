@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "accesskit"
-version = "0.19.0"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e25ae84c0260bdf5df07796d7cc4882460de26a2b406ec0e6c42461a723b271b"
+checksum = "553cd5f6b68b8c3dd07606447b91a12c044e8023d30decdc1554ecc313481d25"
 
 [[package]]
 name = "accesskit-c"
@@ -20,9 +20,9 @@ dependencies = [
 
 [[package]]
 name = "accesskit_atspi_common"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29bd41de2e54451a8ca0dd95ebf45b54d349d29ebceb7f20be264eee14e3d477"
+checksum = "fe8f7e6cedea3731ad97d934cb85d89d930e34ade75a82aec3ec0adc9d834d0a"
 dependencies = [
  "accesskit",
  "accesskit_consumer",
@@ -34,9 +34,9 @@ dependencies = [
 
 [[package]]
 name = "accesskit_consumer"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bfae7c152994a31dc7d99b8eeac7784a919f71d1b306f4b83217e110fd3824c"
+checksum = "5c964dad39d2e2d6977674abb9bf333a118a657dd5abb6d3b90ac44ab1f70951"
 dependencies = [
  "accesskit",
  "hashbrown",
@@ -44,9 +44,9 @@ dependencies = [
 
 [[package]]
 name = "accesskit_macos"
-version = "0.20.0"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "692dd318ff8a7a0ffda67271c4bd10cf32249656f4e49390db0b26ca92b095f2"
+checksum = "dc1aada7b0eec94ac456568d123ea32a4155cc7670c7d28c37d19843a4f00ba6"
 dependencies = [
  "accesskit",
  "accesskit_consumer",
@@ -58,9 +58,9 @@ dependencies = [
 
 [[package]]
 name = "accesskit_unix"
-version = "0.15.0"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5f7474c36606d0fe4f438291d667bae7042ea2760f506650ad2366926358fc8"
+checksum = "31a205f8ef4ae2d1e1ad93cc616e27f93c471628787612ecaed565773bdfeb3c"
 dependencies = [
  "accesskit",
  "accesskit_atspi_common",
@@ -76,9 +76,9 @@ dependencies = [
 
 [[package]]
 name = "accesskit_windows"
-version = "0.27.0"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70a042b62c9c05bf7b616f015515c17d2813f3ba89978d6f4fc369735d60700a"
+checksum = "b415603285ccd9db7a4c97bc4e4e450132e4dc5df639acc5aaa3b59cf607de5f"
 dependencies = [
  "accesskit",
  "accesskit_consumer",
