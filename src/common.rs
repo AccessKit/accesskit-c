@@ -404,6 +404,41 @@ impl node {
         let node = mut_from_ptr(node);
         node.clear_actions();
     }
+
+    /// Return whether the specified action is in the set supported on this node's
+    /// direct children in the filtered tree.
+    #[no_mangle]
+    pub extern "C" fn accesskit_node_child_supports_action(
+        node: *const node,
+        action: Action,
+    ) -> bool {
+        let node = ref_from_ptr(node);
+        node.child_supports_action(action)
+    }
+
+    /// Add the specified action to the set supported on this node's direct
+    /// children in the filtered tree.
+    #[no_mangle]
+    pub extern "C" fn accesskit_node_add_child_action(node: *mut node, action: Action) {
+        let node = mut_from_ptr(node);
+        node.add_child_action(action);
+    }
+
+    /// Remove the specified action from the set supported on this node's direct
+    /// children in the filtered tree.
+    #[no_mangle]
+    pub extern "C" fn accesskit_node_remove_child_action(node: *mut node, action: Action) {
+        let node = mut_from_ptr(node);
+        node.remove_child_action(action);
+    }
+
+    /// Clear the set of actions supported on this node's direct children in the
+    /// filtered tree.
+    #[no_mangle]
+    pub extern "C" fn accesskit_node_clear_child_actions(node: *mut node) {
+        let node = mut_from_ptr(node);
+        node.clear_child_actions();
+    }
 }
 
 flag_methods! {
@@ -856,7 +891,10 @@ pub enum action_data {
     Value(*mut c_char),
     NumericValue(f64),
     ScrollUnit(ScrollUnit),
-    ScrollTargetRect(Rect),
+    /// Optional suggestion for `ACCESSKIT_ACTION_SCROLL_INTO_VIEW`, specifying
+    /// the preferred position of the target node relative to the scrollable
+    /// container's viewport.
+    ScrollHint(ScrollHint),
     ScrollToPoint(Point),
     SetScrollOffset(Point),
     SetTextSelection(text_selection),
@@ -879,7 +917,7 @@ impl From<ActionData> for action_data {
             ActionData::Value(value) => Self::Value(CString::new(&*value).unwrap().into_raw()),
             ActionData::NumericValue(value) => Self::NumericValue(value),
             ActionData::ScrollUnit(value) => Self::ScrollUnit(value),
-            ActionData::ScrollTargetRect(rect) => Self::ScrollTargetRect(rect),
+            ActionData::ScrollHint(hint) => Self::ScrollHint(hint),
             ActionData::ScrollToPoint(point) => Self::ScrollToPoint(point),
             ActionData::SetScrollOffset(offset) => Self::SetScrollOffset(offset),
             ActionData::SetTextSelection(selection) => Self::SetTextSelection(selection.into()),

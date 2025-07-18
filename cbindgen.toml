@@ -47,6 +47,7 @@ renaming_overrides_prefixing = true
 "Point" = "accesskit_point"
 "Rect" = "accesskit_rect"
 "Role" = "accesskit_role"
+"ScrollHint" = "accesskit_scroll_hint"
 "ScrollUnit" = "accesskit_scroll_unit"
 "Size" = "accesskit_size"
 "SortDirection" = "accesskit_sort_direction"
