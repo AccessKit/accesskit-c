@@ -76,6 +76,23 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.17.0](https://github.com/AccessKit/accesskit-c/compare/0.16.0...0.17.0) (2025-07-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update for the latest AccessKit release ([#49](https://github.com/AccessKit/accesskit-c/issues/49))
+* bump the rust-crates group with 4 updates ([#45](https://github.com/AccessKit/accesskit-c/issues/45))
+
+### deps
+
+* Update for the latest AccessKit release ([#49](https://github.com/AccessKit/accesskit-c/issues/49)) ([b429c4a](https://github.com/AccessKit/accesskit-c/commit/b429c4a6fea5f1f1f8f4b45050d9ec81f3dcd313))
+
+
+### Bug Fixes
+
+* bump the rust-crates group with 4 updates ([#45](https://github.com/AccessKit/accesskit-c/issues/45)) ([ac163d1](https://github.com/AccessKit/accesskit-c/commit/ac163d14d82070819d7fec6f4d3c3c381b8ecede))
+
 ## [0.16.0](https://github.com/AccessKit/accesskit-c/compare/0.15.1...0.16.0) (2025-05-25)
 
 
