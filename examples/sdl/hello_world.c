@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
   window_state_init(&state);
   SDL_Window *window =
       SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED,
-                       SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
+                       SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_HIDDEN);
   SDL_Surface *screen_surface = SDL_GetWindowSurface(window);
   Uint32 window_id = SDL_GetWindowID(window);
   struct action_handler_state action_handler = {user_event, window_id};
