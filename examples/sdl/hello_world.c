@@ -374,7 +374,8 @@ int main(int argc, char *argv[]) {
         window_state_unlock(&state);
       }
     }
-    SDL_FillRect(screen_surface, NULL, SDL_MapRGB(&(*screen_surface->format), 0x00, 0x00, 0x00));
+    SDL_FillRect(screen_surface, NULL,
+                 SDL_MapRGB(&(*screen_surface->format), 0x00, 0x00, 0x00));
     SDL_UpdateWindowSurface(window);
   }
 
