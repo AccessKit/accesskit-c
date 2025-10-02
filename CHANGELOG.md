@@ -76,6 +76,14 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.17.1](https://github.com/AccessKit/accesskit-c/compare/0.17.0...0.17.1) (2025-10-02)
+
+
+### Bug Fixes
+
+* bump the rust-crates group with 4 updates ([#54](https://github.com/AccessKit/accesskit-c/issues/54)) ([f71fc32](https://github.com/AccessKit/accesskit-c/commit/f71fc326c7637cc9d0dc02192a2b9cd4fe95dfa0))
+* Draw on the window to make the SDL example work under Wayland ([#51](https://github.com/AccessKit/accesskit-c/issues/51)) ([4872478](https://github.com/AccessKit/accesskit-c/commit/48724780647b01fde19156c2825645673e176cf7))
+
 ## [0.17.0](https://github.com/AccessKit/accesskit-c/compare/0.16.0...0.17.0) (2025-07-18)
 
 
