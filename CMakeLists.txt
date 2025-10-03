@@ -4,6 +4,7 @@ project(accesskit-c)
 
 option(ACCESSKIT_BUILD_HEADERS "Whether to build header files" OFF)
 option(ACCESSKIT_BUILD_LIBRARIES "Whether to build libraries" ON)
+option(ACCESSKIT_ANDROID_EMBEDDED_DEX "Whether to embed the classes.dex file in the library (Android only)" OFF)
 
 if (ACCESSKIT_BUILD_LIBRARIES)
     include(FetchContent)
@@ -19,6 +20,9 @@ if (ACCESSKIT_BUILD_LIBRARIES)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
     set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
     corrosion_import_crate(MANIFEST_PATH Cargo.toml)
+    if (ACCESSKIT_ANDROID_EMBEDDED_DEX)
+        corrosion_set_features(accesskit FEATURES android-embedded-dex)
+    endif()
 endif()
 
 if (ACCESSKIT_BUILD_HEADERS)

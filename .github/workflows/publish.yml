@@ -51,6 +51,14 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             path: linux/x86_64
+          - os: ubuntu-latest
+            target: aarch64-linux-android
+            cmake-options: -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-28
+            path: android/arm64-v8a
+          - os: ubuntu-latest
+            target: x86_64-linux-android
+            cmake-options: -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-28
+            path: android/x86_64
 
     name: Build
     steps:
