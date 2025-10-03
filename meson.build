@@ -288,6 +288,7 @@ if cbindgen.found() and clang_format.found()
     build_by_default: false,
     install: true,
     install_dir: generated_headers_directory,
+    install_tag: ['generated-headers'],
   )
 endif
 
@@ -471,6 +472,7 @@ if get_option('default_library') in ['static', 'both']
     ],
     install: true,
     install_dir: get_option('libdir'),
+    install_tag: ['devel'],
   )
 endif
 
