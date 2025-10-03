@@ -16,6 +16,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#ifdef __ANDROID__
+#include <jni.h>
+#endif
 
 /**
  * An action to be taken on an accessibility node.
@@ -569,6 +572,24 @@ enum accesskit_vertical_offset
 typedef uint8_t accesskit_vertical_offset;
 #endif  // __cplusplus
 
+#if defined(__ANDROID__)
+typedef struct accesskit_android_adapter accesskit_android_adapter;
+#endif
+
+#if defined(__ANDROID__)
+typedef struct accesskit_android_injecting_adapter
+    accesskit_android_injecting_adapter;
+#endif
+
+#if defined(__ANDROID__)
+typedef struct accesskit_android_platform_action
+    accesskit_android_platform_action;
+#endif
+
+#if defined(__ANDROID__)
+typedef struct accesskit_android_queued_events accesskit_android_queued_events;
+#endif
+
 typedef struct accesskit_custom_action accesskit_custom_action;
 
 #if defined(__APPLE__)
@@ -1026,13 +1047,6 @@ typedef struct accesskit_size {
   double height;
 } accesskit_size;
 
-/**
- * Ownership of `request` is transferred to the callback. `request` must
- * be freed using `accesskit_action_request_free`.
- */
-typedef void (*accesskit_action_handler_callback)(
-    struct accesskit_action_request *request, void *userdata);
-
 typedef void *accesskit_tree_update_factory_userdata;
 
 /**
@@ -1044,6 +1058,13 @@ typedef struct accesskit_tree_update *(*accesskit_tree_update_factory)(
 
 typedef struct accesskit_tree_update *(*accesskit_activation_handler_callback)(
     void *userdata);
+
+/**
+ * Ownership of `request` is transferred to the callback. `request` must
+ * be freed using `accesskit_action_request_free`.
+ */
+typedef void (*accesskit_action_handler_callback)(
+    struct accesskit_action_request *request, void *userdata);
 
 typedef void (*accesskit_deactivation_handler_callback)(void *userdata);
 
@@ -2437,6 +2458,108 @@ struct accesskit_vec2 accesskit_vec2_scale(struct accesskit_vec2 vec,
                                            double scalar);
 
 struct accesskit_vec2 accesskit_vec2_neg(struct accesskit_vec2 vec);
+
+#if defined(__ANDROID__)
+struct accesskit_android_platform_action *
+accesskit_android_platform_action_from_java(JNIEnv *env, jint action,
+                                            jobject arguments);
+#endif
+
+#if defined(__ANDROID__)
+void accesskit_android_platform_action_free(
+    struct accesskit_android_platform_action *action);
+#endif
+
+#if defined(__ANDROID__)
+/**
+ * Memory is also freed when calling this function.
+ */
+void accesskit_android_queued_events_raise(
+    struct accesskit_android_queued_events *events, JNIEnv *env, jobject host);
+#endif
+
+#if defined(__ANDROID__)
+struct accesskit_android_adapter *accesskit_android_adapter_new(void);
+#endif
+
+#if defined(__ANDROID__)
+void accesskit_android_adapter_free(struct accesskit_android_adapter *adapter);
+#endif
+
+#if defined(__ANDROID__)
+/**
+ * You must call `accesskit_android_queued_events_raise` on the returned
+ * pointer. It can be null if the adapter is not active.
+ */
+struct accesskit_android_queued_events *
+accesskit_android_adapter_update_if_active(
+    struct accesskit_android_adapter *adapter,
+    accesskit_tree_update_factory update_factory,
+    void *update_factory_userdata);
+#endif
+
+#if defined(__ANDROID__)
+jobject accesskit_android_adapter_create_accessibility_node_info(
+    struct accesskit_android_adapter *adapter,
+    accesskit_activation_handler_callback activation_handler,
+    void *activation_handler_userdata, JNIEnv *env, jobject host,
+    jint virtual_view_id);
+#endif
+
+#if defined(__ANDROID__)
+jobject accesskit_android_adapter_find_focus(
+    struct accesskit_android_adapter *adapter,
+    accesskit_activation_handler_callback activation_handler,
+    void *activation_handler_userdata, JNIEnv *env, jobject host,
+    jint focus_type);
+#endif
+
+#if defined(__ANDROID__)
+/**
+ * You must call `accesskit_android_queued_events_raise` on the returned
+ * pointer. It can be null if the adapter is not active.
+ */
+struct accesskit_android_queued_events *
+accesskit_android_adapter_perform_action(
+    struct accesskit_android_adapter *adapter,
+    accesskit_action_handler_callback action_handler,
+    void *action_handler_userdata, jint virtual_view_id,
+    const struct accesskit_android_platform_action *action);
+#endif
+
+#if defined(__ANDROID__)
+/**
+ * You must call `accesskit_android_queued_events_raise` on the returned
+ * pointer. It can be null if the adapter is not active.
+ */
+struct accesskit_android_queued_events *
+accesskit_android_adapter_on_hover_event(
+    struct accesskit_android_adapter *adapter,
+    accesskit_activation_handler_callback activation_handler,
+    void *activation_handler_userdata, jint action, jfloat x, jfloat y);
+#endif
+
+#if defined(__ANDROID__)
+struct accesskit_android_injecting_adapter *
+accesskit_android_injecting_adapter_new(
+    JNIEnv *env, jobject host,
+    accesskit_activation_handler_callback activation_handler,
+    void *activation_handler_userdata,
+    accesskit_action_handler_callback action_handler,
+    void *action_handler_userdata);
+#endif
+
+#if defined(__ANDROID__)
+void accesskit_android_injecting_adapter_free(
+    struct accesskit_android_injecting_adapter *adapter);
+#endif
+
+#if defined(__ANDROID__)
+void accesskit_android_injecting_adapter_update_if_active(
+    struct accesskit_android_injecting_adapter *adapter,
+    accesskit_tree_update_factory update_factory,
+    void *update_factory_userdata);
+#endif
 
 #if defined(__APPLE__)
 /**
