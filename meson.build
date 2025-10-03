@@ -260,8 +260,39 @@ if toolchain_arg != []
   cargo_wrapper_args += toolchain_arg
 endif
 
+# Header generation with cbindgen
+generated_headers_directory = meson.project_source_root() / 'include'
+rustup = find_program('rustup', required: true)
+cbindgen = find_program('cbindgen', required: false)
+clang_format = find_program('clang-format', required: false)
+
+if cbindgen.found() and clang_format.found()
+  # Generate header with cbindgen, then format
+  generated_header = custom_target(
+    'accesskit_unformatted.h',
+    output: 'accesskit_unformatted.h',
+    command: [
+      rustup, 'run', 'nightly-2025-03-27',
+      cbindgen, '--crate', 'accesskit-c', '--output', '@OUTPUT@',
+      meson.project_source_root()
+    ],
+    build_by_default: false,
+  )
+
+  formatted_header = custom_target(
+    'accesskit.h',
+    input: generated_header,
+    output: 'accesskit.h',
+    command: [clang_format, '@INPUT@'],
+    capture: true,
+    build_by_default: false,
+    install: true,
+    install_dir: generated_headers_directory,
+  )
+endif
+
 includes = files(
-    'include/accesskit.h'
+    generated_headers_directory / 'accesskit.h'
 )
 
 install_headers(
