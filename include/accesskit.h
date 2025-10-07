@@ -869,8 +869,9 @@ typedef struct accesskit_opt_text_selection {
 } accesskit_opt_text_selection;
 
 /**
- * Use `accesskit_custom_action_new` to create this struct. Do not reallocate
- * `description`.
+ * Use `accesskit_custom_action_new` or
+ * `accesskit_custom_action_new_with_length` to create this struct. Do not
+ * reallocate `description`.
  *
  * When you get this struct, you are responsible for freeing `description`.
  */
@@ -2090,6 +2091,12 @@ void accesskit_node_clear_text_selection(struct accesskit_node *node);
 
 struct accesskit_custom_action accesskit_custom_action_new(
     int32_t id, const char *description);
+
+/**
+ * The string must not contain null bytes.
+ */
+struct accesskit_custom_action accesskit_custom_action_new_with_length(
+    int32_t id, size_t length, const char *description);
 
 void accesskit_custom_actions_free(struct accesskit_custom_actions *value);
 
