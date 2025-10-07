@@ -869,8 +869,7 @@ typedef struct accesskit_opt_text_selection {
 } accesskit_opt_text_selection;
 
 /**
- * Use `accesskit_custom_action_new` or
- * `accesskit_custom_action_new_with_length` to create this struct. Do not
+ * Use `accesskit_custom_action_new` or to create this struct. Do not
  * reallocate `description`.
  *
  * When you get this struct, you are responsible for freeing `description`.
@@ -2092,12 +2091,6 @@ void accesskit_node_clear_text_selection(struct accesskit_node *node);
 struct accesskit_custom_action accesskit_custom_action_new(
     int32_t id, const char *description);
 
-/**
- * The string must not contain null bytes.
- */
-struct accesskit_custom_action accesskit_custom_action_new_with_length(
-    int32_t id, size_t length, const char *description);
-
 void accesskit_custom_actions_free(struct accesskit_custom_actions *value);
 
 /**
@@ -2136,9 +2129,15 @@ void accesskit_tree_free(struct accesskit_tree *tree);
  */
 char *accesskit_tree_get_toolkit_name(const struct accesskit_tree *tree);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `toolkit_name`
+ */
 void accesskit_tree_set_toolkit_name(struct accesskit_tree *tree,
                                      const char *toolkit_name);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `toolkit_name`
+ */
 void accesskit_tree_set_toolkit_name_with_length(struct accesskit_tree *tree,
                                                  size_t length,
                                                  const char *toolkit_name);
@@ -2150,9 +2149,15 @@ void accesskit_tree_clear_toolkit_name(struct accesskit_tree *tree);
  */
 char *accesskit_tree_get_toolkit_version(const struct accesskit_tree *tree);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `toolkit_version`
+ */
 void accesskit_tree_set_toolkit_version(struct accesskit_tree *tree,
                                         const char *toolkit_version);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `toolkit_version`
+ */
 void accesskit_tree_set_toolkit_version_with_length(
     struct accesskit_tree *tree, size_t length, const char *toolkit_version);
 
