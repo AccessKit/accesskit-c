@@ -795,6 +795,18 @@ impl tree {
             unsafe { CStr::from_ptr(toolkit_name) }.to_string_lossy(),
         ));
     }
+    
+    #[no_mangle]
+    pub extern "C" fn accesskit_tree_set_toolkit_name_with_length(
+        tree: *mut tree,
+        length: usize,
+        toolkit_name: *const c_char,
+    ) {
+        let tree = mut_from_ptr(tree);
+        tree.toolkit_name = Some(String::from_utf8_lossy(
+            unsafe { slice::from_raw_parts(toolkit_name as *const u8, length) }
+        ).into_owned())
+    }
 
     #[no_mangle]
     pub extern "C" fn accesskit_tree_clear_toolkit_name(tree: *mut tree) {
@@ -821,6 +833,18 @@ impl tree {
         tree.toolkit_version = Some(String::from(
             unsafe { CStr::from_ptr(toolkit_version) }.to_string_lossy(),
         ));
+    }
+    
+    #[no_mangle]
+    pub extern "C" fn accesskit_tree_set_toolkit_version_with_length(
+        tree: *mut tree,
+        length: usize,
+        toolkit_version: *const c_char,
+    ) {
+        let tree = mut_from_ptr(tree);
+        tree.toolkit_version = Some(String::from_utf8_lossy(
+            unsafe { slice::from_raw_parts(toolkit_version as *const u8, length) }
+        ).into_owned())
     }
 
     #[no_mangle]

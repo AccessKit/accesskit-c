@@ -2132,6 +2132,10 @@ char *accesskit_tree_get_toolkit_name(const struct accesskit_tree *tree);
 void accesskit_tree_set_toolkit_name(struct accesskit_tree *tree,
                                      const char *toolkit_name);
 
+void accesskit_tree_set_toolkit_name_with_length(struct accesskit_tree *tree,
+                                                 size_t length,
+                                                 const char *toolkit_name);
+
 void accesskit_tree_clear_toolkit_name(struct accesskit_tree *tree);
 
 /**
@@ -2141,6 +2145,9 @@ char *accesskit_tree_get_toolkit_version(const struct accesskit_tree *tree);
 
 void accesskit_tree_set_toolkit_version(struct accesskit_tree *tree,
                                         const char *toolkit_version);
+
+void accesskit_tree_set_toolkit_version_with_length(
+    struct accesskit_tree *tree, size_t length, const char *toolkit_version);
 
 void accesskit_tree_clear_toolkit_version(struct accesskit_tree *tree);
 
@@ -2432,6 +2439,14 @@ accesskit_macos_subclassing_adapter_update_view_focus_state(
  */
 void accesskit_macos_add_focus_forwarder_to_window_class(
     const char *class_name);
+#endif
+
+#if defined(__APPLE__)
+/**
+ * See `accesskit_macos_add_focus_forwarder_to_window_class`
+ */
+void accesskit_macos_add_focus_forwarder_to_window_class_with_length(
+    size_t length, const char *class_name);
 #endif
 
 #if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
