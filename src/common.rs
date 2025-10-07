@@ -267,7 +267,7 @@ macro_rules! string_property_methods {
             }
             /// Caller is responsible for freeing the memory pointed by `value`.
             #[no_mangle]
-            pub extern "C" fn $c_setter_with_length(node: *mut node, value: *const c_char, length: usize) {
+            pub extern "C" fn $c_setter_with_length(node: *mut node, length: usize, value: *const c_char) {
                 let node = mut_from_ptr(node);
                 let value = unsafe { slice::from_raw_parts(value as *const u8, length) };
                 node.$setter(String::from_utf8_lossy(value));
