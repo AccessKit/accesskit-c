@@ -668,7 +668,9 @@ impl node {
 }
 clearer! { accesskit_node_clear_text_selection, clear_text_selection }
 
-/// Use `accesskit_custom_action_new` to create this struct. Do not reallocate `description`.
+/// Use `accesskit_custom_action_new` or 
+/// `accesskit_custom_action_new_with_length` to create this struct. Do not 
+/// reallocate `description`.
 ///
 /// When you get this struct, you are responsible for freeing `description`.
 #[derive(Clone)]
@@ -687,6 +689,23 @@ impl custom_action {
         let description = CString::new(String::from(
             unsafe { CStr::from_ptr(description) }.to_string_lossy(),
         ))
+        .unwrap();
+        Self {
+            id,
+            description: description.into_raw(),
+        }
+    }
+    
+    /// The string must not contain null bytes.
+    #[no_mangle]
+    pub extern "C" fn accesskit_custom_action_new_with_length(
+        id: i32,
+        length: usize,
+        description: *const c_char,
+    ) -> custom_action {
+        let description = CString::new(String::from_utf8_lossy(
+            unsafe { slice::from_raw_parts(description as *const u8, length) }
+        ).into_owned())
         .unwrap();
         Self {
             id,
