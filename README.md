@@ -69,6 +69,14 @@ cmake --build build
 cmake --install build
 ```
 
+Alternatively, you can use Meson like so:
+
+```console
+meson setup build
+meson compile -C build accesskit.h
+meson install -C build --tags generated-headers --no-rebuild
+```
+
 ## License
 
 AccessKit is licensed under the [Apache License, Version 2.0](LICENSE-APACHE) or the [MIT license](LICENSE-MIT), at your option.

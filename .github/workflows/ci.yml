@@ -110,14 +110,19 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
-    - name: install nightly toolchain
+    - uses: actions/setup-python@v6
+    - run: pip install meson ninja
+
+    - name: install nightly Rust toolchain
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: nightly-2025-03-27
 
-    - uses: dtolnay/install@master
+    - name: install cbindgen
+      uses: dtolnay/install@master
       with:
         crate: cbindgen
-    - run: cmake -S . -B build -DACCESSKIT_BUILD_HEADERS=ON -DACCESSKIT_BUILD_LIBRARIES=OFF
-    - run: cmake --build build
+
+    - run: meson setup build
+    - run: meson compile -C build accesskit.h
     - run: cmp build/accesskit.h include/accesskit.h

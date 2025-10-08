@@ -260,15 +260,6 @@ if toolchain_arg != []
   cargo_wrapper_args += toolchain_arg
 endif
 
-includes = files(
-    'include/accesskit.h'
-)
-
-install_headers(
-    includes,
-    subdir: '@0@'.format(accesskit_c_lib_name),
-)
-
 library_sources = files(
   'Cargo.lock',
   'Cargo.toml',
@@ -278,6 +269,48 @@ library_sources = files(
   'src/macos.rs',
   'src/unix.rs',
   'src/windows.rs',
+)
+
+# Header generation with cbindgen
+generated_headers_directory = meson.project_source_root() / 'include'
+rustup = find_program('rustup', required: false)
+cbindgen = find_program('cbindgen', required: false)
+clang_format = find_program('clang-format', required: false)
+
+if rustup.found() and cbindgen.found() and clang_format.found()
+  # Generate header with cbindgen, then format
+  generated_header = custom_target(
+    'accesskit_unformatted.h',
+    output: 'accesskit_unformatted.h',
+    depend_files: [library_sources, '.clang-format', 'cbindgen.toml'],
+    command: [
+      rustup, 'run', 'nightly-2025-03-27',
+      cbindgen, '--crate', 'accesskit-c', '--output', '@OUTPUT@',
+      meson.project_source_root()
+    ],
+    build_by_default: false,
+  )
+
+  formatted_header = custom_target(
+    'accesskit.h',
+    input: generated_header,
+    output: 'accesskit.h',
+    command: [clang_format, '@INPUT@'],
+    capture: true,
+    build_by_default: false,
+    install: true,
+    install_dir: generated_headers_directory,
+    install_tag: ['generated-headers'],
+  )
+endif
+
+includes = files(
+    generated_headers_directory / 'accesskit.h'
+)
+
+install_headers(
+    includes,
+    subdir: '@0@'.format(accesskit_c_lib_name),
 )
 
 rust_artifacts = custom_target(
@@ -440,6 +473,7 @@ if get_option('default_library') in ['static', 'both']
     ],
     install: true,
     install_dir: get_option('libdir'),
+    install_tag: ['devel'],
   )
 endif
 
