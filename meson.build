@@ -262,11 +262,11 @@ endif
 
 # Header generation with cbindgen
 generated_headers_directory = meson.project_source_root() / 'include'
-rustup = find_program('rustup', required: true)
+rustup = find_program('rustup', required: false)
 cbindgen = find_program('cbindgen', required: false)
 clang_format = find_program('clang-format', required: false)
 
-if cbindgen.found() and clang_format.found()
+if rustup.found() and cbindgen.found() and clang_format.found()
   # Generate header with cbindgen, then format
   generated_header = custom_target(
     'accesskit_unformatted.h',
