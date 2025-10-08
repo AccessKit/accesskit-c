@@ -260,6 +260,17 @@ if toolchain_arg != []
   cargo_wrapper_args += toolchain_arg
 endif
 
+library_sources = files(
+  'Cargo.lock',
+  'Cargo.toml',
+  'src/common.rs',
+  'src/geometry.rs',
+  'src/lib.rs',
+  'src/macos.rs',
+  'src/unix.rs',
+  'src/windows.rs',
+)
+
 # Header generation with cbindgen
 generated_headers_directory = meson.project_source_root() / 'include'
 rustup = find_program('rustup', required: false)
@@ -271,6 +282,7 @@ if rustup.found() and cbindgen.found() and clang_format.found()
   generated_header = custom_target(
     'accesskit_unformatted.h',
     output: 'accesskit_unformatted.h',
+    depend_files: [library_sources, '.clang-format', 'cbindgen.toml'],
     command: [
       rustup, 'run', 'nightly-2025-03-27',
       cbindgen, '--crate', 'accesskit-c', '--output', '@OUTPUT@',
@@ -299,17 +311,6 @@ includes = files(
 install_headers(
     includes,
     subdir: '@0@'.format(accesskit_c_lib_name),
-)
-
-library_sources = files(
-  'Cargo.lock',
-  'Cargo.toml',
-  'src/common.rs',
-  'src/geometry.rs',
-  'src/lib.rs',
-  'src/macos.rs',
-  'src/unix.rs',
-  'src/windows.rs',
 )
 
 rust_artifacts = custom_target(
