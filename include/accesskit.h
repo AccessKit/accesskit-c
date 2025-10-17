@@ -2000,6 +2000,11 @@ struct accesskit_node *accesskit_node_new(accesskit_role role);
 
 void accesskit_node_free(struct accesskit_node *node);
 
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_node_debug(const struct accesskit_node *node);
+
 struct accesskit_tree *accesskit_tree_new(accesskit_node_id root);
 
 void accesskit_tree_free(struct accesskit_tree *tree);
@@ -2024,6 +2029,11 @@ void accesskit_tree_set_toolkit_version(struct accesskit_tree *tree,
 
 void accesskit_tree_clear_toolkit_version(struct accesskit_tree *tree);
 
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_tree_debug(const struct accesskit_tree *tree);
+
 struct accesskit_tree_update *accesskit_tree_update_with_focus(
     accesskit_node_id focus);
 
@@ -2047,6 +2057,12 @@ void accesskit_tree_update_clear_tree(struct accesskit_tree_update *update);
 
 void accesskit_tree_update_set_focus(struct accesskit_tree_update *update,
                                      accesskit_node_id focus);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_tree_update_debug(
+    const struct accesskit_tree_update *tree_update);
 
 void accesskit_action_request_free(struct accesskit_action_request *request);
 
@@ -2214,6 +2230,14 @@ void *accesskit_macos_adapter_hit_test(
 
 #if defined(__APPLE__)
 /**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_macos_adapter_debug(
+    const struct accesskit_macos_adapter *adapter);
+#endif
+
+#if defined(__APPLE__)
+/**
  * # Safety
  *
  * `view` must be a valid, unreleased pointer to an `NSView`.
@@ -2347,6 +2371,15 @@ void accesskit_unix_adapter_update_window_focus_state(
     struct accesskit_unix_adapter *adapter, bool is_focused);
 #endif
 
+#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
+     defined(__NetBSD__) || defined(__OpenBSD__))
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_unix_adapter_debug(
+    const struct accesskit_unix_adapter *adapter);
+#endif
+
 #if defined(_WIN32)
 /**
  * Memory is also freed when calling this function.
@@ -2395,6 +2428,14 @@ struct accesskit_opt_lresult accesskit_windows_adapter_handle_wm_getobject(
     struct accesskit_windows_adapter *adapter, WPARAM wparam, LPARAM lparam,
     accesskit_activation_handler_callback activation_handler,
     void *activation_handler_userdata);
+#endif
+
+#if defined(_WIN32)
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_windows_adapter_debug(
+    const struct accesskit_windows_adapter *adapter);
 #endif
 
 #if defined(_WIN32)

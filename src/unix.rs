@@ -3,14 +3,16 @@
 // the LICENSE-APACHE file) or the MIT license (found in
 // the LICENSE-MIT file), at your option.
 
-use crate::{
-    box_from_ptr, mut_from_ptr, tree_update_factory, tree_update_factory_userdata,
-    ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr,
-    DeactivationHandlerCallback, FfiActionHandler, FfiActivationHandler, FfiDeactivationHandler,
-};
 use accesskit::Rect;
 use accesskit_unix::Adapter;
-use std::os::raw::c_void;
+use std::ffi::{c_char, c_void};
+
+use crate::{
+    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, tree_update_factory,
+    tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
+    CastPtr, DeactivationHandlerCallback, FfiActionHandler, FfiActivationHandler,
+    FfiDeactivationHandler,
+};
 
 pub struct unix_adapter {
     _private: [u8; 0],
@@ -84,5 +86,11 @@ impl unix_adapter {
     ) {
         let adapter = mut_from_ptr(adapter);
         adapter.update_window_focus_state(is_focused);
+    }
+
+    /// Caller must call `accesskit_string_free` with the return value.
+    #[no_mangle]
+    pub extern "C" fn accesskit_unix_adapter_debug(adapter: *const unix_adapter) -> *mut c_char {
+        debug_repr_from_ptr(adapter)
     }
 }
