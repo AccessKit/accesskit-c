@@ -3,13 +3,14 @@
 // the LICENSE-APACHE file) or the MIT license (found in
 // the LICENSE-MIT file), at your option.
 
-use crate::{
-    box_from_ptr, mut_from_ptr, opt_struct, tree_update_factory, tree_update_factory_userdata,
-    ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr, FfiActionHandler,
-    FfiActivationHandler,
-};
 use accesskit_windows::*;
-use std::os::raw::c_void;
+use std::ffi::{c_char, c_void};
+
+use crate::{
+    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, tree_update_factory,
+    tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
+    CastPtr, FfiActionHandler, FfiActivationHandler,
+};
 
 pub struct windows_queued_events {
     _private: [u8; 0],
@@ -101,6 +102,14 @@ impl windows_adapter {
             FfiActivationHandler::new(activation_handler, activation_handler_userdata);
         let lresult = adapter.handle_wm_getobject(wparam, lparam, &mut activation_handler);
         opt_lresult::from(lresult)
+    }
+
+    /// Caller must call `accesskit_string_free` with the return value.
+    #[no_mangle]
+    pub extern "C" fn accesskit_windows_adapter_debug(
+        adapter: *const windows_adapter,
+    ) -> *mut c_char {
+        debug_repr_from_ptr(adapter)
     }
 }
 

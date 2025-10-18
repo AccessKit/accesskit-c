@@ -3,13 +3,16 @@
 // the LICENSE-APACHE file) or the MIT license (found in
 // the LICENSE-MIT file), at your option.
 
-use crate::{box_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, BoxCastPtr, CastPtr};
 use accesskit::*;
 use std::{
     ffi::{CStr, CString},
     mem,
     os::raw::{c_char, c_void},
     ptr, slice,
+};
+
+use crate::{
+    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, BoxCastPtr, CastPtr,
 };
 
 pub struct node {
@@ -735,6 +738,12 @@ impl node {
     pub extern "C" fn accesskit_node_free(node: *mut node) {
         drop(box_from_ptr(node));
     }
+
+    /// Caller must call `accesskit_string_free` with the return value.
+    #[no_mangle]
+    pub extern "C" fn accesskit_node_debug(node: *const node) -> *mut c_char {
+        debug_repr_from_ptr(node)
+    }
 }
 
 pub struct tree {
@@ -812,6 +821,12 @@ impl tree {
         let tree = mut_from_ptr(tree);
         tree.toolkit_version = None;
     }
+
+    /// Caller must call `accesskit_string_free` with the return value.
+    #[no_mangle]
+    pub extern "C" fn accesskit_tree_debug(tree: *const tree) -> *mut c_char {
+        debug_repr_from_ptr(tree)
+    }
 }
 
 pub struct tree_update {
@@ -882,6 +897,12 @@ impl tree_update {
     pub extern "C" fn accesskit_tree_update_set_focus(update: *mut tree_update, focus: node_id) {
         let update = mut_from_ptr(update);
         update.focus = focus.into();
+    }
+
+    /// Caller must call `accesskit_string_free` with the return value.
+    #[no_mangle]
+    pub extern "C" fn accesskit_tree_update_debug(tree_update: *const tree_update) -> *mut c_char {
+        debug_repr_from_ptr(tree_update)
     }
 }
 

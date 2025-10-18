@@ -3,17 +3,15 @@
 // the LICENSE-APACHE file) or the MIT license (found in
 // the LICENSE-MIT file), at your option.
 
-use crate::{
-    box_from_ptr, mut_from_ptr, tree_update_factory, tree_update_factory_userdata,
-    ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr, FfiActionHandler,
-    FfiActivationHandler,
-};
 use accesskit_macos::{
     add_focus_forwarder_to_window_class, Adapter, NSPoint, QueuedEvents, SubclassingAdapter,
 };
-use std::{
-    ffi::CStr,
-    os::raw::{c_char, c_void},
+use std::ffi::{c_char, c_void, CStr};
+
+use crate::{
+    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, tree_update_factory,
+    tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
+    CastPtr, FfiActionHandler, FfiActivationHandler,
 };
 
 pub struct macos_queued_events {
@@ -133,6 +131,12 @@ impl macos_adapter {
         let mut activation_handler =
             FfiActivationHandler::new(activation_handler, activation_handler_userdata);
         adapter.hit_test(NSPoint::new(x, y), &mut activation_handler) as *mut _
+    }
+
+    /// Caller must call `accesskit_string_free` with the return value.
+    #[no_mangle]
+    pub extern "C" fn accesskit_macos_adapter_debug(adapter: *const macos_adapter) -> *mut c_char {
+        debug_repr_from_ptr(adapter)
     }
 }
 
