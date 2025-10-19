@@ -249,3 +249,13 @@ pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class(
     let class_name = unsafe { CStr::from_ptr(class_name).to_string_lossy() };
     add_focus_forwarder_to_window_class(&class_name);
 }
+
+/// See `accesskit_macos_add_focus_forwarder_to_window_class`
+#[no_mangle]
+pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class_with_length(
+    length: usize,
+    class_name: *const c_char,
+) {
+    let class_name = String::from_utf8_lossy(unsafe { slice::from_raw_parts(value as *const u8, length) });
+    add_focus_forwarder_to_window_class(&class_name);
+}
