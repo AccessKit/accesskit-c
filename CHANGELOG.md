@@ -76,6 +76,13 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.18.0](https://github.com/AccessKit/accesskit-c/compare/0.17.1...0.18.0) (2025-10-31)
+
+
+### Features
+
+* Add functions to get string representation of opaque types ([#56](https://github.com/AccessKit/accesskit-c/issues/56)) ([f885b39](https://github.com/AccessKit/accesskit-c/commit/f885b392d670c1b2f6ad2f23e57cc1f933e97a98))
+
 ## [0.17.1](https://github.com/AccessKit/accesskit-c/compare/0.17.0...0.17.1) (2025-10-02)
 
 
