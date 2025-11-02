@@ -12,7 +12,8 @@ use std::{
 };
 
 use crate::{
-    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, BoxCastPtr, CastPtr,
+    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, string_from_c_slice,
+    BoxCastPtr, CastPtr,
 };
 
 pub struct node {
@@ -267,10 +268,9 @@ macro_rules! string_property_methods {
             }
             /// Caller is responsible for freeing the memory pointed by `value`.
             #[no_mangle]
-            pub extern "C" fn $c_setter_with_length(node: *mut node, length: usize, value: *const c_char) {
+            pub extern "C" fn $c_setter_with_length(node: *mut node, value: *const c_char, length: usize) {
                 let node = mut_from_ptr(node);
-                let value = unsafe { slice::from_raw_parts(value as *const u8, length) };
-                node.$setter(String::from_utf8_lossy(value));
+                node.$setter(unsafe { string_from_c_slice(value, length) });
             }
         }
         clearer! { $c_clearer, $clearer })*
@@ -668,7 +668,7 @@ impl node {
 }
 clearer! { accesskit_node_clear_text_selection, clear_text_selection }
 
-/// Use `accesskit_custom_action_new` or to create this struct. Do not
+/// Use `accesskit_custom_action_new` to create this struct. Do not
 /// reallocate `description`.
 ///
 /// When you get this struct, you are responsible for freeing `description`.
@@ -797,18 +797,16 @@ impl tree {
             unsafe { CStr::from_ptr(toolkit_name) }.to_string_lossy(),
         ));
     }
-    
+
     /// Caller is responsible for freeing the memory pointed by `toolkit_name`
     #[no_mangle]
     pub extern "C" fn accesskit_tree_set_toolkit_name_with_length(
         tree: *mut tree,
-        length: usize,
         toolkit_name: *const c_char,
+        length: usize,
     ) {
         let tree = mut_from_ptr(tree);
-        tree.toolkit_name = Some(String::from_utf8_lossy(
-            unsafe { slice::from_raw_parts(toolkit_name as *const u8, length) }
-        ).into_owned())
+        tree.toolkit_name = Some(unsafe { string_from_c_slice(toolkit_name, length) })
     }
 
     #[no_mangle]
@@ -838,18 +836,16 @@ impl tree {
             unsafe { CStr::from_ptr(toolkit_version) }.to_string_lossy(),
         ));
     }
-    
+
     /// Caller is responsible for freeing the memory pointed by `toolkit_version`
     #[no_mangle]
     pub extern "C" fn accesskit_tree_set_toolkit_version_with_length(
         tree: *mut tree,
-        length: usize,
         toolkit_version: *const c_char,
+        length: usize,
     ) {
         let tree = mut_from_ptr(tree);
-        tree.toolkit_version = Some(String::from_utf8_lossy(
-            unsafe { slice::from_raw_parts(toolkit_version as *const u8, length) }
-        ).into_owned())
+        tree.toolkit_version = Some(unsafe { string_from_c_slice(toolkit_version, length) });
     }
 
     #[no_mangle]

@@ -9,7 +9,7 @@ use accesskit_macos::{
 use std::ffi::{c_char, c_void, CStr};
 
 use crate::{
-    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, tree_update_factory,
+    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, string_from_c_slice, tree_update_factory,
     tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
     CastPtr, FfiActionHandler, FfiActivationHandler,
 };
@@ -250,12 +250,14 @@ pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class(
     add_focus_forwarder_to_window_class(&class_name);
 }
 
+/// Caller is responsible for freeing `class_name`.
+///
 /// See `accesskit_macos_add_focus_forwarder_to_window_class`
 #[no_mangle]
 pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class_with_length(
-    length: usize,
     class_name: *const c_char,
+    length: usize,
 ) {
-    let class_name = String::from_utf8_lossy(unsafe { slice::from_raw_parts(value as *const u8, length) });
+    let class_name = string_from_c_slice(class_name, length);
     add_focus_forwarder_to_window_class(&class_name);
 }

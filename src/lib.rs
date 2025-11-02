@@ -33,6 +33,7 @@ mod windows;
 use std::{
     ffi::{c_char, CString},
     fmt::Debug,
+    slice,
 };
 
 pub use common::*;
@@ -190,4 +191,8 @@ where
     let value = ref_from_ptr(value);
     let debug_repr = format!("{:?}", value);
     CString::new(debug_repr).unwrap().into_raw()
+}
+
+unsafe fn string_from_c_slice(value: *const c_char, length: usize) -> String {
+    String::from_utf8_lossy(slice::from_raw_parts(value as *const u8, length)).into_owned()
 }
