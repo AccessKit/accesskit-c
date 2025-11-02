@@ -869,8 +869,8 @@ typedef struct accesskit_opt_text_selection {
 } accesskit_opt_text_selection;
 
 /**
- * Use `accesskit_custom_action_new` to create this struct. Do not reallocate
- * `description`.
+ * Use `accesskit_custom_action_new` to create this struct. Do not
+ * reallocate `description`.
  *
  * When you get this struct, you are responsible for freeing `description`.
  */
@@ -1368,6 +1368,12 @@ char *accesskit_node_label(const struct accesskit_node *node);
  */
 void accesskit_node_set_label(struct accesskit_node *node, const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_label_with_length(struct accesskit_node *node,
+                                          const char *value, size_t length);
+
 void accesskit_node_clear_label(struct accesskit_node *node);
 
 /**
@@ -1381,6 +1387,13 @@ char *accesskit_node_description(const struct accesskit_node *node);
 void accesskit_node_set_description(struct accesskit_node *node,
                                     const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_description_with_length(struct accesskit_node *node,
+                                                const char *value,
+                                                size_t length);
+
 void accesskit_node_clear_description(struct accesskit_node *node);
 
 /**
@@ -1392,6 +1405,12 @@ char *accesskit_node_value(const struct accesskit_node *node);
  * Caller is responsible for freeing the memory pointed by `value`.
  */
 void accesskit_node_set_value(struct accesskit_node *node, const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_value_with_length(struct accesskit_node *node,
+                                          const char *value, size_t length);
 
 void accesskit_node_clear_value(struct accesskit_node *node);
 
@@ -1406,6 +1425,13 @@ char *accesskit_node_access_key(const struct accesskit_node *node);
 void accesskit_node_set_access_key(struct accesskit_node *node,
                                    const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_access_key_with_length(struct accesskit_node *node,
+                                               const char *value,
+                                               size_t length);
+
 void accesskit_node_clear_access_key(struct accesskit_node *node);
 
 /**
@@ -1418,6 +1444,12 @@ char *accesskit_node_author_id(const struct accesskit_node *node);
  */
 void accesskit_node_set_author_id(struct accesskit_node *node,
                                   const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_author_id_with_length(struct accesskit_node *node,
+                                              const char *value, size_t length);
 
 void accesskit_node_clear_author_id(struct accesskit_node *node);
 
@@ -1432,6 +1464,13 @@ char *accesskit_node_class_name(const struct accesskit_node *node);
 void accesskit_node_set_class_name(struct accesskit_node *node,
                                    const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_class_name_with_length(struct accesskit_node *node,
+                                               const char *value,
+                                               size_t length);
+
 void accesskit_node_clear_class_name(struct accesskit_node *node);
 
 /**
@@ -1444,6 +1483,13 @@ char *accesskit_node_font_family(const struct accesskit_node *node);
  */
 void accesskit_node_set_font_family(struct accesskit_node *node,
                                     const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_font_family_with_length(struct accesskit_node *node,
+                                                const char *value,
+                                                size_t length);
 
 void accesskit_node_clear_font_family(struct accesskit_node *node);
 
@@ -1458,6 +1504,12 @@ char *accesskit_node_html_tag(const struct accesskit_node *node);
 void accesskit_node_set_html_tag(struct accesskit_node *node,
                                  const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_html_tag_with_length(struct accesskit_node *node,
+                                             const char *value, size_t length);
+
 void accesskit_node_clear_html_tag(struct accesskit_node *node);
 
 /**
@@ -1470,6 +1522,13 @@ char *accesskit_node_inner_html(const struct accesskit_node *node);
  */
 void accesskit_node_set_inner_html(struct accesskit_node *node,
                                    const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_inner_html_with_length(struct accesskit_node *node,
+                                               const char *value,
+                                               size_t length);
 
 void accesskit_node_clear_inner_html(struct accesskit_node *node);
 
@@ -1484,6 +1543,12 @@ char *accesskit_node_keyboard_shortcut(const struct accesskit_node *node);
 void accesskit_node_set_keyboard_shortcut(struct accesskit_node *node,
                                           const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_keyboard_shortcut_with_length(
+    struct accesskit_node *node, const char *value, size_t length);
+
 void accesskit_node_clear_keyboard_shortcut(struct accesskit_node *node);
 
 /**
@@ -1496,6 +1561,12 @@ char *accesskit_node_language(const struct accesskit_node *node);
  */
 void accesskit_node_set_language(struct accesskit_node *node,
                                  const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_language_with_length(struct accesskit_node *node,
+                                             const char *value, size_t length);
 
 void accesskit_node_clear_language(struct accesskit_node *node);
 
@@ -1510,6 +1581,13 @@ char *accesskit_node_placeholder(const struct accesskit_node *node);
 void accesskit_node_set_placeholder(struct accesskit_node *node,
                                     const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_placeholder_with_length(struct accesskit_node *node,
+                                                const char *value,
+                                                size_t length);
+
 void accesskit_node_clear_placeholder(struct accesskit_node *node);
 
 /**
@@ -1522,6 +1600,12 @@ char *accesskit_node_role_description(const struct accesskit_node *node);
  */
 void accesskit_node_set_role_description(struct accesskit_node *node,
                                          const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_role_description_with_length(
+    struct accesskit_node *node, const char *value, size_t length);
 
 void accesskit_node_clear_role_description(struct accesskit_node *node);
 
@@ -1536,6 +1620,12 @@ char *accesskit_node_state_description(const struct accesskit_node *node);
 void accesskit_node_set_state_description(struct accesskit_node *node,
                                           const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_state_description_with_length(
+    struct accesskit_node *node, const char *value, size_t length);
+
 void accesskit_node_clear_state_description(struct accesskit_node *node);
 
 /**
@@ -1548,6 +1638,12 @@ char *accesskit_node_tooltip(const struct accesskit_node *node);
  */
 void accesskit_node_set_tooltip(struct accesskit_node *node, const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_tooltip_with_length(struct accesskit_node *node,
+                                            const char *value, size_t length);
+
 void accesskit_node_clear_tooltip(struct accesskit_node *node);
 
 /**
@@ -1559,6 +1655,12 @@ char *accesskit_node_url(const struct accesskit_node *node);
  * Caller is responsible for freeing the memory pointed by `value`.
  */
 void accesskit_node_set_url(struct accesskit_node *node, const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_url_with_length(struct accesskit_node *node,
+                                        const char *value, size_t length);
 
 void accesskit_node_clear_url(struct accesskit_node *node);
 
@@ -1573,6 +1675,13 @@ char *accesskit_node_row_index_text(const struct accesskit_node *node);
 void accesskit_node_set_row_index_text(struct accesskit_node *node,
                                        const char *value);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_row_index_text_with_length(struct accesskit_node *node,
+                                                   const char *value,
+                                                   size_t length);
+
 void accesskit_node_clear_row_index_text(struct accesskit_node *node);
 
 /**
@@ -1585,6 +1694,12 @@ char *accesskit_node_column_index_text(const struct accesskit_node *node);
  */
 void accesskit_node_set_column_index_text(struct accesskit_node *node,
                                           const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_column_index_text_with_length(
+    struct accesskit_node *node, const char *value, size_t length);
 
 void accesskit_node_clear_column_index_text(struct accesskit_node *node);
 
@@ -2014,8 +2129,18 @@ void accesskit_tree_free(struct accesskit_tree *tree);
  */
 char *accesskit_tree_get_toolkit_name(const struct accesskit_tree *tree);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `toolkit_name`
+ */
 void accesskit_tree_set_toolkit_name(struct accesskit_tree *tree,
                                      const char *toolkit_name);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `toolkit_name`
+ */
+void accesskit_tree_set_toolkit_name_with_length(struct accesskit_tree *tree,
+                                                 const char *toolkit_name,
+                                                 size_t length);
 
 void accesskit_tree_clear_toolkit_name(struct accesskit_tree *tree);
 
@@ -2024,8 +2149,18 @@ void accesskit_tree_clear_toolkit_name(struct accesskit_tree *tree);
  */
 char *accesskit_tree_get_toolkit_version(const struct accesskit_tree *tree);
 
+/**
+ * Caller is responsible for freeing the memory pointed by `toolkit_version`
+ */
 void accesskit_tree_set_toolkit_version(struct accesskit_tree *tree,
                                         const char *toolkit_version);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `toolkit_version`
+ */
+void accesskit_tree_set_toolkit_version_with_length(struct accesskit_tree *tree,
+                                                    const char *toolkit_version,
+                                                    size_t length);
 
 void accesskit_tree_clear_toolkit_version(struct accesskit_tree *tree);
 
@@ -2317,6 +2452,28 @@ accesskit_macos_subclassing_adapter_update_view_focus_state(
  */
 void accesskit_macos_add_focus_forwarder_to_window_class(
     const char *class_name);
+#endif
+
+#if defined(__APPLE__)
+/**
+ * Modifies the specified class, which must be a subclass of `NSWindow`,
+ * to include an `accessibilityFocusedUIElement` method that calls
+ * the corresponding method on the window's content view. This is needed
+ * for windowing libraries such as SDL that place the keyboard focus
+ * directly on the window rather than the content view.
+ * Caller is responsible for freeing `class_name`.
+ *
+ * # Safety
+ *
+ * This function is declared unsafe because the caller must ensure that the
+ * code for this library is never unloaded from the application process,
+ * since it's not possible to reverse this operation. It's safest
+ * if this library is statically linked into the application's main executable.
+ * Also, this function assumes that the specified class is a subclass
+ * of `NSWindow`.
+ */
+void accesskit_macos_add_focus_forwarder_to_window_class_with_length(
+    const char *class_name, size_t length);
 #endif
 
 #if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \

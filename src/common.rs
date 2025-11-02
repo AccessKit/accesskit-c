@@ -12,7 +12,8 @@ use std::{
 };
 
 use crate::{
-    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, BoxCastPtr, CastPtr,
+    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, string_from_c_slice,
+    BoxCastPtr, CastPtr,
 };
 
 pub struct node {
@@ -247,7 +248,7 @@ macro_rules! node_id_property_methods {
 }
 
 macro_rules! string_property_methods {
-    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $c_setter_with_length:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         $(impl node {
             /// Caller must call `accesskit_string_free` with the return value.
             #[no_mangle]
@@ -264,6 +265,12 @@ macro_rules! string_property_methods {
                 let node = mut_from_ptr(node);
                 let value = unsafe { CStr::from_ptr(value) };
                 node.$setter(value.to_string_lossy());
+            }
+            /// Caller is responsible for freeing the memory pointed by `value`.
+            #[no_mangle]
+            pub extern "C" fn $c_setter_with_length(node: *mut node, value: *const c_char, length: usize) {
+                let node = mut_from_ptr(node);
+                node.$setter(unsafe { string_from_c_slice(value, length) });
             }
         }
         clearer! { $c_clearer, $clearer })*
@@ -495,24 +502,24 @@ pub extern "C" fn accesskit_string_free(string: *mut c_char) {
 }
 
 string_property_methods! {
-    (accesskit_node_label, label, accesskit_node_set_label, set_label, accesskit_node_clear_label, clear_label),
-    (accesskit_node_description, description, accesskit_node_set_description, set_description, accesskit_node_clear_description, clear_description),
-    (accesskit_node_value, value, accesskit_node_set_value, set_value, accesskit_node_clear_value, clear_value),
-    (accesskit_node_access_key, access_key, accesskit_node_set_access_key, set_access_key, accesskit_node_clear_access_key, clear_access_key),
-    (accesskit_node_author_id, author_id, accesskit_node_set_author_id, set_author_id, accesskit_node_clear_author_id, clear_author_id),
-    (accesskit_node_class_name, class_name, accesskit_node_set_class_name, set_class_name, accesskit_node_clear_class_name, clear_class_name),
-    (accesskit_node_font_family, font_family, accesskit_node_set_font_family, set_font_family, accesskit_node_clear_font_family, clear_font_family),
-    (accesskit_node_html_tag, html_tag, accesskit_node_set_html_tag, set_html_tag, accesskit_node_clear_html_tag, clear_html_tag),
-    (accesskit_node_inner_html, inner_html, accesskit_node_set_inner_html, set_inner_html, accesskit_node_clear_inner_html, clear_inner_html),
-    (accesskit_node_keyboard_shortcut, keyboard_shortcut, accesskit_node_set_keyboard_shortcut, set_keyboard_shortcut, accesskit_node_clear_keyboard_shortcut, clear_keyboard_shortcut),
-    (accesskit_node_language, language, accesskit_node_set_language, set_language, accesskit_node_clear_language, clear_language),
-    (accesskit_node_placeholder, placeholder, accesskit_node_set_placeholder, set_placeholder, accesskit_node_clear_placeholder, clear_placeholder),
-    (accesskit_node_role_description, role_description, accesskit_node_set_role_description, set_role_description, accesskit_node_clear_role_description, clear_role_description),
-    (accesskit_node_state_description, state_description, accesskit_node_set_state_description, set_state_description, accesskit_node_clear_state_description, clear_state_description),
-    (accesskit_node_tooltip, tooltip, accesskit_node_set_tooltip, set_tooltip, accesskit_node_clear_tooltip, clear_tooltip),
-    (accesskit_node_url, url, accesskit_node_set_url, set_url, accesskit_node_clear_url, clear_url),
-    (accesskit_node_row_index_text, row_index_text, accesskit_node_set_row_index_text, set_row_index_text, accesskit_node_clear_row_index_text, clear_row_index_text),
-    (accesskit_node_column_index_text, column_index_text, accesskit_node_set_column_index_text, set_column_index_text, accesskit_node_clear_column_index_text, clear_column_index_text)
+    (accesskit_node_label, label, accesskit_node_set_label, accesskit_node_set_label_with_length, set_label, accesskit_node_clear_label, clear_label),
+    (accesskit_node_description, description, accesskit_node_set_description, accesskit_node_set_description_with_length, set_description, accesskit_node_clear_description, clear_description),
+    (accesskit_node_value, value, accesskit_node_set_value, accesskit_node_set_value_with_length, set_value, accesskit_node_clear_value, clear_value),
+    (accesskit_node_access_key, access_key, accesskit_node_set_access_key, accesskit_node_set_access_key_with_length, set_access_key, accesskit_node_clear_access_key, clear_access_key),
+    (accesskit_node_author_id, author_id, accesskit_node_set_author_id, accesskit_node_set_author_id_with_length, set_author_id, accesskit_node_clear_author_id, clear_author_id),
+    (accesskit_node_class_name, class_name, accesskit_node_set_class_name, accesskit_node_set_class_name_with_length, set_class_name, accesskit_node_clear_class_name, clear_class_name),
+    (accesskit_node_font_family, font_family, accesskit_node_set_font_family, accesskit_node_set_font_family_with_length, set_font_family, accesskit_node_clear_font_family, clear_font_family),
+    (accesskit_node_html_tag, html_tag, accesskit_node_set_html_tag, accesskit_node_set_html_tag_with_length, set_html_tag, accesskit_node_clear_html_tag, clear_html_tag),
+    (accesskit_node_inner_html, inner_html, accesskit_node_set_inner_html, accesskit_node_set_inner_html_with_length, set_inner_html, accesskit_node_clear_inner_html, clear_inner_html),
+    (accesskit_node_keyboard_shortcut, keyboard_shortcut, accesskit_node_set_keyboard_shortcut, accesskit_node_set_keyboard_shortcut_with_length, set_keyboard_shortcut, accesskit_node_clear_keyboard_shortcut, clear_keyboard_shortcut),
+    (accesskit_node_language, language, accesskit_node_set_language, accesskit_node_set_language_with_length, set_language, accesskit_node_clear_language, clear_language),
+    (accesskit_node_placeholder, placeholder, accesskit_node_set_placeholder, accesskit_node_set_placeholder_with_length, set_placeholder, accesskit_node_clear_placeholder, clear_placeholder),
+    (accesskit_node_role_description, role_description, accesskit_node_set_role_description, accesskit_node_set_role_description_with_length, set_role_description, accesskit_node_clear_role_description, clear_role_description),
+    (accesskit_node_state_description, state_description, accesskit_node_set_state_description, accesskit_node_set_state_description_with_length, set_state_description, accesskit_node_clear_state_description, clear_state_description),
+    (accesskit_node_tooltip, tooltip, accesskit_node_set_tooltip, accesskit_node_set_tooltip_with_length, set_tooltip, accesskit_node_clear_tooltip, clear_tooltip),
+    (accesskit_node_url, url, accesskit_node_set_url, accesskit_node_set_url_with_length, set_url, accesskit_node_clear_url, clear_url),
+    (accesskit_node_row_index_text, row_index_text, accesskit_node_set_row_index_text, accesskit_node_set_row_index_text_with_length, set_row_index_text, accesskit_node_clear_row_index_text, clear_row_index_text),
+    (accesskit_node_column_index_text, column_index_text, accesskit_node_set_column_index_text, accesskit_node_set_column_index_text_with_length, set_column_index_text, accesskit_node_clear_column_index_text, clear_column_index_text)
 }
 
 f64_property_methods! {
@@ -661,7 +668,8 @@ impl node {
 }
 clearer! { accesskit_node_clear_text_selection, clear_text_selection }
 
-/// Use `accesskit_custom_action_new` to create this struct. Do not reallocate `description`.
+/// Use `accesskit_custom_action_new` to create this struct. Do not
+/// reallocate `description`.
 ///
 /// When you get this struct, you are responsible for freeing `description`.
 #[derive(Clone)]
@@ -778,6 +786,7 @@ impl tree {
         }
     }
 
+    /// Caller is responsible for freeing the memory pointed by `toolkit_name`
     #[no_mangle]
     pub extern "C" fn accesskit_tree_set_toolkit_name(
         tree: *mut tree,
@@ -787,6 +796,17 @@ impl tree {
         tree.toolkit_name = Some(String::from(
             unsafe { CStr::from_ptr(toolkit_name) }.to_string_lossy(),
         ));
+    }
+
+    /// Caller is responsible for freeing the memory pointed by `toolkit_name`
+    #[no_mangle]
+    pub extern "C" fn accesskit_tree_set_toolkit_name_with_length(
+        tree: *mut tree,
+        toolkit_name: *const c_char,
+        length: usize,
+    ) {
+        let tree = mut_from_ptr(tree);
+        tree.toolkit_name = Some(unsafe { string_from_c_slice(toolkit_name, length) })
     }
 
     #[no_mangle]
@@ -805,6 +825,7 @@ impl tree {
         }
     }
 
+    /// Caller is responsible for freeing the memory pointed by `toolkit_version`
     #[no_mangle]
     pub extern "C" fn accesskit_tree_set_toolkit_version(
         tree: *mut tree,
@@ -814,6 +835,17 @@ impl tree {
         tree.toolkit_version = Some(String::from(
             unsafe { CStr::from_ptr(toolkit_version) }.to_string_lossy(),
         ));
+    }
+
+    /// Caller is responsible for freeing the memory pointed by `toolkit_version`
+    #[no_mangle]
+    pub extern "C" fn accesskit_tree_set_toolkit_version_with_length(
+        tree: *mut tree,
+        toolkit_version: *const c_char,
+        length: usize,
+    ) {
+        let tree = mut_from_ptr(tree);
+        tree.toolkit_version = Some(unsafe { string_from_c_slice(toolkit_version, length) });
     }
 
     #[no_mangle]

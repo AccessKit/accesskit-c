@@ -9,7 +9,7 @@ use accesskit_macos::{
 use std::ffi::{c_char, c_void, CStr};
 
 use crate::{
-    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, tree_update_factory,
+    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, string_from_c_slice, tree_update_factory,
     tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
     CastPtr, FfiActionHandler, FfiActivationHandler,
 };
@@ -247,5 +247,29 @@ pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class(
     class_name: *const c_char,
 ) {
     let class_name = unsafe { CStr::from_ptr(class_name).to_string_lossy() };
+    add_focus_forwarder_to_window_class(&class_name);
+}
+
+/// Modifies the specified class, which must be a subclass of `NSWindow`,
+/// to include an `accessibilityFocusedUIElement` method that calls
+/// the corresponding method on the window's content view. This is needed
+/// for windowing libraries such as SDL that place the keyboard focus
+/// directly on the window rather than the content view.
+/// Caller is responsible for freeing `class_name`.
+///
+/// # Safety
+///
+/// This function is declared unsafe because the caller must ensure that the
+/// code for this library is never unloaded from the application process,
+/// since it's not possible to reverse this operation. It's safest
+/// if this library is statically linked into the application's main executable.
+/// Also, this function assumes that the specified class is a subclass
+/// of `NSWindow`.
+#[no_mangle]
+pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class_with_length(
+    class_name: *const c_char,
+    length: usize,
+) {
+    let class_name = string_from_c_slice(class_name, length);
     add_focus_forwarder_to_window_class(&class_name);
 }
