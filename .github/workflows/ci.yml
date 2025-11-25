@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Check formatting
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: install stable toolchain
         uses: dtolnay/rust-toolchain@master
@@ -34,7 +34,7 @@ jobs:
         os: [macOS-latest, windows-2025, ubuntu-latest]
     name: cargo clippy
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: install stable toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -52,7 +52,7 @@ jobs:
     outputs:
       version: ${{ steps.step2.outputs.version }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - id: step2
         run: echo "version=`cat Cargo.toml | sed -n 's/rust-version = "\(.*\)"/\1/p'`" >> "$GITHUB_OUTPUT"
 
@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: find-msrv
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           rust-version: ${{ needs.find-msrv.outputs.version }}
@@ -91,7 +91,7 @@ jobs:
         os: [macOS-latest, windows-2025, ubuntu-latest]
     name: cargo test
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: install stable toolchain
         uses: dtolnay/rust-toolchain@master
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Check committed C header
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - uses: actions/setup-python@v6
     - run: pip install meson ninja
