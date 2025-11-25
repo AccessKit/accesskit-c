@@ -76,6 +76,19 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.18.0](https://github.com/AccessKit/accesskit-c/compare/0.17.1...0.18.0) (2025-11-25)
+
+
+### Features
+
+* Add functions to get string representation of opaque types ([#56](https://github.com/AccessKit/accesskit-c/issues/56)) ([f885b39](https://github.com/AccessKit/accesskit-c/commit/f885b392d670c1b2f6ad2f23e57cc1f933e97a98))
+* Allow usage of char slices in addition to null-terminated strings ([#60](https://github.com/AccessKit/accesskit-c/issues/60)) ([5f0a917](https://github.com/AccessKit/accesskit-c/commit/5f0a9175e0b7995b08cf21f8daf141c78c47c62e))
+
+
+### Bug Fixes
+
+* bump the rust-crates group with 3 updates ([#59](https://github.com/AccessKit/accesskit-c/issues/59)) ([314b789](https://github.com/AccessKit/accesskit-c/commit/314b789e6c7cfdaaf9e0aba94c85e2618dbab5be))
+
 ## [0.17.1](https://github.com/AccessKit/accesskit-c/compare/0.17.0...0.17.1) (2025-10-02)
 
 
