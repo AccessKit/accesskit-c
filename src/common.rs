@@ -3,7 +3,10 @@
 // the LICENSE-APACHE file) or the MIT license (found in
 // the LICENSE-MIT file), at your option.
 
-use crate::{box_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, BoxCastPtr, CastPtr};
+use crate::{
+    box_from_ptr, capture::capture_tree_update, mut_from_ptr, opt_struct, ref_from_ptr, BoxCastPtr,
+    CastPtr,
+};
 use accesskit::*;
 use std::{
     ffi::{CStr, CString},
@@ -975,7 +978,9 @@ impl ActivationHandler for FfiActivationHandler {
         if result.is_null() {
             None
         } else {
-            Some(*box_from_ptr(result))
+            let update = *box_from_ptr(result);
+            capture_tree_update(&update);
+            Some(update)
         }
     }
 }

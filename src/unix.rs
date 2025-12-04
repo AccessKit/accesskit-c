@@ -4,9 +4,10 @@
 // the LICENSE-MIT file), at your option.
 
 use crate::{
-    box_from_ptr, mut_from_ptr, tree_update_factory, tree_update_factory_userdata,
-    ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr,
-    DeactivationHandlerCallback, FfiActionHandler, FfiActivationHandler, FfiDeactivationHandler,
+    box_from_ptr, capture::capture_tree_update, mut_from_ptr, tree_update_factory,
+    tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
+    CastPtr, DeactivationHandlerCallback, FfiActionHandler, FfiActivationHandler,
+    FfiDeactivationHandler,
 };
 use accesskit::Rect;
 use accesskit_unix::Adapter;
@@ -73,7 +74,11 @@ impl unix_adapter {
         let update_factory = update_factory.unwrap();
         let update_factory_userdata = tree_update_factory_userdata(update_factory_userdata);
         let adapter = mut_from_ptr(adapter);
-        adapter.update_if_active(|| *box_from_ptr(update_factory(update_factory_userdata)));
+        adapter.update_if_active(|| {
+            let update = *box_from_ptr(update_factory(update_factory_userdata));
+            capture_tree_update(&update);
+            update
+        });
     }
 
     /// Update the tree state based on whether the window is focused.
