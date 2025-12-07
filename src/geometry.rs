@@ -5,6 +5,17 @@
 
 use accesskit::{Affine, Point, Rect, Size, Vec2};
 
+/// Construct an affine transform from coefficients.
+///
+/// # Safety
+///
+/// `coefficients` must point to a valid array of 6 `f64` values.
+#[no_mangle]
+pub unsafe extern "C" fn accesskit_affine_new(coefficients: *const f64) -> Affine {
+    let slice = unsafe { std::slice::from_raw_parts(coefficients, 6) };
+    Affine::new([slice[0], slice[1], slice[2], slice[3], slice[4], slice[5]])
+}
+
 #[no_mangle]
 pub const extern "C" fn accesskit_affine_identity() -> Affine {
     Affine::scale(1.0)
@@ -73,9 +84,52 @@ pub extern "C" fn accesskit_affine_is_nan(affine: *const Affine) -> bool {
     }
 }
 
+/// Get the coefficients of the transform.
+///
+/// # Safety
+///
+/// `out` must point to a valid array of 6 `f64` values where the coefficients
+/// will be written.
+#[no_mangle]
+pub unsafe extern "C" fn accesskit_affine_as_coeffs(affine: Affine, out: *mut f64) {
+    let coeffs = affine.as_coeffs();
+    let slice = unsafe { std::slice::from_raw_parts_mut(out, 6) };
+    slice.copy_from_slice(&coeffs);
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_affine_mul(a: Affine, b: Affine) -> Affine {
+    a * b
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_affine_transform_point(affine: Affine, point: Point) -> Point {
+    affine * point
+}
+
 #[no_mangle]
 pub const extern "C" fn accesskit_point_to_vec2(point: Point) -> Vec2 {
     Point::to_vec2(point)
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_point_add_vec2(point: Point, vec: Vec2) -> Point {
+    point + vec
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_point_sub_vec2(point: Point, vec: Vec2) -> Point {
+    point - vec
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_point_sub_point(a: Point, b: Point) -> Vec2 {
+    a - b
+}
+
+#[no_mangle]
+pub const extern "C" fn accesskit_rect_new(x0: f64, y0: f64, x1: f64, y1: f64) -> Rect {
+    Rect::new(x0, y0, x1, y1)
 }
 
 #[no_mangle]
@@ -162,8 +216,28 @@ pub extern "C" fn accesskit_rect_intersect(rect: *const Rect, other: Rect) -> Re
 }
 
 #[no_mangle]
+pub extern "C" fn accesskit_rect_translate(rect: Rect, translation: Vec2) -> Rect {
+    rect + translation
+}
+
+#[no_mangle]
 pub const extern "C" fn accesskit_size_to_vec2(size: Size) -> Vec2 {
     Size::to_vec2(size)
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_size_scale(size: Size, scalar: f64) -> Size {
+    size * scalar
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_size_add(a: Size, b: Size) -> Size {
+    a + b
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_size_sub(a: Size, b: Size) -> Size {
+    a - b
 }
 
 #[no_mangle]
@@ -174,4 +248,24 @@ pub const extern "C" fn accesskit_vec2_to_point(vec2: Vec2) -> Point {
 #[no_mangle]
 pub const extern "C" fn accesskit_vec2_to_size(vec2: Vec2) -> Size {
     Vec2::to_size(vec2)
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_vec2_add(a: Vec2, b: Vec2) -> Vec2 {
+    a + b
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_vec2_sub(a: Vec2, b: Vec2) -> Vec2 {
+    a - b
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_vec2_scale(vec: Vec2, scalar: f64) -> Vec2 {
+    vec * scalar
+}
+
+#[no_mangle]
+pub extern "C" fn accesskit_vec2_neg(vec: Vec2) -> Vec2 {
+    -vec
 }
