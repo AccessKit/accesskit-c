@@ -2050,15 +2050,6 @@ void accesskit_tree_update_set_focus(struct accesskit_tree_update *update,
 
 void accesskit_action_request_free(struct accesskit_action_request *request);
 
-/**
- * Construct an affine transform from coefficients.
- *
- * # Safety
- *
- * `coefficients` must point to a valid array of 6 `f64` values.
- */
-struct accesskit_affine accesskit_affine_new(const double *coefficients);
-
 struct accesskit_affine accesskit_affine_identity(void);
 
 struct accesskit_affine accesskit_affine_flip_y(void);
@@ -2086,16 +2077,6 @@ struct accesskit_rect accesskit_affine_transform_rect_bbox(
 bool accesskit_affine_is_finite(const struct accesskit_affine *affine);
 
 bool accesskit_affine_is_nan(const struct accesskit_affine *affine);
-
-/**
- * Get the coefficients of the transform.
- *
- * # Safety
- *
- * `out` must point to a valid array of 6 `f64` values where the coefficients
- * will be written.
- */
-void accesskit_affine_as_coeffs(struct accesskit_affine affine, double *out);
 
 struct accesskit_affine accesskit_affine_mul(struct accesskit_affine a,
                                              struct accesskit_affine b);

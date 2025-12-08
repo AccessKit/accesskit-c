@@ -5,17 +5,6 @@
 
 use accesskit::{Affine, Point, Rect, Size, Vec2};
 
-/// Construct an affine transform from coefficients.
-///
-/// # Safety
-///
-/// `coefficients` must point to a valid array of 6 `f64` values.
-#[no_mangle]
-pub unsafe extern "C" fn accesskit_affine_new(coefficients: *const f64) -> Affine {
-    let slice = unsafe { std::slice::from_raw_parts(coefficients, 6) };
-    Affine::new([slice[0], slice[1], slice[2], slice[3], slice[4], slice[5]])
-}
-
 #[no_mangle]
 pub const extern "C" fn accesskit_affine_identity() -> Affine {
     Affine::scale(1.0)
@@ -82,19 +71,6 @@ pub extern "C" fn accesskit_affine_is_nan(affine: *const Affine) -> bool {
     } else {
         unsafe { Box::from_raw(affine as *mut Affine).is_nan() }
     }
-}
-
-/// Get the coefficients of the transform.
-///
-/// # Safety
-///
-/// `out` must point to a valid array of 6 `f64` values where the coefficients
-/// will be written.
-#[no_mangle]
-pub unsafe extern "C" fn accesskit_affine_as_coeffs(affine: Affine, out: *mut f64) {
-    let coeffs = affine.as_coeffs();
-    let slice = unsafe { std::slice::from_raw_parts_mut(out, 6) };
-    slice.copy_from_slice(&coeffs);
 }
 
 #[no_mangle]
