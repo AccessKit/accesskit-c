@@ -2229,7 +2229,25 @@ bool accesskit_affine_is_finite(const struct accesskit_affine *affine);
 
 bool accesskit_affine_is_nan(const struct accesskit_affine *affine);
 
+struct accesskit_affine accesskit_affine_mul(struct accesskit_affine a,
+                                             struct accesskit_affine b);
+
+struct accesskit_point accesskit_affine_transform_point(
+    struct accesskit_affine affine, struct accesskit_point point);
+
 struct accesskit_vec2 accesskit_point_to_vec2(struct accesskit_point point);
+
+struct accesskit_point accesskit_point_add_vec2(struct accesskit_point point,
+                                                struct accesskit_vec2 vec);
+
+struct accesskit_point accesskit_point_sub_vec2(struct accesskit_point point,
+                                                struct accesskit_vec2 vec);
+
+struct accesskit_vec2 accesskit_point_sub_point(struct accesskit_point a,
+                                                struct accesskit_point b);
+
+struct accesskit_rect accesskit_rect_new(double x0, double y0, double x1,
+                                         double y1);
 
 struct accesskit_rect accesskit_rect_from_points(struct accesskit_point p0,
                                                  struct accesskit_point p1);
@@ -2277,11 +2295,34 @@ struct accesskit_rect accesskit_rect_union_pt(const struct accesskit_rect *rect,
 struct accesskit_rect accesskit_rect_intersect(
     const struct accesskit_rect *rect, struct accesskit_rect other);
 
+struct accesskit_rect accesskit_rect_translate(
+    struct accesskit_rect rect, struct accesskit_vec2 translation);
+
 struct accesskit_vec2 accesskit_size_to_vec2(struct accesskit_size size);
+
+struct accesskit_size accesskit_size_scale(struct accesskit_size size,
+                                           double scalar);
+
+struct accesskit_size accesskit_size_add(struct accesskit_size a,
+                                         struct accesskit_size b);
+
+struct accesskit_size accesskit_size_sub(struct accesskit_size a,
+                                         struct accesskit_size b);
 
 struct accesskit_point accesskit_vec2_to_point(struct accesskit_vec2 vec2);
 
 struct accesskit_size accesskit_vec2_to_size(struct accesskit_vec2 vec2);
+
+struct accesskit_vec2 accesskit_vec2_add(struct accesskit_vec2 a,
+                                         struct accesskit_vec2 b);
+
+struct accesskit_vec2 accesskit_vec2_sub(struct accesskit_vec2 a,
+                                         struct accesskit_vec2 b);
+
+struct accesskit_vec2 accesskit_vec2_scale(struct accesskit_vec2 vec,
+                                           double scalar);
+
+struct accesskit_vec2 accesskit_vec2_neg(struct accesskit_vec2 vec);
 
 #if defined(__APPLE__)
 /**
