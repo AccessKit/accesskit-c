@@ -573,6 +573,8 @@ enum accesskit_vertical_offset
 typedef uint8_t accesskit_vertical_offset;
 #endif  // __cplusplus
 
+typedef struct accesskit_custom_action accesskit_custom_action;
+
 #if defined(__APPLE__)
 typedef struct accesskit_macos_adapter accesskit_macos_adapter;
 #endif
@@ -868,20 +870,9 @@ typedef struct accesskit_opt_text_selection {
   struct accesskit_text_selection value;
 } accesskit_opt_text_selection;
 
-/**
- * Use `accesskit_custom_action_new` to create this struct. Do not
- * reallocate `description`.
- *
- * When you get this struct, you are responsible for freeing `description`.
- */
-typedef struct accesskit_custom_action {
-  int32_t id;
-  char *description;
-} accesskit_custom_action;
-
 typedef struct accesskit_custom_actions {
   size_t length;
-  struct accesskit_custom_action *values;
+  struct accesskit_custom_action **values;
 } accesskit_custom_actions;
 
 /**
@@ -2088,26 +2079,55 @@ void accesskit_node_set_text_selection(struct accesskit_node *node,
 
 void accesskit_node_clear_text_selection(struct accesskit_node *node);
 
-struct accesskit_custom_action accesskit_custom_action_new(
-    int32_t id, const char *description);
+struct accesskit_custom_action *accesskit_custom_action_new(int32_t id);
+
+void accesskit_custom_action_free(struct accesskit_custom_action *action);
+
+int32_t accesskit_custom_action_id(
+    const struct accesskit_custom_action *action);
+
+void accesskit_custom_action_set_id(struct accesskit_custom_action *action,
+                                    int32_t id);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_custom_action_description(
+    const struct accesskit_custom_action *action);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `description`.
+ */
+void accesskit_custom_action_set_description(
+    struct accesskit_custom_action *action, const char *description);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `description`.
+ */
+void accesskit_custom_action_set_description_with_length(
+    struct accesskit_custom_action *action, const char *description,
+    size_t length);
 
 void accesskit_custom_actions_free(struct accesskit_custom_actions *value);
 
 /**
- * Caller is responsible for freeing the returned value.
+ * Caller must call `accesskit_custom_actions_free` with the return value.
  */
-const struct accesskit_custom_actions *accesskit_node_custom_actions(
+struct accesskit_custom_actions *accesskit_node_custom_actions(
     const struct accesskit_node *node);
 
 /**
- * Caller is responsible for freeing `values`.
+ * Caller is responsible for freeing each `custom_action` in the array.
  */
 void accesskit_node_set_custom_actions(
     struct accesskit_node *node, size_t length,
-    const struct accesskit_custom_action *values);
+    struct accesskit_custom_action *const *values);
 
+/**
+ * Takes ownership of `action`.
+ */
 void accesskit_node_push_custom_action(struct accesskit_node *node,
-                                       struct accesskit_custom_action item);
+                                       struct accesskit_custom_action *action);
 
 void accesskit_node_clear_custom_actions(struct accesskit_node *node);
 
