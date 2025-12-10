@@ -60,7 +60,7 @@ pub extern "C" fn accesskit_affine_is_finite(affine: *const Affine) -> bool {
     if affine.is_null() {
         false
     } else {
-        unsafe { Box::from_raw(affine as *mut Affine).is_finite() }
+        unsafe { (*affine).is_finite() }
     }
 }
 
@@ -69,7 +69,7 @@ pub extern "C" fn accesskit_affine_is_nan(affine: *const Affine) -> bool {
     if affine.is_null() {
         false
     } else {
-        unsafe { Box::from_raw(affine as *mut Affine).is_nan() }
+        unsafe { (*affine).is_nan() }
     }
 }
 
@@ -135,7 +135,7 @@ macro_rules! rect_getter_methods {
             if rect.is_null() {
                 $default_value
             } else {
-                unsafe { Box::from_raw(rect as *mut Rect).$getter() }
+                unsafe { (*rect).$getter() }
             }
         })*
     }
@@ -160,7 +160,7 @@ pub extern "C" fn accesskit_rect_contains(rect: *const Rect, point: Point) -> bo
     if rect.is_null() {
         false
     } else {
-        unsafe { Box::from_raw(rect as *mut Rect).contains(point) }
+        unsafe { (*rect).contains(point) }
     }
 }
 
@@ -169,7 +169,7 @@ pub extern "C" fn accesskit_rect_union(rect: *const Rect, other: Rect) -> Rect {
     if rect.is_null() {
         Rect::ZERO
     } else {
-        unsafe { Box::from_raw(rect as *mut Rect).union(other) }
+        unsafe { (*rect).union(other) }
     }
 }
 
@@ -178,7 +178,7 @@ pub extern "C" fn accesskit_rect_union_pt(rect: *const Rect, pt: Point) -> Rect 
     if rect.is_null() {
         Rect::ZERO
     } else {
-        unsafe { Box::from_raw(rect as *mut Rect).union_pt(pt) }
+        unsafe { (*rect).union_pt(pt) }
     }
 }
 
@@ -187,7 +187,7 @@ pub extern "C" fn accesskit_rect_intersect(rect: *const Rect, other: Rect) -> Re
     if rect.is_null() {
         Rect::ZERO
     } else {
-        unsafe { Box::from_raw(rect as *mut Rect).intersect(other) }
+        unsafe { (*rect).intersect(other) }
     }
 }
 
