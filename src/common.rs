@@ -165,40 +165,6 @@ macro_rules! slice_struct {
     };
 }
 
-macro_rules! array_struct {
-    ($struct_name:ident, $rust_type:ty, $ffi_type:ty, $c_free_fn:ident) => {
-        #[repr(C)]
-        pub struct $struct_name {
-            pub length: usize,
-            pub values: *mut $ffi_type,
-        }
-        impl CastPtr for $struct_name {
-            type RustType = $struct_name;
-        }
-        impl BoxCastPtr for $struct_name {}
-        impl $struct_name {
-            #[no_mangle]
-            pub extern "C" fn $c_free_fn(value: *mut $struct_name) {
-                let array = box_from_ptr(value);
-                unsafe { Vec::from_raw_parts(array.values, array.length, array.length) };
-                drop(array);
-            }
-        }
-        impl From<&[$rust_type]> for $struct_name {
-            fn from(values: &[$rust_type]) -> Self {
-                let length = values.len();
-                let mut ffi_values = values.iter().map(From::from).collect::<Vec<$ffi_type>>();
-                let array = Self {
-                    length,
-                    values: ffi_values.as_mut_ptr(),
-                };
-                mem::forget(ffi_values);
-                array
-            }
-        }
-    };
-}
-
 macro_rules! vec_property_methods {
     ($(($item_type:ty, $c_getter:ident, $getter:ident, *mut $getter_result:ty, $c_setter:ident, $setter:ident, $setter_param:ty, $c_pusher:ident, $pusher:ident, $c_clearer:ident, $clearer:ident)),+) => {
         $(property_getters! { $c_getter, $getter, *mut $getter_result }
@@ -668,72 +634,154 @@ impl node {
 }
 clearer! { accesskit_node_clear_text_selection, clear_text_selection }
 
-/// Use `accesskit_custom_action_new` to create this struct. Do not
-/// reallocate `description`.
-///
-/// When you get this struct, you are responsible for freeing `description`.
-#[derive(Clone)]
-#[repr(C)]
 pub struct custom_action {
-    pub id: i32,
-    pub description: *mut c_char,
+    _private: [u8; 0],
 }
+
+impl CastPtr for custom_action {
+    type RustType = CustomAction;
+}
+
+impl BoxCastPtr for custom_action {}
 
 impl custom_action {
     #[no_mangle]
-    pub extern "C" fn accesskit_custom_action_new(
-        id: i32,
-        description: *const c_char,
-    ) -> custom_action {
-        let description = CString::new(String::from(
-            unsafe { CStr::from_ptr(description) }.to_string_lossy(),
-        ))
-        .unwrap();
-        Self {
+    pub extern "C" fn accesskit_custom_action_new(id: i32) -> *mut custom_action {
+        let action = CustomAction {
             id,
-            description: description.into_raw(),
+            description: String::new().into(),
+        };
+        BoxCastPtr::to_mut_ptr(action)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn accesskit_custom_action_free(action: *mut custom_action) {
+        drop(box_from_ptr(action));
+    }
+
+    #[no_mangle]
+    pub extern "C" fn accesskit_custom_action_id(action: *const custom_action) -> i32 {
+        let action = ref_from_ptr(action);
+        action.id
+    }
+
+    #[no_mangle]
+    pub extern "C" fn accesskit_custom_action_set_id(action: *mut custom_action, id: i32) {
+        let action = mut_from_ptr(action);
+        action.id = id;
+    }
+
+    /// Caller must call `accesskit_string_free` with the return value.
+    #[no_mangle]
+    pub extern "C" fn accesskit_custom_action_description(
+        action: *const custom_action,
+    ) -> *mut c_char {
+        let action = ref_from_ptr(action);
+        CString::new(&*action.description).unwrap().into_raw()
+    }
+
+    /// Caller is responsible for freeing the memory pointed by `description`.
+    #[no_mangle]
+    pub extern "C" fn accesskit_custom_action_set_description(
+        action: *mut custom_action,
+        description: *const c_char,
+    ) {
+        let action = mut_from_ptr(action);
+        action.description = unsafe { CStr::from_ptr(description) }
+            .to_string_lossy()
+            .into();
+    }
+
+    /// Caller is responsible for freeing the memory pointed by `description`.
+    #[no_mangle]
+    pub extern "C" fn accesskit_custom_action_set_description_with_length(
+        action: *mut custom_action,
+        description: *const c_char,
+        length: usize,
+    ) {
+        let action = mut_from_ptr(action);
+        action.description = unsafe { string_from_c_slice(description, length) }.into();
+    }
+}
+
+#[repr(C)]
+pub struct custom_actions {
+    pub length: usize,
+    pub values: *mut *mut custom_action,
+}
+
+impl CastPtr for custom_actions {
+    type RustType = custom_actions;
+}
+
+impl BoxCastPtr for custom_actions {}
+
+impl custom_actions {
+    #[no_mangle]
+    pub extern "C" fn accesskit_custom_actions_free(value: *mut custom_actions) {
+        let array = box_from_ptr(value);
+        let values = unsafe { Vec::from_raw_parts(array.values, array.length, array.length) };
+        for ptr in values {
+            drop(box_from_ptr(ptr));
         }
+        drop(array);
     }
 }
 
-impl Drop for custom_action {
-    fn drop(&mut self) {
-        accesskit_string_free(self.description);
+impl From<&[CustomAction]> for custom_actions {
+    fn from(values: &[CustomAction]) -> Self {
+        let length = values.len();
+        let mut ffi_values: Vec<*mut custom_action> = values
+            .iter()
+            .map(|action| BoxCastPtr::to_mut_ptr(action.clone()))
+            .collect();
+        let array = Self {
+            length,
+            values: ffi_values.as_mut_ptr(),
+        };
+        mem::forget(ffi_values);
+        array
     }
 }
 
-impl From<custom_action> for CustomAction {
-    fn from(action: custom_action) -> Self {
-        Self {
-            id: action.id,
-            description: unsafe { CStr::from_ptr(action.description).to_string_lossy().into() },
-        }
+impl node {
+    /// Caller must call `accesskit_custom_actions_free` with the return value.
+    #[no_mangle]
+    pub extern "C" fn accesskit_node_custom_actions(node: *const node) -> *mut custom_actions {
+        let node = ref_from_ptr(node);
+        BoxCastPtr::to_mut_ptr(node.custom_actions().into())
+    }
+
+    /// Caller is responsible for freeing each `custom_action` in the array.
+    #[no_mangle]
+    pub extern "C" fn accesskit_node_set_custom_actions(
+        node: *mut node,
+        length: usize,
+        values: *const *mut custom_action,
+    ) {
+        let node = mut_from_ptr(node);
+        let values = unsafe {
+            slice::from_raw_parts(values, length)
+                .iter()
+                .map(|ptr| ref_from_ptr(*ptr).clone())
+                .collect::<Vec<CustomAction>>()
+        };
+        node.set_custom_actions(values);
+    }
+
+    /// Takes ownership of `action`.
+    #[no_mangle]
+    pub extern "C" fn accesskit_node_push_custom_action(
+        node: *mut node,
+        action: *mut custom_action,
+    ) {
+        let node = mut_from_ptr(node);
+        let action = box_from_ptr(action);
+        node.push_custom_action(*action);
     }
 }
 
-impl From<&custom_action> for CustomAction {
-    fn from(action: &custom_action) -> Self {
-        Self {
-            id: action.id,
-            description: unsafe { CStr::from_ptr(action.description).to_string_lossy().into() },
-        }
-    }
-}
-
-impl From<&CustomAction> for custom_action {
-    fn from(action: &CustomAction) -> Self {
-        Self {
-            id: action.id,
-            description: CString::new(&*action.description).unwrap().into_raw(),
-        }
-    }
-}
-
-array_struct! { custom_actions, CustomAction, custom_action, accesskit_custom_actions_free }
-
-vec_property_methods! {
-    (CustomAction, accesskit_node_custom_actions, custom_actions, *mut custom_actions, accesskit_node_set_custom_actions, set_custom_actions, custom_action, accesskit_node_push_custom_action, push_custom_action, accesskit_node_clear_custom_actions, clear_custom_actions)
-}
+clearer! { accesskit_node_clear_custom_actions, clear_custom_actions }
 
 impl node {
     #[no_mangle]
