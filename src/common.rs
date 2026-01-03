@@ -252,6 +252,15 @@ macro_rules! f64_property_methods {
     }
 }
 
+macro_rules! f32_property_methods {
+    ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
+        opt_struct! { opt_float, f32 }
+        $(simple_property_methods! {
+            $c_getter, $getter, opt_float, $c_setter, $setter, f32, $c_clearer, $clearer
+        })*
+    }
+}
+
 macro_rules! usize_property_methods {
     ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         opt_struct! { opt_index, usize }
@@ -263,9 +272,9 @@ macro_rules! usize_property_methods {
 
 macro_rules! color_property_methods {
     ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
-        opt_struct! { opt_color, u32 }
+        opt_struct! { opt_color, Color }
         $(simple_property_methods! {
-            $c_getter, $getter, opt_color, $c_setter, $setter, u32, $c_clearer, $clearer
+            $c_getter, $getter, opt_color, $c_setter, $setter, Color, $c_clearer, $clearer
         })*
     }
 }
@@ -428,7 +437,6 @@ flag_methods! {
     (accesskit_node_is_touch_transparent, is_touch_transparent, accesskit_node_set_touch_transparent, set_touch_transparent, accesskit_node_clear_touch_transparent, clear_touch_transparent),
     (accesskit_node_is_read_only, is_read_only, accesskit_node_set_read_only, set_read_only, accesskit_node_clear_read_only, clear_read_only),
     (accesskit_node_is_disabled, is_disabled, accesskit_node_set_disabled, set_disabled, accesskit_node_clear_disabled, clear_disabled),
-    (accesskit_node_is_bold, is_bold, accesskit_node_set_bold, set_bold, accesskit_node_clear_bold, clear_bold),
     (accesskit_node_is_italic, is_italic, accesskit_node_set_italic, set_italic, accesskit_node_clear_italic, clear_italic),
     (accesskit_node_clips_children, clips_children, accesskit_node_set_clips_children, set_clips_children, accesskit_node_clear_clips_children, clear_clips_children),
     (accesskit_node_is_line_breaking_object, is_line_breaking_object, accesskit_node_set_is_line_breaking_object, set_is_line_breaking_object, accesskit_node_clear_is_line_breaking_object, clear_is_line_breaking_object),
@@ -485,7 +493,9 @@ string_property_methods! {
     (accesskit_node_tooltip, tooltip, accesskit_node_set_tooltip, accesskit_node_set_tooltip_with_length, set_tooltip, accesskit_node_clear_tooltip, clear_tooltip),
     (accesskit_node_url, url, accesskit_node_set_url, accesskit_node_set_url_with_length, set_url, accesskit_node_clear_url, clear_url),
     (accesskit_node_row_index_text, row_index_text, accesskit_node_set_row_index_text, accesskit_node_set_row_index_text_with_length, set_row_index_text, accesskit_node_clear_row_index_text, clear_row_index_text),
-    (accesskit_node_column_index_text, column_index_text, accesskit_node_set_column_index_text, accesskit_node_set_column_index_text_with_length, set_column_index_text, accesskit_node_clear_column_index_text, clear_column_index_text)
+    (accesskit_node_column_index_text, column_index_text, accesskit_node_set_column_index_text, accesskit_node_set_column_index_text_with_length, set_column_index_text, accesskit_node_clear_column_index_text, clear_column_index_text),
+    (accesskit_node_braille_label, braille_label, accesskit_node_set_braille_label, accesskit_node_set_braille_label_with_length, set_braille_label, accesskit_node_clear_braille_label, clear_braille_label),
+    (accesskit_node_braille_role_description, braille_role_description, accesskit_node_set_braille_role_description, accesskit_node_set_braille_role_description_with_length, set_braille_role_description, accesskit_node_clear_braille_role_description, clear_braille_role_description)
 }
 
 f64_property_methods! {
@@ -499,7 +509,10 @@ f64_property_methods! {
     (accesskit_node_min_numeric_value, min_numeric_value, accesskit_node_set_min_numeric_value, set_min_numeric_value, accesskit_node_clear_min_numeric_value, clear_min_numeric_value),
     (accesskit_node_max_numeric_value, max_numeric_value, accesskit_node_set_max_numeric_value, set_max_numeric_value, accesskit_node_clear_max_numeric_value, clear_max_numeric_value),
     (accesskit_node_numeric_value_step, numeric_value_step, accesskit_node_set_numeric_value_step, set_numeric_value_step, accesskit_node_clear_numeric_value_step, clear_numeric_value_step),
-    (accesskit_node_numeric_value_jump, numeric_value_jump, accesskit_node_set_numeric_value_jump, set_numeric_value_jump, accesskit_node_clear_numeric_value_jump, clear_numeric_value_jump),
+    (accesskit_node_numeric_value_jump, numeric_value_jump, accesskit_node_set_numeric_value_jump, set_numeric_value_jump, accesskit_node_clear_numeric_value_jump, clear_numeric_value_jump)
+}
+
+f32_property_methods! {
     (accesskit_node_font_size, font_size, accesskit_node_set_font_size, set_font_size, accesskit_node_clear_font_size, clear_font_size),
     (accesskit_node_font_weight, font_weight, accesskit_node_set_font_weight, set_font_weight, accesskit_node_clear_font_weight, clear_font_weight)
 }
@@ -530,7 +543,7 @@ text_decoration_property_methods! {
 
 length_slice_property_methods! {
     (accesskit_node_character_lengths, character_lengths, accesskit_node_set_character_lengths, set_character_lengths, accesskit_node_clear_character_lengths, clear_character_lengths),
-    (accesskit_node_word_lengths, word_lengths, accesskit_node_set_word_lengths, set_word_lengths, accesskit_node_clear_word_lengths, clear_word_lengths)
+    (accesskit_node_word_starts, word_starts, accesskit_node_set_word_starts, set_word_starts, accesskit_node_clear_word_starts, clear_word_starts)
 }
 
 coord_slice_property_methods! {
