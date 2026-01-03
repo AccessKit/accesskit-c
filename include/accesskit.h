@@ -312,11 +312,8 @@ enum accesskit_role
   ACCESSKIT_ROLE_CONTENT_INFO,
   ACCESSKIT_ROLE_DEFINITION,
   ACCESSKIT_ROLE_DESCRIPTION_LIST,
-  ACCESSKIT_ROLE_DESCRIPTION_LIST_DETAIL,
-  ACCESSKIT_ROLE_DESCRIPTION_LIST_TERM,
   ACCESSKIT_ROLE_DETAILS,
   ACCESSKIT_ROLE_DIALOG,
-  ACCESSKIT_ROLE_DIRECTORY,
   ACCESSKIT_ROLE_DISCLOSURE_TRIANGLE,
   ACCESSKIT_ROLE_DOCUMENT,
   ACCESSKIT_ROLE_EMBEDDED_OBJECT,
@@ -325,12 +322,11 @@ enum accesskit_role
   ACCESSKIT_ROLE_FIGURE_CAPTION,
   ACCESSKIT_ROLE_FIGURE,
   ACCESSKIT_ROLE_FOOTER,
-  ACCESSKIT_ROLE_FOOTER_AS_NON_LANDMARK,
   ACCESSKIT_ROLE_FORM,
   ACCESSKIT_ROLE_GRID,
+  ACCESSKIT_ROLE_GRID_CELL,
   ACCESSKIT_ROLE_GROUP,
   ACCESSKIT_ROLE_HEADER,
-  ACCESSKIT_ROLE_HEADER_AS_NON_LANDMARK,
   ACCESSKIT_ROLE_HEADING,
   ACCESSKIT_ROLE_IFRAME,
   ACCESSKIT_ROLE_IFRAME_PRESENTATIONAL,
@@ -352,8 +348,6 @@ enum accesskit_role
   ACCESSKIT_ROLE_NAVIGATION,
   ACCESSKIT_ROLE_NOTE,
   ACCESSKIT_ROLE_PLUGIN_OBJECT,
-  ACCESSKIT_ROLE_PORTAL,
-  ACCESSKIT_ROLE_PRE,
   ACCESSKIT_ROLE_PROGRESS_INDICATOR,
   ACCESSKIT_ROLE_RADIO_GROUP,
   ACCESSKIT_ROLE_REGION,
@@ -364,6 +358,8 @@ enum accesskit_role
   ACCESSKIT_ROLE_SCROLL_VIEW,
   ACCESSKIT_ROLE_SEARCH,
   ACCESSKIT_ROLE_SECTION,
+  ACCESSKIT_ROLE_SECTION_FOOTER,
+  ACCESSKIT_ROLE_SECTION_HEADER,
   ACCESSKIT_ROLE_SLIDER,
   ACCESSKIT_ROLE_SPIN_BUTTON,
   ACCESSKIT_ROLE_SPLITTER,
@@ -644,10 +640,30 @@ typedef struct accesskit_opt_double {
  *
  * If `has_value` is false, do not read the `value` field.
  */
+typedef struct accesskit_opt_float {
+  bool has_value;
+  float value;
+} accesskit_opt_float;
+
+/**
+ * Represents an optional value.
+ *
+ * If `has_value` is false, do not read the `value` field.
+ */
 typedef struct accesskit_opt_index {
   bool has_value;
   size_t value;
 } accesskit_opt_index;
+
+/**
+ * A color represented in 8-bit sRGB plus alpha.
+ */
+typedef struct accesskit_color {
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  uint8_t alpha;
+} accesskit_color;
 
 /**
  * Represents an optional value.
@@ -656,7 +672,7 @@ typedef struct accesskit_opt_index {
  */
 typedef struct accesskit_opt_color {
   bool has_value;
-  uint32_t value;
+  struct accesskit_color value;
 } accesskit_opt_color;
 
 /**
@@ -1121,12 +1137,6 @@ bool accesskit_node_is_disabled(const struct accesskit_node *node);
 void accesskit_node_set_disabled(struct accesskit_node *node);
 
 void accesskit_node_clear_disabled(struct accesskit_node *node);
-
-bool accesskit_node_is_bold(const struct accesskit_node *node);
-
-void accesskit_node_set_bold(struct accesskit_node *node);
-
-void accesskit_node_clear_bold(struct accesskit_node *node);
 
 bool accesskit_node_is_italic(const struct accesskit_node *node);
 
@@ -1694,6 +1704,46 @@ void accesskit_node_set_column_index_text_with_length(
 
 void accesskit_node_clear_column_index_text(struct accesskit_node *node);
 
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_node_braille_label(const struct accesskit_node *node);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_braille_label(struct accesskit_node *node,
+                                      const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_braille_label_with_length(struct accesskit_node *node,
+                                                  const char *value,
+                                                  size_t length);
+
+void accesskit_node_clear_braille_label(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_node_braille_role_description(
+    const struct accesskit_node *node);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_braille_role_description(struct accesskit_node *node,
+                                                 const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_braille_role_description_with_length(
+    struct accesskit_node *node, const char *value, size_t length);
+
+void accesskit_node_clear_braille_role_description(struct accesskit_node *node);
+
 struct accesskit_opt_double accesskit_node_scroll_x(
     const struct accesskit_node *node);
 
@@ -1776,17 +1826,17 @@ void accesskit_node_set_numeric_value_jump(struct accesskit_node *node,
 
 void accesskit_node_clear_numeric_value_jump(struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_font_size(
+struct accesskit_opt_float accesskit_node_font_size(
     const struct accesskit_node *node);
 
-void accesskit_node_set_font_size(struct accesskit_node *node, double value);
+void accesskit_node_set_font_size(struct accesskit_node *node, float value);
 
 void accesskit_node_clear_font_size(struct accesskit_node *node);
 
-struct accesskit_opt_double accesskit_node_font_weight(
+struct accesskit_opt_float accesskit_node_font_weight(
     const struct accesskit_node *node);
 
-void accesskit_node_set_font_weight(struct accesskit_node *node, double value);
+void accesskit_node_set_font_weight(struct accesskit_node *node, float value);
 
 void accesskit_node_clear_font_weight(struct accesskit_node *node);
 
@@ -1858,7 +1908,7 @@ struct accesskit_opt_color accesskit_node_color_value(
     const struct accesskit_node *node);
 
 void accesskit_node_set_color_value(struct accesskit_node *node,
-                                    uint32_t value);
+                                    struct accesskit_color value);
 
 void accesskit_node_clear_color_value(struct accesskit_node *node);
 
@@ -1866,7 +1916,7 @@ struct accesskit_opt_color accesskit_node_background_color(
     const struct accesskit_node *node);
 
 void accesskit_node_set_background_color(struct accesskit_node *node,
-                                         uint32_t value);
+                                         struct accesskit_color value);
 
 void accesskit_node_clear_background_color(struct accesskit_node *node);
 
@@ -1874,7 +1924,7 @@ struct accesskit_opt_color accesskit_node_foreground_color(
     const struct accesskit_node *node);
 
 void accesskit_node_set_foreground_color(struct accesskit_node *node,
-                                         uint32_t value);
+                                         struct accesskit_color value);
 
 void accesskit_node_clear_foreground_color(struct accesskit_node *node);
 
@@ -1913,16 +1963,16 @@ void accesskit_node_set_character_lengths(struct accesskit_node *node,
 
 void accesskit_node_clear_character_lengths(struct accesskit_node *node);
 
-struct accesskit_lengths accesskit_node_word_lengths(
+struct accesskit_lengths accesskit_node_word_starts(
     const struct accesskit_node *node);
 
 /**
  * Caller is responsible for freeing `values`.
  */
-void accesskit_node_set_word_lengths(struct accesskit_node *node, size_t length,
-                                     const uint8_t *values);
+void accesskit_node_set_word_starts(struct accesskit_node *node, size_t length,
+                                    const uint8_t *values);
 
-void accesskit_node_clear_word_lengths(struct accesskit_node *node);
+void accesskit_node_clear_word_starts(struct accesskit_node *node);
 
 struct accesskit_opt_coords accesskit_node_character_positions(
     const struct accesskit_node *node);
