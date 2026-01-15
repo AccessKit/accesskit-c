@@ -515,19 +515,19 @@ enum accesskit_text_align
 typedef uint8_t accesskit_text_align;
 #endif  // __cplusplus
 
-enum accesskit_text_decoration
+enum accesskit_text_decoration_style
 #ifdef __cplusplus
     : uint8_t
 #endif  // __cplusplus
 {
-  ACCESSKIT_TEXT_DECORATION_SOLID,
-  ACCESSKIT_TEXT_DECORATION_DOTTED,
-  ACCESSKIT_TEXT_DECORATION_DASHED,
-  ACCESSKIT_TEXT_DECORATION_DOUBLE,
-  ACCESSKIT_TEXT_DECORATION_WAVY,
+  ACCESSKIT_TEXT_DECORATION_STYLE_SOLID,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DOTTED,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DASHED,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DOUBLE,
+  ACCESSKIT_TEXT_DECORATION_STYLE_WAVY,
 };
 #ifndef __cplusplus
-typedef uint8_t accesskit_text_decoration;
+typedef uint8_t accesskit_text_decoration_style;
 #endif  // __cplusplus
 
 enum accesskit_text_direction
@@ -626,6 +626,24 @@ typedef struct accesskit_opt_node_id {
 } accesskit_opt_node_id;
 
 /**
+ * A 128-bit identifier for a tree, represented as a UUID in big-endian byte
+ * order.
+ */
+typedef struct accesskit_tree_id {
+  uint8_t bytes[16];
+} accesskit_tree_id;
+
+/**
+ * Represents an optional value.
+ *
+ * If `has_value` is false, do not read the `value` field.
+ */
+typedef struct accesskit_opt_tree_id {
+  bool has_value;
+  struct accesskit_tree_id value;
+} accesskit_opt_tree_id;
+
+/**
  * Represents an optional value.
  *
  * If `has_value` is false, do not read the `value` field.
@@ -676,13 +694,21 @@ typedef struct accesskit_opt_color {
 } accesskit_opt_color;
 
 /**
+ * The style and color for a type of text decoration.
+ */
+typedef struct accesskit_text_decoration {
+  accesskit_text_decoration_style style;
+  struct accesskit_color color;
+} accesskit_text_decoration;
+
+/**
  * Represents an optional value.
  *
  * If `has_value` is false, do not read the `value` field.
  */
 typedef struct accesskit_opt_text_decoration {
   bool has_value;
-  accesskit_text_decoration value;
+  struct accesskit_text_decoration value;
 } accesskit_opt_text_decoration;
 
 typedef struct accesskit_lengths {
@@ -963,7 +989,8 @@ typedef struct accesskit_opt_action_data {
 
 typedef struct accesskit_action_request {
   accesskit_action action;
-  accesskit_node_id target;
+  struct accesskit_tree_id target_tree;
+  accesskit_node_id target_node;
   struct accesskit_opt_action_data data;
 } accesskit_action_request;
 
@@ -1035,6 +1062,8 @@ typedef struct accesskit_opt_lresult {
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
+
+extern const struct accesskit_tree_id ACCESSKIT_TREE_ID_ROOT;
 
 accesskit_role accesskit_node_role(const struct accesskit_node *node);
 
@@ -1353,6 +1382,14 @@ void accesskit_node_set_popup_for(struct accesskit_node *node,
                                   accesskit_node_id value);
 
 void accesskit_node_clear_popup_for(struct accesskit_node *node);
+
+struct accesskit_opt_tree_id accesskit_node_tree_id(
+    const struct accesskit_node *node);
+
+void accesskit_node_set_tree_id(struct accesskit_node *node,
+                                struct accesskit_tree_id value);
+
+void accesskit_node_clear_tree_id(struct accesskit_node *node);
 
 /**
  * Only call this function with a string that originated from AccessKit.
@@ -1932,7 +1969,7 @@ struct accesskit_opt_text_decoration accesskit_node_overline(
     const struct accesskit_node *node);
 
 void accesskit_node_set_overline(struct accesskit_node *node,
-                                 accesskit_text_decoration value);
+                                 struct accesskit_text_decoration value);
 
 void accesskit_node_clear_overline(struct accesskit_node *node);
 
@@ -1940,7 +1977,7 @@ struct accesskit_opt_text_decoration accesskit_node_strikethrough(
     const struct accesskit_node *node);
 
 void accesskit_node_set_strikethrough(struct accesskit_node *node,
-                                      accesskit_text_decoration value);
+                                      struct accesskit_text_decoration value);
 
 void accesskit_node_clear_strikethrough(struct accesskit_node *node);
 
@@ -1948,7 +1985,7 @@ struct accesskit_opt_text_decoration accesskit_node_underline(
     const struct accesskit_node *node);
 
 void accesskit_node_set_underline(struct accesskit_node *node,
-                                  accesskit_text_decoration value);
+                                  struct accesskit_text_decoration value);
 
 void accesskit_node_clear_underline(struct accesskit_node *node);
 
@@ -2262,6 +2299,12 @@ void accesskit_tree_update_clear_tree(struct accesskit_tree_update *update);
 
 void accesskit_tree_update_set_focus(struct accesskit_tree_update *update,
                                      accesskit_node_id focus);
+
+struct accesskit_tree_id accesskit_tree_update_get_tree_id(
+    const struct accesskit_tree_update *update);
+
+void accesskit_tree_update_set_tree_id(struct accesskit_tree_update *update,
+                                       struct accesskit_tree_id tree_id);
 
 /**
  * Caller must call `accesskit_string_free` with the return value.

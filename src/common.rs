@@ -194,6 +194,29 @@ macro_rules! vec_property_methods {
 
 pub type node_id = u64;
 
+/// A 128-bit identifier for a tree, represented as a UUID in big-endian byte order.
+#[repr(C)]
+pub struct tree_id {
+    pub bytes: [u8; 16],
+}
+
+impl From<TreeId> for tree_id {
+    fn from(id: TreeId) -> Self {
+        Self {
+            bytes: *id.0.as_bytes(),
+        }
+    }
+}
+
+impl From<tree_id> for TreeId {
+    fn from(id: tree_id) -> Self {
+        TreeId(Uuid::from_bytes(id.bytes))
+    }
+}
+
+#[no_mangle]
+pub static ACCESSKIT_TREE_ID_ROOT: tree_id = tree_id { bytes: [0; 16] };
+
 slice_struct! { node_ids, NodeId, node_id }
 
 macro_rules! node_id_vec_property_methods {
@@ -466,6 +489,12 @@ node_id_property_methods! {
     (accesskit_node_next_on_line, next_on_line, accesskit_node_set_next_on_line, set_next_on_line, accesskit_node_clear_next_on_line, clear_next_on_line),
     (accesskit_node_previous_on_line, previous_on_line, accesskit_node_set_previous_on_line, set_previous_on_line, accesskit_node_clear_previous_on_line, clear_previous_on_line),
     (accesskit_node_popup_for, popup_for, accesskit_node_set_popup_for, set_popup_for, accesskit_node_clear_popup_for, clear_popup_for)
+}
+
+opt_struct! { opt_tree_id, tree_id }
+
+simple_property_methods! {
+    accesskit_node_tree_id, tree_id, opt_tree_id, accesskit_node_set_tree_id, set_tree_id, tree_id, accesskit_node_clear_tree_id, clear_tree_id
 }
 
 /// Only call this function with a string that originated from AccessKit.
@@ -938,6 +967,7 @@ impl tree_update {
         let update = TreeUpdate {
             nodes: vec![],
             tree: None,
+            tree_id: TreeId::ROOT,
             focus: focus.into(),
         };
         BoxCastPtr::to_mut_ptr(update)
@@ -951,6 +981,7 @@ impl tree_update {
         let update = TreeUpdate {
             nodes: Vec::with_capacity(capacity),
             tree: None,
+            tree_id: TreeId::ROOT,
             focus: focus.into(),
         };
         BoxCastPtr::to_mut_ptr(update)
@@ -990,6 +1021,21 @@ impl tree_update {
     pub extern "C" fn accesskit_tree_update_set_focus(update: *mut tree_update, focus: node_id) {
         let update = mut_from_ptr(update);
         update.focus = focus.into();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn accesskit_tree_update_get_tree_id(update: *const tree_update) -> tree_id {
+        let update = ref_from_ptr(update);
+        update.tree_id.into()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn accesskit_tree_update_set_tree_id(
+        update: *mut tree_update,
+        tree_id: tree_id,
+    ) {
+        let update = mut_from_ptr(update);
+        update.tree_id = tree_id.into();
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
@@ -1042,7 +1088,8 @@ impl From<ActionData> for action_data {
 #[repr(C)]
 pub struct action_request {
     pub action: Action,
-    pub target: node_id,
+    pub target_tree: tree_id,
+    pub target_node: node_id,
     pub data: opt_action_data,
 }
 
@@ -1050,7 +1097,8 @@ impl From<ActionRequest> for action_request {
     fn from(request: ActionRequest) -> action_request {
         Self {
             action: request.action,
-            target: request.target.into(),
+            target_tree: request.target_tree.into(),
+            target_node: request.target_node.into(),
             data: request.data.into(),
         }
     }
