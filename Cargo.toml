@@ -16,16 +16,16 @@ doc = false
 cbindgen = []
 
 [dependencies]
-accesskit = "0.22.0"
+accesskit = "0.23.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-accesskit_windows = "0.30.0"
+accesskit_windows = "0.31.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-accesskit_macos = "0.23.0"
+accesskit_macos = "0.24.0"
 
 [target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
-accesskit_unix = "0.18.0"
+accesskit_unix = "0.19.0"
 
 [profile.release]
 lto = true
