@@ -76,6 +76,13 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.20.0](https://github.com/AccessKit/accesskit-c/compare/0.19.0...0.20.0) (2026-01-16)
+
+
+### Features
+
+* Add Android support ([#70](https://github.com/AccessKit/accesskit-c/issues/70)) ([d6046de](https://github.com/AccessKit/accesskit-c/commit/d6046de803b08752c3ffd8c7a1ec59ed6c3249a5))
+
 ## [0.19.0](https://github.com/AccessKit/accesskit-c/compare/0.18.0...0.19.0) (2026-01-03)
 
 
