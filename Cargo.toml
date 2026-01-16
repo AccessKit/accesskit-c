@@ -14,6 +14,7 @@ doc = false
 
 [features]
 cbindgen = []
+android-embedded-dex = ["accesskit_android/embedded-dex"]
 
 [dependencies]
 accesskit = "0.22.0"
@@ -26,6 +27,9 @@ accesskit_macos = "0.23.0"
 
 [target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
 accesskit_unix = "0.18.0"
+
+[target.'cfg(target_os = "android")'.dependencies]
+accesskit_android = "0.5.0"
 
 [profile.release]
 lto = true

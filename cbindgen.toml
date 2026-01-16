@@ -10,6 +10,9 @@ include_guard = "ACCESSKIT_H"
 cpp_compat = true
 after_includes = """#ifdef _WIN32
 #include <windows.h>
+#endif
+#ifdef __ANDROID__
+#include <jni.h>
 #endif"""
 
 usize_is_size_t = true
@@ -20,6 +23,7 @@ prefix = "accesskit_"
 renaming_overrides_prefixing = true
 
 [defines]
+"target_os = android" = "__ANDROID__"
 "target_os = linux" = "__linux__"
 "target_os = dragonfly" = "__DragonFly__"
 "target_os = freebsd" = "__FreeBSD__"
@@ -40,6 +44,10 @@ renaming_overrides_prefixing = true
 "HWND" = "HWND"
 "HasPopup" = "accesskit_has_popup"
 "Invalid" = "accesskit_invalid"
+"JNIEnv" = "JNIEnv"
+"jfloat" = "jfloat"
+"jint" = "jint"
+"jobject" = "jobject"
 "LPARAM" = "LPARAM"
 "LRESULT" = "LRESULT"
 "ListStyle" = "accesskit_list_style"

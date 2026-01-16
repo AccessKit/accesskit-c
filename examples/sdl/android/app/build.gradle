@@ -1,0 +1,74 @@
+plugins {
+    id 'com.android.application'
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+
+def sdl2Dir = localProperties.getProperty('sdl2.dir')
+def accesskitDir = localProperties.getProperty('accesskit.dir')
+
+android {
+    namespace = 'dev.accesskit.sdl_example'
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "dev.accesskit.sdl_example"
+        minSdk = 28
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+
+        ndk {
+            abiFilters 'arm64-v8a', 'x86_64'
+        }
+
+        externalNativeBuild {
+            cmake {
+                def cmakeArgs = ["-DANDROID_STL=c++_shared"]
+                if (sdl2Dir != null) {
+                    cmakeArgs.add("-DSDL2_DIR=${sdl2Dir}")
+                }
+                if (accesskitDir != null) {
+                    cmakeArgs.add("-DACCESSKIT_DIR=${accesskitDir}")
+                }
+                arguments(*cmakeArgs)
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles(getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro')
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = "src/main/jni/CMakeLists.txt"
+            version = "3.22.1"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+            if (sdl2Dir != null) {
+                java.srcDirs += "${sdl2Dir}/android-project/app/src/main/java"
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
