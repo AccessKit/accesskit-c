@@ -5,9 +5,21 @@
 
 #include "accesskit.h"
 
-#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
-     defined(__NetBSD__) || defined(__OpenBSD__))
+#if defined(__ANDROID__)
+extern void android_request_accessibility_update(void);
+#endif
+
+#if ((defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
+      defined(__NetBSD__) || defined(__OpenBSD__)) &&                         \
+     !defined(__ANDROID__))
 #define UNIX
+#endif
+
+#if defined(__ANDROID__)
+/* Android-specific globals for marshaling updates to UI thread */
+static accesskit_tree_update_factory g_pending_update_factory = NULL;
+static void *g_pending_update_userdata = NULL;
+static SDL_mutex *g_update_mutex = NULL;
 #endif
 
 const char WINDOW_TITLE[] = "Hello world";
@@ -18,9 +30,9 @@ const accesskit_node_id BUTTON_2_ID = 2;
 const accesskit_node_id ANNOUNCEMENT_ID = 3;
 #define INITIAL_FOCUS BUTTON_1_ID
 
-const accesskit_rect BUTTON_1_RECT = {20.0, 20.0, 100.0, 60.0};
+const accesskit_rect BUTTON_1_RECT = {20.0, 50.0, 400.0, 200.0};
 
-const accesskit_rect BUTTON_2_RECT = {20.0, 60.0, 100.0, 100.0};
+const accesskit_rect BUTTON_2_RECT = {20.0, 250.0, 400.0, 400.0};
 
 const Sint32 SET_FOCUS_MSG = 0;
 const Sint32 DO_DEFAULT_ACTION_MSG = 1;
@@ -55,6 +67,10 @@ struct accesskit_sdl_adapter {
   accesskit_unix_adapter *adapter;
 #elif defined(_WIN32)
   accesskit_windows_subclassing_adapter *adapter;
+#elif defined(__ANDROID__)
+  /* On Android, the adapter is owned by the UI thread (JNI side).
+     This struct only exists for API compatibility. */
+  int dummy;
 #endif
 };
 
@@ -86,19 +102,38 @@ void accesskit_sdl_adapter_init(
   adapter->adapter = accesskit_windows_subclassing_adapter_new(
       wmInfo.info.win.window, activation_handler, activation_handler_userdata,
       action_handler, action_handler_userdata);
+#elif defined(__ANDROID__)
+  (void)adapter;
+  (void)window;
+  (void)activation_handler;
+  (void)activation_handler_userdata;
+  (void)action_handler;
+  (void)action_handler_userdata;
+  (void)deactivation_handler;
+  (void)deactivation_handler_userdata;
+  /* On Android, the adapter is owned by the UI thread (JNI side).
+     Nothing to do here. */
 #endif
 }
 
 void accesskit_sdl_adapter_destroy(struct accesskit_sdl_adapter *adapter) {
-  if (adapter->adapter != NULL) {
 #if defined(__APPLE__)
+  if (adapter->adapter != NULL) {
     accesskit_macos_subclassing_adapter_free(adapter->adapter);
-#elif defined(UNIX)
-    accesskit_unix_adapter_free(adapter->adapter);
-#elif defined(_WIN32)
-    accesskit_windows_subclassing_adapter_free(adapter->adapter);
-#endif
   }
+#elif defined(UNIX)
+  if (adapter->adapter != NULL) {
+    accesskit_unix_adapter_free(adapter->adapter);
+  }
+#elif defined(_WIN32)
+  if (adapter->adapter != NULL) {
+    accesskit_windows_subclassing_adapter_free(adapter->adapter);
+  }
+#elif defined(__ANDROID__)
+  /* On Android, the adapter is owned by the UI thread (JNI side).
+     Nothing to do here. */
+  (void)adapter;
+#endif
 }
 
 void accesskit_sdl_adapter_update_if_active(
@@ -122,6 +157,14 @@ void accesskit_sdl_adapter_update_if_active(
   if (events != NULL) {
     accesskit_windows_queued_events_raise(events);
   }
+#elif defined(__ANDROID__)
+  (void)adapter;
+  SDL_LockMutex(g_update_mutex);
+  g_pending_update_factory = update_factory;
+  g_pending_update_userdata = update_factory_userdata;
+  SDL_UnlockMutex(g_update_mutex);
+
+  android_request_accessibility_update();
 #endif
 }
 
@@ -137,6 +180,10 @@ void accesskit_sdl_adapter_update_window_focus_state(
 #elif defined(UNIX)
   accesskit_unix_adapter_update_window_focus_state(adapter->adapter,
                                                    is_focused);
+#elif defined(__ANDROID__)
+  /* On Android, focus is handled by the system */
+  (void)adapter;
+  (void)is_focused;
 #endif
   /* On Windows, the subclassing adapter takes care of this. */
 }
@@ -154,6 +201,10 @@ void accesskit_sdl_adapter_update_root_window_bounds(
   accesskit_rect inner_bounds = {x, y, x + width, y + height};
   accesskit_unix_adapter_set_root_window_bounds(adapter->adapter, outer_bounds,
                                                 inner_bounds);
+#elif defined(__ANDROID__)
+  /* On Android, bounds are managed by the system */
+  (void)adapter;
+  (void)window;
 #endif
 }
 
@@ -286,7 +337,36 @@ void deactivate_accessibility(void *userdata) {
      is active, so there's nothing to do here. */
 }
 
+#if defined(__ANDROID__)
+/* On Android, we need global state accessible from JNI.
+   The adapter is owned by the UI thread (JNI side), not here. */
+static struct window_state *g_window_state = NULL;
+static struct action_handler_state *g_action_handler_state = NULL;
+
+void *get_window_state(void) { return g_window_state; }
+void *get_action_handler_state(void) { return g_action_handler_state; }
+
+/* Called from JNI on UI thread to get and clear the pending update */
+accesskit_tree_update *get_pending_update(void) {
+  SDL_LockMutex(g_update_mutex);
+  accesskit_tree_update *update = NULL;
+  if (g_pending_update_factory != NULL) {
+    update = g_pending_update_factory(g_pending_update_userdata);
+    g_pending_update_factory = NULL;
+    g_pending_update_userdata = NULL;
+  }
+  SDL_UnlockMutex(g_update_mutex);
+  return update;
+}
+
+/* SDL uses SDL_main on Android */
+#define main SDL_main
+#endif
+
 int main(int argc, char *argv[]) {
+  (void)argc;
+  (void)argv;
+#if !defined(__ANDROID__)
   printf("This example has no visible GUI, and a keyboard interface:\n");
   printf("- [Tab] switches focus between two logical buttons.\n");
   printf(
@@ -299,6 +379,7 @@ int main(int argc, char *argv[]) {
 #elif defined(UNIX)
   printf("Enable Orca with [Super]+[Alt]+[S].\n");
 #endif
+#endif /* !__ANDROID__ */
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     fprintf(stderr, "SDL initialization failed: (%s)\n", SDL_GetError());
     return -1;
@@ -317,6 +398,11 @@ int main(int argc, char *argv[]) {
   SDL_Surface *screen_surface = SDL_GetWindowSurface(window);
   Uint32 window_id = SDL_GetWindowID(window);
   struct action_handler_state action_handler = {user_event, window_id};
+#if defined(__ANDROID__)
+  g_window_state = &state;
+  g_action_handler_state = &action_handler;
+  g_update_mutex = SDL_CreateMutex();
+#endif
   struct accesskit_sdl_adapter adapter;
   accesskit_sdl_adapter_init(&adapter, window, build_initial_tree, &state,
                              do_action, &action_handler,
@@ -380,7 +466,14 @@ int main(int argc, char *argv[]) {
   }
 
   accesskit_sdl_adapter_destroy(&adapter);
+#if defined(__ANDROID__)
+  g_window_state = NULL;
+  g_action_handler_state = NULL;
+  SDL_DestroyMutex(g_update_mutex);
+  g_update_mutex = NULL;
+#endif
   window_state_destroy(&state);
+  SDL_DestroyWindow(window);
   SDL_Quit();
   return 0;
 }

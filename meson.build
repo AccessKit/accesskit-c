@@ -259,10 +259,14 @@ endif
 if toolchain_arg != []
   cargo_wrapper_args += toolchain_arg
 endif
+if get_option('android-embedded-dex')
+  cargo_wrapper_args += ['--features', 'android-embedded-dex']
+endif
 
 library_sources = files(
   'Cargo.lock',
   'Cargo.toml',
+  'src/android.rs',
   'src/common.rs',
   'src/geometry.rs',
   'src/lib.rs',

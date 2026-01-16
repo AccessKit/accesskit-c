@@ -1,0 +1,18 @@
+# Gradle
+.gradle/
+build/
+local.properties
+
+# Android Studio
+*.iml
+.idea/
+.DS_Store
+
+# Native libraries (user-provided)
+app/src/main/jniLibs/
+
+# Generated files
+*.apk
+*.ap_
+*.dex
+*.class

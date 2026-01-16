@@ -23,3 +23,8 @@ option('rustc-version',
        type: 'string',
        value: '',
        description: 'Installed RustC version to use (if needed; currently only supported for Windows builds)')
+
+option('android-embedded-dex',
+       type: 'boolean',
+       value: false,
+       description: 'Embed the classes.dex file in the library (Android only)')

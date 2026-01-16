@@ -34,3 +34,26 @@ First download an SDL2 package from the project's [GitHub release page](https://
 cmake -S . -B build -DACCESSKIT_DIR="../.." -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
+
+### Android
+
+You will need to build SDL2 for Android (see [SDL Android README](https://github.com/libsdl-org/SDL/blob/main/docs/README-android.md)).
+
+#### Building the Example APK
+
+1. Copy pre-built libraries to `android/app/src/main/jniLibs/<abi>/`
+2. Configure `android/local.properties`:
+   ```properties
+   sdk.dir=/path/to/Android/Sdk
+   sdl2.dir=/path/to/SDL2-source
+   accesskit.dir=/path/to/accesskit-c
+   ```
+
+   - `sdl2.dir`: Path to SDL2 source directory containing `include/SDL.h`
+   - `accesskit.dir`: Path to accesskit-c root directory containing `include/accesskit.h`
+
+3. Build and install:
+   ```bash
+   cd android
+   ./gradlew installDebug
+   ```

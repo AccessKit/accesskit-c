@@ -80,6 +80,10 @@ parser.add_argument(
     "--extension", required=True, help="filename extension for the library (so, a, dll, lib, dylib)",
 )
 
+parser.add_argument(
+    "--features", action="append", default=[], help="Cargo features to enable",
+)
+
 args = parser.parse_args()
 
 if args.toolchain_version is not None and args.target is None and args.build_triplet is None:
@@ -103,7 +107,7 @@ pkg_config_path.insert(
 )
 env["PKG_CONFIG_PATH"] = os.pathsep.join(pkg_config_path)
 
-features = []
+features = args.features
 
 cargo_cmd = [Path(args.cargo).as_posix()]
 
