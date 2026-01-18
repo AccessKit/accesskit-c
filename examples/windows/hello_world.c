@@ -86,10 +86,10 @@ accesskit_tree_update *build_initial_tree(void *userdata) {
 void do_action(accesskit_action_request *request, void *userdata) {
   HWND window = userdata;
   if (request->action == ACCESSKIT_ACTION_FOCUS) {
-    LPARAM lparam = (LPARAM)(request->target);
+    LPARAM lparam = (LPARAM)(request->target_node);
     PostMessage((HWND)window, SET_FOCUS_MSG, 0, lparam);
   } else if (request->action == ACCESSKIT_ACTION_CLICK) {
-    LPARAM lparam = (LPARAM)(request->target);
+    LPARAM lparam = (LPARAM)(request->target_node);
     PostMessage((HWND)window, DO_DEFAULT_ACTION_MSG, 0, lparam);
   }
   accesskit_action_request_free(request);

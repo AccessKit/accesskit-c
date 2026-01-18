@@ -54,6 +54,7 @@ renaming_overrides_prefixing = true
 "SortDirection" = "accesskit_sort_direction"
 "TextAlign" = "accesskit_text_align"
 "TextDecoration" = "accesskit_text_decoration"
+"TextDecorationStyle" = "accesskit_text_decoration_style"
 "TextDirection" = "accesskit_text_direction"
 "Toggled" = "accesskit_toggled"
 "Vec2" = "accesskit_vec2"
