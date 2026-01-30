@@ -41,6 +41,8 @@ cmake --install build
 
 ### Notes on cross-compiling
 
+#### CMake
+
 On Windows, you will need to pass the `-A` flag when configuring the project. For instance, to target ARM64:
 
 ```bash
@@ -51,6 +53,30 @@ On other platforms you will have to specify which Rust target to use, as well as
 
 ```bash
 cmake -S . -B build -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=x86 -DRust_CARGO_TARGET=i686-unknown-linux-gnu
+```
+
+#### Meson
+
+For cross-compiling with Meson, create a cross file and use the `triplet` option to specify the Rust target. For example, to cross-compile for ARM Linux (`arm-unknown-linux-gnueabihf`), create a cross file `arm-linux-gnueabihf.txt`:
+
+```ini
+[binaries]
+c = 'arm-linux-gnueabihf-gcc'
+ar = 'arm-linux-gnueabihf-ar'
+strip = 'arm-linux-gnueabihf-strip'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'armv7l'
+endian = 'little'
+```
+
+Then configure and build:
+
+```bash
+meson setup build --cross-file arm-linux-gnueabihf.txt -Dtriplet=arm-unknown-linux-gnueabihf
+meson compile -C build
 ```
 
 ### Regenerating the header file
