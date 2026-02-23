@@ -28,7 +28,7 @@ cc = meson.get_compiler('c')
 # MSRV - Minimum Supported Rust Version
 # If you change this, please update these:
 #   - the "rust-version" value in Cargo.toml
-msrv = '1.77.2'
+msrv = '1.85'
 cargo = find_program('cargo', version:'>= @0@'.format(msrv))
 cargo_wrapper = find_program('meson/cargo_wrapper.py', native: true)
 rustc = find_program('rustc', version:'>= @0@'.format(msrv))

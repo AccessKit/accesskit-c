@@ -5,7 +5,7 @@ authors = ["The AccessKit contributors"]
 license = "MIT OR Apache-2.0"
 publish = false
 edition = "2021"
-rust-version = "1.77.2"
+rust-version = "1.85"
 
 [lib]
 name = "accesskit"
@@ -16,16 +16,16 @@ doc = false
 cbindgen = []
 
 [dependencies]
-accesskit = "0.23.0"
+accesskit = "0.24.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-accesskit_windows = "0.31.1"
+accesskit_windows = "0.32.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-accesskit_macos = "0.24.1"
+accesskit_macos = "0.25.0"
 
 [target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
-accesskit_unix = "0.19.1"
+accesskit_unix = "0.20.0"
 
 [profile.release]
 lto = true
