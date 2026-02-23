@@ -63,12 +63,16 @@ macro_rules! array_setter {
             #[no_mangle]
             pub extern "C" fn $c_setter(node: *mut node, length: usize, values: *const $ffi_type) {
                 let node = mut_from_ptr(node);
-                let values = unsafe {
-                    slice::from_raw_parts(values, length)
-                        .iter()
-                        .cloned()
-                        .map(From::from)
-                        .collect::<Vec<$rust_type>>()
+                let values = if length == 0 {
+                    Vec::new()
+                } else {
+                    unsafe {
+                        slice::from_raw_parts(values, length)
+                            .iter()
+                            .cloned()
+                            .map(From::from)
+                            .collect::<Vec<$rust_type>>()
+                    }
                 };
                 node.$setter(values);
             }
@@ -157,8 +161,13 @@ macro_rules! slice_struct {
         }
         impl From<$struct_name> for Vec<$rust_type> {
             fn from(values: $struct_name) -> Self {
-                unsafe {
-                    slice::from_raw_parts(values.values as *mut $rust_type, values.length).to_vec()
+                if values.length == 0 {
+                    Vec::new()
+                } else {
+                    unsafe {
+                        slice::from_raw_parts(values.values as *mut $rust_type, values.length)
+                            .to_vec()
+                    }
                 }
             }
         }
@@ -794,7 +803,8 @@ impl node {
         BoxCastPtr::to_mut_ptr(node.custom_actions().into())
     }
 
-    /// Caller is responsible for freeing each `custom_action` in the array.
+    /// Caller is responsible for freeing each `custom_action` in the array
+    /// as well as the `values` array itself.
     #[no_mangle]
     pub extern "C" fn accesskit_node_set_custom_actions(
         node: *mut node,
@@ -802,11 +812,15 @@ impl node {
         values: *const *mut custom_action,
     ) {
         let node = mut_from_ptr(node);
-        let values = unsafe {
-            slice::from_raw_parts(values, length)
-                .iter()
-                .map(|ptr| ref_from_ptr(*ptr).clone())
-                .collect::<Vec<CustomAction>>()
+        let values = if length == 0 {
+            Vec::new()
+        } else {
+            unsafe {
+                slice::from_raw_parts(values, length)
+                    .iter()
+                    .map(|ptr| ref_from_ptr(*ptr).clone())
+                    .collect::<Vec<CustomAction>>()
+            }
         };
         node.set_custom_actions(values);
     }

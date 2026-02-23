@@ -194,5 +194,9 @@ where
 }
 
 unsafe fn string_from_c_slice(value: *const c_char, length: usize) -> String {
-    String::from_utf8_lossy(slice::from_raw_parts(value as *const u8, length)).into_owned()
+    if length == 0 {
+        String::new()
+    } else {
+        String::from_utf8_lossy(slice::from_raw_parts(value as *const u8, length)).into_owned()
+    }
 }
