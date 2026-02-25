@@ -777,6 +777,7 @@ impl From<&[CustomAction]> for custom_actions {
             .iter()
             .map(|action| BoxCastPtr::to_mut_ptr(action.clone()))
             .collect();
+        ffi_values.shrink_to_fit();
         let array = Self {
             length,
             values: ffi_values.as_mut_ptr(),
