@@ -121,9 +121,10 @@ Java_dev_accesskit_sdl_1example_AccessKitSDLActivity_nativePerformAction(
 
   if (events != NULL) {
     accesskit_android_queued_events_raise(events, env, host);
+    return JNI_TRUE;
   }
 
-  return JNI_TRUE;
+  return JNI_FALSE;
 }
 
 JNIEXPORT void JNICALL
