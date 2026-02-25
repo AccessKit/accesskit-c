@@ -76,6 +76,24 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.21.0](https://github.com/AccessKit/accesskit-c/compare/0.20.0...0.21.0) (2026-02-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update minimum supported Rust version to 1.85 ([#80](https://github.com/AccessKit/accesskit-c/issues/80))
+
+### Features
+
+* Add Android support ([#72](https://github.com/AccessKit/accesskit-c/issues/72)) ([c42e2d9](https://github.com/AccessKit/accesskit-c/commit/c42e2d9d754ef190ef9b11d393a52dc10db05028))
+
+
+### Bug Fixes
+
+* Allow null pointers as empty slices ([#79](https://github.com/AccessKit/accesskit-c/issues/79)) ([a3a8348](https://github.com/AccessKit/accesskit-c/commit/a3a8348e003fb16f4860ffb9a1d41b948654ef38))
+* Ensure Vec capacity equals length in custom_actions to avoid UB on free ([#82](https://github.com/AccessKit/accesskit-c/issues/82)) ([29b4a3e](https://github.com/AccessKit/accesskit-c/commit/29b4a3e71a9b74830ab0bb8fdb37b7df91c08ed9))
+* Update minimum supported Rust version to 1.85 ([#80](https://github.com/AccessKit/accesskit-c/issues/80)) ([c07ddbc](https://github.com/AccessKit/accesskit-c/commit/c07ddbc6442cee72e32e3049d39c9a37b45fe6a3))
+
 ## [0.20.0](https://github.com/AccessKit/accesskit-c/compare/0.19.0...0.20.0) (2026-01-18)
 
 
