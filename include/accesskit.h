@@ -2204,7 +2204,8 @@ struct accesskit_custom_actions *accesskit_node_custom_actions(
     const struct accesskit_node *node);
 
 /**
- * Caller is responsible for freeing each `custom_action` in the array.
+ * Caller is responsible for freeing each `custom_action` in the array
+ * as well as the `values` array itself.
  */
 void accesskit_node_set_custom_actions(
     struct accesskit_node *node, size_t length,
