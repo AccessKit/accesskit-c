@@ -76,6 +76,13 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.21.1](https://github.com/AccessKit/accesskit-c/compare/0.21.0...0.21.1) (2026-02-26)
+
+
+### Bug Fixes
+
+* Fix Android platform detection in CMake build process ([#83](https://github.com/AccessKit/accesskit-c/issues/83)) ([8cca8b6](https://github.com/AccessKit/accesskit-c/commit/8cca8b63e982522d888794073fe4e5a792e13910))
+
 ## [0.21.0](https://github.com/AccessKit/accesskit-c/compare/0.20.0...0.21.0) (2026-02-25)
 
 
