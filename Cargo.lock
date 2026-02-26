@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "accesskit-c"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "accesskit",
  "accesskit_android",
