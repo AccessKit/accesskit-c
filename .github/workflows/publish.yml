@@ -78,7 +78,7 @@ jobs:
           cmake --install build ${{ contains(matrix.target, 'msvc') && '--config Release' || '' }}
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.target }}
           path: lib
@@ -90,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
 
