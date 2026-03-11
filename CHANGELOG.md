@@ -76,6 +76,13 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.21.2](https://github.com/AccessKit/accesskit-c/compare/0.21.1...0.21.2) (2026-03-11)
+
+
+### Bug Fixes
+
+* bump the rust-crates group with 4 updates ([#87](https://github.com/AccessKit/accesskit-c/issues/87)) ([32d4dcc](https://github.com/AccessKit/accesskit-c/commit/32d4dccabd5e78ddca0f08b64c752a348cfa9656))
+
 ## [0.21.1](https://github.com/AccessKit/accesskit-c/compare/0.21.0...0.21.1) (2026-02-26)
 
 
