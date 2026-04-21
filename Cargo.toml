@@ -31,6 +31,9 @@ accesskit_unix = "0.21.1"
 [target.'cfg(target_os = "android")'.dependencies]
 accesskit_android = "0.7.3"
 
+[target.'cfg(any(target_os = "ios", target_os = "tvos", target_os = "visionos", target_os = "watchos"))'.dependencies]
+accesskit_ios = "0.1.0"
+
 [profile.release]
 lto = true
 opt-level = "z"

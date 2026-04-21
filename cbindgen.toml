@@ -13,7 +13,45 @@ after_includes = """#ifdef _WIN32
 #endif
 #ifdef __ANDROID__
 #include <jni.h>
-#endif"""
+#endif
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+/* Older SDKs may not define all of these; force them to 0 so the
+   value-based checks below are safe. */
+#ifndef TARGET_OS_OSX
+#define TARGET_OS_OSX 0
+#endif
+#ifndef TARGET_OS_IOS
+#define TARGET_OS_IOS 0
+#endif
+#ifndef TARGET_OS_TV
+#define TARGET_OS_TV 0
+#endif
+#ifndef TARGET_OS_WATCH
+#define TARGET_OS_WATCH 0
+#endif
+#ifndef TARGET_OS_VISION
+#define TARGET_OS_VISION 0
+#endif
+#ifndef TARGET_OS_MACCATALYST
+#define TARGET_OS_MACCATALYST 0
+#endif
+#if TARGET_OS_OSX
+#define ACCESSKIT_MACOS
+#endif
+#if TARGET_OS_IOS || TARGET_OS_MACCATALYST
+#define ACCESSKIT_IOS
+#endif
+#if TARGET_OS_TV
+#define ACCESSKIT_TVOS
+#endif
+#if TARGET_OS_WATCH
+#define ACCESSKIT_WATCHOS
+#endif
+#if TARGET_OS_VISION
+#define ACCESSKIT_VISIONOS
+#endif
+#endif /* __APPLE__ */"""
 
 usize_is_size_t = true
 
@@ -29,7 +67,11 @@ renaming_overrides_prefixing = true
 "target_os = freebsd" = "__FreeBSD__"
 "target_os = netbsd" = "__NetBSD__"
 "target_os = openbsd" = "__OpenBSD__"
-"target_os = macos" = "__APPLE__"
+"target_os = ios" = "ACCESSKIT_IOS"
+"target_os = macos" = "ACCESSKIT_MACOS"
+"target_os = tvos" = "ACCESSKIT_TVOS"
+"target_os = visionos" = "ACCESSKIT_VISIONOS"
+"target_os = watchos" = "ACCESSKIT_WATCHOS"
 "target_os = windows" = "_WIN32"
 
 [export.rename]

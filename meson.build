@@ -23,6 +23,8 @@ project('accesskit-c',
 )
 
 host_system = host_machine.system()
+apple_systems = ['darwin', 'ios', 'tvos', 'visionos', 'watchos']
+non_macos_apple_systems = ['ios', 'tvos', 'visionos', 'watchos']
 cc = meson.get_compiler('c')
 
 # MSRV - Minimum Supported Rust Version
@@ -41,6 +43,10 @@ python = py.find_installation()
 
 appkit_dep = dependency('appleframeworks', modules: 'AppKit',
                         required: host_system == 'darwin')
+uikit_dep = dependency('appleframeworks', modules: 'UIKit',
+                       required: host_system in non_macos_apple_systems)
+objc_dep = cc.find_library('objc', required: host_system in apple_systems)
+cxx_dep = cc.find_library('c++', required: host_system in apple_systems)
 m_dep = cc.find_library('m', required: false)
 uiautomationcore_dep = cc.find_library('uiautomationcore',
                                        required: host_system == 'windows')
@@ -197,7 +203,7 @@ if host_system == 'windows'
   endforeach
 endif
 
-private_dependencies += [m_dep, appkit_dep, uiautomationcore_dep, runtimeobject_dep, propsys_dep]
+private_dependencies += [m_dep, appkit_dep, uikit_dep, objc_dep, cxx_dep, uiautomationcore_dep, runtimeobject_dep, propsys_dep]
 library_dependencies += other_library_dependencies
 library_dependencies += private_dependencies
 
@@ -230,7 +236,7 @@ if host_system == 'windows'
   ext_dynamic = 'dll'
   ext_static = is_msvc_style ? 'lib' : 'a'
   ext_exe = '.exe'
-elif host_system in ['darwin', 'ios']
+elif host_system in apple_systems
   lib_prefix = 'lib'
   ext_dynamic = 'dylib'
   ext_static = 'a'
@@ -269,6 +275,7 @@ library_sources = files(
   'src/android.rs',
   'src/common.rs',
   'src/geometry.rs',
+  'src/ios.rs',
   'src/lib.rs',
   'src/macos.rs',
   'src/unix.rs',
@@ -341,7 +348,7 @@ makedef_args = [
   '^accesskit_.',
 ]
 
-if host_system in ['darwin', 'ios']
+if host_system in apple_systems
   makedef_args += ['--os', 'darwin']
 elif host_system in ['windows', 'cygwin']
   makedef_args += ['--os', 'win']
@@ -363,7 +370,7 @@ if is_msvc_style
 else
   nm = find_program('llvm-nm', required: false)
   if not nm.found()
-    if host_system in ['darwin', 'ios']
+    if host_system in apple_systems
       warning('llvm-nm not found, you may experience problems when creating the shared libaccesskit-c.')
       warning('Please install the llvm-tools component through rustup, or point Meson to an existing LLVM installation.')
     endif
@@ -382,7 +389,7 @@ symbol_list_target = custom_target(
 
 symbol_list = symbol_list_target[0]
 
-if host_system in ['darwin', 'ios']
+if host_system in apple_systems
   vflags = ['-Wl,-exported_symbols_list,@0@'.format(symbol_list_target.full_path())]
 elif host_system == 'windows'
   vflags = []

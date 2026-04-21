@@ -40,9 +40,22 @@ jobs:
   clippy:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [macOS-latest, windows-2025, ubuntu-latest]
-    name: cargo clippy
+        include:
+          - os: windows-2025
+            name: Windows
+          - os: macOS-latest
+            name: macOS
+          - os: ubuntu-latest
+            name: Linux
+          - os: ubuntu-latest
+            name: Android
+            target: aarch64-linux-android
+          - os: macOS-latest
+            name: iOS Simulator
+            target: aarch64-apple-ios-sim
+    name: cargo clippy (${{ matrix.name }})
     steps:
       - uses: actions/checkout@v6
 
@@ -50,12 +63,13 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+          targets: ${{ matrix.target }}
 
       - name: restore cache
         uses: Swatinem/rust-cache@v2
 
       - name: cargo clippy
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy ${{ matrix.target && format('--target {0}', matrix.target) }} --all-targets -- -D warnings
 
   find-msrv:
     runs-on: ubuntu-latest
@@ -72,6 +86,7 @@ jobs:
       matrix:
         include:
           - target: aarch64-apple-darwin
+          - target: aarch64-apple-ios
           - target: i686-pc-windows-gnu
           - target: i686-pc-windows-msvc
           - target: i686-unknown-linux-gnu

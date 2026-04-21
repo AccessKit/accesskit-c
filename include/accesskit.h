@@ -19,211 +19,44 @@
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
-
-/**
- * An action to be taken on an accessibility node.
- */
-enum accesskit_action
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  /**
-   * Do the equivalent of a single click or tap.
-   */
-  ACCESSKIT_ACTION_CLICK,
-  ACCESSKIT_ACTION_FOCUS,
-  ACCESSKIT_ACTION_BLUR,
-  ACCESSKIT_ACTION_COLLAPSE,
-  ACCESSKIT_ACTION_EXPAND,
-  /**
-   * Requires [`ActionRequest::data`] to be set to [`ActionData::CustomAction`].
-   */
-  ACCESSKIT_ACTION_CUSTOM_ACTION,
-  /**
-   * Decrement a numeric value by one step.
-   */
-  ACCESSKIT_ACTION_DECREMENT,
-  /**
-   * Increment a numeric value by one step.
-   */
-  ACCESSKIT_ACTION_INCREMENT,
-  ACCESSKIT_ACTION_HIDE_TOOLTIP,
-  ACCESSKIT_ACTION_SHOW_TOOLTIP,
-  /**
-   * Delete any selected text in the control's text value and
-   * insert the specified value in its place, like when typing or pasting.
-   * Requires [`ActionRequest::data`] to be set to [`ActionData::Value`].
-   */
-  ACCESSKIT_ACTION_REPLACE_SELECTED_TEXT,
-  /**
-   * Scroll down by the specified unit.
-   */
-  ACCESSKIT_ACTION_SCROLL_DOWN,
-  /**
-   * Scroll left by the specified unit.
-   */
-  ACCESSKIT_ACTION_SCROLL_LEFT,
-  /**
-   * Scroll right by the specified unit.
-   */
-  ACCESSKIT_ACTION_SCROLL_RIGHT,
-  /**
-   * Scroll up by the specified unit.
-   */
-  ACCESSKIT_ACTION_SCROLL_UP,
-  /**
-   * Scroll any scrollable containers to make the target node visible.
-   * Optionally set [`ActionRequest::data`] to [`ActionData::ScrollHint`].
-   */
-  ACCESSKIT_ACTION_SCROLL_INTO_VIEW,
-  /**
-   * Scroll the given object to a specified point in the tree's container
-   * (e.g. window). Requires [`ActionRequest::data`] to be set to
-   * [`ActionData::ScrollToPoint`].
-   */
-  ACCESSKIT_ACTION_SCROLL_TO_POINT,
-  /**
-   * Requires [`ActionRequest::data`] to be set to
-   * [`ActionData::SetScrollOffset`].
-   */
-  ACCESSKIT_ACTION_SET_SCROLL_OFFSET,
-  /**
-   * Requires [`ActionRequest::data`] to be set to
-   * [`ActionData::SetTextSelection`].
-   */
-  ACCESSKIT_ACTION_SET_TEXT_SELECTION,
-  /**
-   * Don't focus this node, but set it as the sequential focus navigation
-   * starting point, so that pressing Tab moves to the next element
-   * following this one, for example.
-   */
-  ACCESSKIT_ACTION_SET_SEQUENTIAL_FOCUS_NAVIGATION_STARTING_POINT,
-  /**
-   * Replace the value of the control with the specified value and
-   * reset the selection, if applicable. Requires [`ActionRequest::data`]
-   * to be set to [`ActionData::Value`] or [`ActionData::NumericValue`].
-   */
-  ACCESSKIT_ACTION_SET_VALUE,
-  ACCESSKIT_ACTION_SHOW_CONTEXT_MENU,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_action;
-#endif  // __cplusplus
-
-enum accesskit_aria_current
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_ARIA_CURRENT_FALSE,
-  ACCESSKIT_ARIA_CURRENT_TRUE,
-  ACCESSKIT_ARIA_CURRENT_PAGE,
-  ACCESSKIT_ARIA_CURRENT_STEP,
-  ACCESSKIT_ARIA_CURRENT_LOCATION,
-  ACCESSKIT_ARIA_CURRENT_DATE,
-  ACCESSKIT_ARIA_CURRENT_TIME,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_aria_current;
-#endif  // __cplusplus
-
-enum accesskit_auto_complete
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_AUTO_COMPLETE_INLINE,
-  ACCESSKIT_AUTO_COMPLETE_LIST,
-  ACCESSKIT_AUTO_COMPLETE_BOTH,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_auto_complete;
-#endif  // __cplusplus
-
-enum accesskit_has_popup
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_HAS_POPUP_MENU,
-  ACCESSKIT_HAS_POPUP_LISTBOX,
-  ACCESSKIT_HAS_POPUP_TREE,
-  ACCESSKIT_HAS_POPUP_GRID,
-  ACCESSKIT_HAS_POPUP_DIALOG,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_has_popup;
-#endif  // __cplusplus
-
-/**
- * Indicates if a form control has invalid input or if a web DOM element has an
- * [`aria-invalid`] attribute.
- *
- * [`aria-invalid`]: https://www.w3.org/TR/wai-aria-1.1/#aria-invalid
- */
-enum accesskit_invalid
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_INVALID_TRUE,
-  ACCESSKIT_INVALID_GRAMMAR,
-  ACCESSKIT_INVALID_SPELLING,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_invalid;
-#endif  // __cplusplus
-
-enum accesskit_list_style
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_LIST_STYLE_CIRCLE,
-  ACCESSKIT_LIST_STYLE_DISC,
-  ACCESSKIT_LIST_STYLE_IMAGE,
-  ACCESSKIT_LIST_STYLE_NUMERIC,
-  ACCESSKIT_LIST_STYLE_SQUARE,
-  /**
-   * Language specific ordering (alpha, roman, cjk-ideographic, etc...)
-   */
-  ACCESSKIT_LIST_STYLE_OTHER,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_list_style;
-#endif  // __cplusplus
-
-enum accesskit_live
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_LIVE_OFF,
-  ACCESSKIT_LIVE_POLITE,
-  ACCESSKIT_LIVE_ASSERTIVE,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_live;
-#endif  // __cplusplus
-
-enum accesskit_orientation
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  /**
-   * E.g. most toolbars and separators.
-   */
-  ACCESSKIT_ORIENTATION_HORIZONTAL,
-  /**
-   * E.g. menu or combo box.
-   */
-  ACCESSKIT_ORIENTATION_VERTICAL,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_orientation;
-#endif  // __cplusplus
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+/* Older SDKs may not define all of these; force them to 0 so the
+   value-based checks below are safe. */
+#ifndef TARGET_OS_OSX
+#define TARGET_OS_OSX 0
+#endif
+#ifndef TARGET_OS_IOS
+#define TARGET_OS_IOS 0
+#endif
+#ifndef TARGET_OS_TV
+#define TARGET_OS_TV 0
+#endif
+#ifndef TARGET_OS_WATCH
+#define TARGET_OS_WATCH 0
+#endif
+#ifndef TARGET_OS_VISION
+#define TARGET_OS_VISION 0
+#endif
+#ifndef TARGET_OS_MACCATALYST
+#define TARGET_OS_MACCATALYST 0
+#endif
+#if TARGET_OS_OSX
+#define ACCESSKIT_MACOS
+#endif
+#if TARGET_OS_IOS || TARGET_OS_MACCATALYST
+#define ACCESSKIT_IOS
+#endif
+#if TARGET_OS_TV
+#define ACCESSKIT_TVOS
+#endif
+#if TARGET_OS_WATCH
+#define ACCESSKIT_WATCHOS
+#endif
+#if TARGET_OS_VISION
+#define ACCESSKIT_VISIONOS
+#endif
+#endif /* __APPLE__ */
 
 /**
  * The type of an accessibility node.
@@ -448,23 +281,289 @@ typedef uint8_t accesskit_role;
 #endif  // __cplusplus
 
 /**
- * A suggestion about where the node being scrolled into view should be
- * positioned relative to the edges of the scrollable container.
+ * An action to be taken on an accessibility node.
  */
-enum accesskit_scroll_hint
+enum accesskit_action
 #ifdef __cplusplus
     : uint8_t
 #endif  // __cplusplus
 {
-  ACCESSKIT_SCROLL_HINT_TOP_LEFT,
-  ACCESSKIT_SCROLL_HINT_BOTTOM_RIGHT,
-  ACCESSKIT_SCROLL_HINT_TOP_EDGE,
-  ACCESSKIT_SCROLL_HINT_BOTTOM_EDGE,
-  ACCESSKIT_SCROLL_HINT_LEFT_EDGE,
-  ACCESSKIT_SCROLL_HINT_RIGHT_EDGE,
+  /**
+   * Do the equivalent of a single click or tap.
+   */
+  ACCESSKIT_ACTION_CLICK,
+  ACCESSKIT_ACTION_FOCUS,
+  ACCESSKIT_ACTION_BLUR,
+  ACCESSKIT_ACTION_COLLAPSE,
+  ACCESSKIT_ACTION_EXPAND,
+  /**
+   * Requires [`ActionRequest::data`] to be set to [`ActionData::CustomAction`].
+   */
+  ACCESSKIT_ACTION_CUSTOM_ACTION,
+  /**
+   * Decrement a numeric value by one step.
+   */
+  ACCESSKIT_ACTION_DECREMENT,
+  /**
+   * Increment a numeric value by one step.
+   */
+  ACCESSKIT_ACTION_INCREMENT,
+  ACCESSKIT_ACTION_HIDE_TOOLTIP,
+  ACCESSKIT_ACTION_SHOW_TOOLTIP,
+  /**
+   * Delete any selected text in the control's text value and
+   * insert the specified value in its place, like when typing or pasting.
+   * Requires [`ActionRequest::data`] to be set to [`ActionData::Value`].
+   */
+  ACCESSKIT_ACTION_REPLACE_SELECTED_TEXT,
+  /**
+   * Scroll down by the specified unit.
+   */
+  ACCESSKIT_ACTION_SCROLL_DOWN,
+  /**
+   * Scroll left by the specified unit.
+   */
+  ACCESSKIT_ACTION_SCROLL_LEFT,
+  /**
+   * Scroll right by the specified unit.
+   */
+  ACCESSKIT_ACTION_SCROLL_RIGHT,
+  /**
+   * Scroll up by the specified unit.
+   */
+  ACCESSKIT_ACTION_SCROLL_UP,
+  /**
+   * Scroll any scrollable containers to make the target node visible.
+   * Optionally set [`ActionRequest::data`] to [`ActionData::ScrollHint`].
+   */
+  ACCESSKIT_ACTION_SCROLL_INTO_VIEW,
+  /**
+   * Scroll the given object to a specified point in the tree's container
+   * (e.g. window). Requires [`ActionRequest::data`] to be set to
+   * [`ActionData::ScrollToPoint`].
+   */
+  ACCESSKIT_ACTION_SCROLL_TO_POINT,
+  /**
+   * Requires [`ActionRequest::data`] to be set to
+   * [`ActionData::SetScrollOffset`].
+   */
+  ACCESSKIT_ACTION_SET_SCROLL_OFFSET,
+  /**
+   * Requires [`ActionRequest::data`] to be set to
+   * [`ActionData::SetTextSelection`].
+   */
+  ACCESSKIT_ACTION_SET_TEXT_SELECTION,
+  /**
+   * Don't focus this node, but set it as the sequential focus navigation
+   * starting point, so that pressing Tab moves to the next element
+   * following this one, for example.
+   */
+  ACCESSKIT_ACTION_SET_SEQUENTIAL_FOCUS_NAVIGATION_STARTING_POINT,
+  /**
+   * Replace the value of the control with the specified value and
+   * reset the selection, if applicable. Requires [`ActionRequest::data`]
+   * to be set to [`ActionData::Value`] or [`ActionData::NumericValue`].
+   */
+  ACCESSKIT_ACTION_SET_VALUE,
+  ACCESSKIT_ACTION_SHOW_CONTEXT_MENU,
 };
 #ifndef __cplusplus
-typedef uint8_t accesskit_scroll_hint;
+typedef uint8_t accesskit_action;
+#endif  // __cplusplus
+
+enum accesskit_text_decoration_style
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_TEXT_DECORATION_STYLE_SOLID,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DOTTED,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DASHED,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DOUBLE,
+  ACCESSKIT_TEXT_DECORATION_STYLE_WAVY,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_text_decoration_style;
+#endif  // __cplusplus
+
+/**
+ * Indicates if a form control has invalid input or if a web DOM element has an
+ * [`aria-invalid`] attribute.
+ *
+ * [`aria-invalid`]: https://www.w3.org/TR/wai-aria-1.1/#aria-invalid
+ */
+enum accesskit_invalid
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_INVALID_TRUE,
+  ACCESSKIT_INVALID_GRAMMAR,
+  ACCESSKIT_INVALID_SPELLING,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_invalid;
+#endif  // __cplusplus
+
+enum accesskit_toggled
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_TOGGLED_FALSE,
+  ACCESSKIT_TOGGLED_TRUE,
+  ACCESSKIT_TOGGLED_MIXED,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_toggled;
+#endif  // __cplusplus
+
+enum accesskit_live
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_LIVE_OFF,
+  ACCESSKIT_LIVE_POLITE,
+  ACCESSKIT_LIVE_ASSERTIVE,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_live;
+#endif  // __cplusplus
+
+enum accesskit_text_direction
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_TEXT_DIRECTION_LEFT_TO_RIGHT,
+  ACCESSKIT_TEXT_DIRECTION_RIGHT_TO_LEFT,
+  ACCESSKIT_TEXT_DIRECTION_TOP_TO_BOTTOM,
+  ACCESSKIT_TEXT_DIRECTION_BOTTOM_TO_TOP,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_text_direction;
+#endif  // __cplusplus
+
+enum accesskit_orientation
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  /**
+   * E.g. most toolbars and separators.
+   */
+  ACCESSKIT_ORIENTATION_HORIZONTAL,
+  /**
+   * E.g. menu or combo box.
+   */
+  ACCESSKIT_ORIENTATION_VERTICAL,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_orientation;
+#endif  // __cplusplus
+
+enum accesskit_sort_direction
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_SORT_DIRECTION_ASCENDING,
+  ACCESSKIT_SORT_DIRECTION_DESCENDING,
+  ACCESSKIT_SORT_DIRECTION_OTHER,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_sort_direction;
+#endif  // __cplusplus
+
+enum accesskit_aria_current
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_ARIA_CURRENT_FALSE,
+  ACCESSKIT_ARIA_CURRENT_TRUE,
+  ACCESSKIT_ARIA_CURRENT_PAGE,
+  ACCESSKIT_ARIA_CURRENT_STEP,
+  ACCESSKIT_ARIA_CURRENT_LOCATION,
+  ACCESSKIT_ARIA_CURRENT_DATE,
+  ACCESSKIT_ARIA_CURRENT_TIME,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_aria_current;
+#endif  // __cplusplus
+
+enum accesskit_auto_complete
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_AUTO_COMPLETE_INLINE,
+  ACCESSKIT_AUTO_COMPLETE_LIST,
+  ACCESSKIT_AUTO_COMPLETE_BOTH,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_auto_complete;
+#endif  // __cplusplus
+
+enum accesskit_has_popup
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_HAS_POPUP_MENU,
+  ACCESSKIT_HAS_POPUP_LISTBOX,
+  ACCESSKIT_HAS_POPUP_TREE,
+  ACCESSKIT_HAS_POPUP_GRID,
+  ACCESSKIT_HAS_POPUP_DIALOG,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_has_popup;
+#endif  // __cplusplus
+
+enum accesskit_list_style
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_LIST_STYLE_CIRCLE,
+  ACCESSKIT_LIST_STYLE_DISC,
+  ACCESSKIT_LIST_STYLE_IMAGE,
+  ACCESSKIT_LIST_STYLE_NUMERIC,
+  ACCESSKIT_LIST_STYLE_SQUARE,
+  /**
+   * Language specific ordering (alpha, roman, cjk-ideographic, etc...)
+   */
+  ACCESSKIT_LIST_STYLE_OTHER,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_list_style;
+#endif  // __cplusplus
+
+enum accesskit_text_align
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_TEXT_ALIGN_LEFT,
+  ACCESSKIT_TEXT_ALIGN_RIGHT,
+  ACCESSKIT_TEXT_ALIGN_CENTER,
+  ACCESSKIT_TEXT_ALIGN_JUSTIFY,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_text_align;
+#endif  // __cplusplus
+
+enum accesskit_vertical_offset
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_VERTICAL_OFFSET_SUBSCRIPT,
+  ACCESSKIT_VERTICAL_OFFSET_SUPERSCRIPT,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_vertical_offset;
 #endif  // __cplusplus
 
 /**
@@ -491,85 +590,24 @@ enum accesskit_scroll_unit
 typedef uint8_t accesskit_scroll_unit;
 #endif  // __cplusplus
 
-enum accesskit_sort_direction
+/**
+ * A suggestion about where the node being scrolled into view should be
+ * positioned relative to the edges of the scrollable container.
+ */
+enum accesskit_scroll_hint
 #ifdef __cplusplus
     : uint8_t
 #endif  // __cplusplus
 {
-  ACCESSKIT_SORT_DIRECTION_ASCENDING,
-  ACCESSKIT_SORT_DIRECTION_DESCENDING,
-  ACCESSKIT_SORT_DIRECTION_OTHER,
+  ACCESSKIT_SCROLL_HINT_TOP_LEFT,
+  ACCESSKIT_SCROLL_HINT_BOTTOM_RIGHT,
+  ACCESSKIT_SCROLL_HINT_TOP_EDGE,
+  ACCESSKIT_SCROLL_HINT_BOTTOM_EDGE,
+  ACCESSKIT_SCROLL_HINT_LEFT_EDGE,
+  ACCESSKIT_SCROLL_HINT_RIGHT_EDGE,
 };
 #ifndef __cplusplus
-typedef uint8_t accesskit_sort_direction;
-#endif  // __cplusplus
-
-enum accesskit_text_align
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_TEXT_ALIGN_LEFT,
-  ACCESSKIT_TEXT_ALIGN_RIGHT,
-  ACCESSKIT_TEXT_ALIGN_CENTER,
-  ACCESSKIT_TEXT_ALIGN_JUSTIFY,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_text_align;
-#endif  // __cplusplus
-
-enum accesskit_text_decoration_style
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_TEXT_DECORATION_STYLE_SOLID,
-  ACCESSKIT_TEXT_DECORATION_STYLE_DOTTED,
-  ACCESSKIT_TEXT_DECORATION_STYLE_DASHED,
-  ACCESSKIT_TEXT_DECORATION_STYLE_DOUBLE,
-  ACCESSKIT_TEXT_DECORATION_STYLE_WAVY,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_text_decoration_style;
-#endif  // __cplusplus
-
-enum accesskit_text_direction
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_TEXT_DIRECTION_LEFT_TO_RIGHT,
-  ACCESSKIT_TEXT_DIRECTION_RIGHT_TO_LEFT,
-  ACCESSKIT_TEXT_DIRECTION_TOP_TO_BOTTOM,
-  ACCESSKIT_TEXT_DIRECTION_BOTTOM_TO_TOP,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_text_direction;
-#endif  // __cplusplus
-
-enum accesskit_toggled
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_TOGGLED_FALSE,
-  ACCESSKIT_TOGGLED_TRUE,
-  ACCESSKIT_TOGGLED_MIXED,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_toggled;
-#endif  // __cplusplus
-
-enum accesskit_vertical_offset
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_VERTICAL_OFFSET_SUBSCRIPT,
-  ACCESSKIT_VERTICAL_OFFSET_SUPERSCRIPT,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_vertical_offset;
+typedef uint8_t accesskit_scroll_hint;
 #endif  // __cplusplus
 
 #if defined(__ANDROID__)
@@ -592,15 +630,31 @@ typedef struct accesskit_android_queued_events accesskit_android_queued_events;
 
 typedef struct accesskit_custom_action accesskit_custom_action;
 
-#if defined(__APPLE__)
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+typedef struct accesskit_ios_adapter accesskit_ios_adapter;
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+typedef struct accesskit_ios_queued_events accesskit_ios_queued_events;
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+typedef struct accesskit_ios_subclassing_adapter
+    accesskit_ios_subclassing_adapter;
+#endif
+
+#if defined(ACCESSKIT_MACOS)
 typedef struct accesskit_macos_adapter accesskit_macos_adapter;
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 typedef struct accesskit_macos_queued_events accesskit_macos_queued_events;
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 typedef struct accesskit_macos_subclassing_adapter
     accesskit_macos_subclassing_adapter;
 #endif
@@ -2561,7 +2615,167 @@ void accesskit_android_injecting_adapter_update_if_active(
     void *update_factory_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * Memory is also freed when calling this function.
+ */
+void accesskit_ios_queued_events_raise(
+    struct accesskit_ios_queued_events *events);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * This function must be called on the main thread.
+ * All handlers will always be called on the main thread.
+ *
+ * # Safety
+ *
+ * `view` must be a valid, unreleased pointer to a `UIView`.
+ */
+struct accesskit_ios_adapter *accesskit_ios_adapter_new(
+    void *view, accesskit_activation_handler_callback activation_handler,
+    void *activation_handler_userdata,
+    accesskit_action_handler_callback action_handler,
+    void *action_handler_userdata,
+    accesskit_deactivation_handler_callback deactivation_handler,
+    void *deactivation_handler_userdata);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+void accesskit_ios_adapter_free(struct accesskit_ios_adapter *adapter);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * You must call `accesskit_ios_queued_events_raise` on the returned pointer. It
+ * can be null if the adapter is not active.
+ */
+struct accesskit_ios_queued_events *accesskit_ios_adapter_update_if_active(
+    struct accesskit_ios_adapter *adapter,
+    accesskit_tree_update_factory update_factory,
+    void *update_factory_userdata);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * Call this when the host view has just appeared on screen. If an
+ * assistive technology is running, this proactively builds the
+ * accessibility tree.
+ *
+ * You must call `accesskit_ios_queued_events_raise` on the returned pointer. It
+ * can be null if the adapter is not active.
+ */
+struct accesskit_ios_queued_events *accesskit_ios_adapter_view_did_appear(
+    struct accesskit_ios_adapter *adapter);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * Returns whether the view itself is an accessibility element.
+ * This corresponds to `isAccessibilityElement`.
+ */
+bool accesskit_ios_adapter_is_accessibility_element(
+    struct accesskit_ios_adapter *adapter);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * Returns a pointer to an `NSArray` of accessibility elements
+ * contained in the view. Ownership of the pointer is not transferred.
+ * This corresponds to `accessibilityElements`.
+ */
+void *accesskit_ios_adapter_accessibility_elements(
+    struct accesskit_ios_adapter *adapter);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * Returns a pointer to the accessibility element at the specified point,
+ * or null if none. Ownership of the pointer is not transferred.
+ * This corresponds to `accessibilityHitTest:`.
+ */
+void *accesskit_ios_adapter_hit_test(struct accesskit_ios_adapter *adapter,
+                                     double x, double y);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_ios_adapter_debug(const struct accesskit_ios_adapter *adapter);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * All handlers will always be called on the main thread.
+ *
+ * # Safety
+ *
+ * `view` must be a valid, unreleased pointer to a `UIView`.
+ */
+struct accesskit_ios_subclassing_adapter *accesskit_ios_subclassing_adapter_new(
+    void *view, accesskit_activation_handler_callback activation_handler,
+    void *activation_handler_userdata,
+    accesskit_action_handler_callback action_handler,
+    void *action_handler_userdata,
+    accesskit_deactivation_handler_callback deactivation_handler,
+    void *deactivation_handler_userdata);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * All handlers will always be called on the main thread.
+ *
+ * # Safety
+ *
+ * `window` must be a valid, unreleased pointer to a `UIWindow`.
+ *
+ * # Panics
+ *
+ * This function panics if the specified window doesn't currently have
+ * a root view controller with a view.
+ */
+struct accesskit_ios_subclassing_adapter *
+accesskit_ios_subclassing_adapter_for_window(
+    void *window, accesskit_activation_handler_callback activation_handler,
+    void *activation_handler_userdata,
+    accesskit_action_handler_callback action_handler,
+    void *action_handler_userdata,
+    accesskit_deactivation_handler_callback deactivation_handler,
+    void *deactivation_handler_userdata);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+void accesskit_ios_subclassing_adapter_free(
+    struct accesskit_ios_subclassing_adapter *adapter);
+#endif
+
+#if (defined(ACCESSKIT_IOS) || defined(ACCESSKIT_TVOS) || \
+     defined(ACCESSKIT_VISIONOS) || defined(ACCESSKIT_WATCHOS))
+/**
+ * You must call `accesskit_ios_queued_events_raise` on the returned pointer. It
+ * can be null if the adapter is not active.
+ */
+struct accesskit_ios_queued_events *
+accesskit_ios_subclassing_adapter_update_if_active(
+    struct accesskit_ios_subclassing_adapter *adapter,
+    accesskit_tree_update_factory update_factory,
+    void *update_factory_userdata);
+#endif
+
+#if defined(ACCESSKIT_MACOS)
 /**
  * Memory is also freed when calling this function.
  */
@@ -2569,7 +2783,7 @@ void accesskit_macos_queued_events_raise(
     struct accesskit_macos_queued_events *events);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * # Safety
  *
@@ -2581,11 +2795,11 @@ struct accesskit_macos_adapter *accesskit_macos_adapter_new(
     void *action_handler_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 void accesskit_macos_adapter_free(struct accesskit_macos_adapter *adapter);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * You must call `accesskit_macos_queued_events_raise` on the returned pointer.
  * It can be null if the adapter is not active.
@@ -2596,7 +2810,7 @@ struct accesskit_macos_queued_events *accesskit_macos_adapter_update_if_active(
     void *update_factory_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * Update the tree state based on whether the window is focused.
  *
@@ -2608,7 +2822,7 @@ accesskit_macos_adapter_update_view_focus_state(
     struct accesskit_macos_adapter *adapter, bool is_focused);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * Returns a pointer to an `NSArray`. Ownership of the pointer is not
  * transferred.
@@ -2619,7 +2833,7 @@ void *accesskit_macos_adapter_view_children(
     void *activation_handler_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * Returns a pointer to an `NSObject`. Ownership of the pointer is not
  * transferred.
@@ -2630,7 +2844,7 @@ void *accesskit_macos_adapter_focus(
     void *activation_handler_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * Returns a pointer to an `NSObject`. Ownership of the pointer is not
  * transferred.
@@ -2641,7 +2855,7 @@ void *accesskit_macos_adapter_hit_test(
     void *activation_handler_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * Caller must call `accesskit_string_free` with the return value.
  */
@@ -2649,7 +2863,7 @@ char *accesskit_macos_adapter_debug(
     const struct accesskit_macos_adapter *adapter);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * # Safety
  *
@@ -2663,7 +2877,7 @@ accesskit_macos_subclassing_adapter_new(
     void *action_handler_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * # Safety
  *
@@ -2682,12 +2896,12 @@ accesskit_macos_subclassing_adapter_for_window(
     void *action_handler_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 void accesskit_macos_subclassing_adapter_free(
     struct accesskit_macos_subclassing_adapter *adapter);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * You must call `accesskit_macos_queued_events_raise` on the returned pointer.
  * It can be null if the adapter is not active.
@@ -2699,7 +2913,7 @@ accesskit_macos_subclassing_adapter_update_if_active(
     void *update_factory_userdata);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * Update the tree state based on whether the window is focused.
  *
@@ -2711,7 +2925,7 @@ accesskit_macos_subclassing_adapter_update_view_focus_state(
     struct accesskit_macos_subclassing_adapter *adapter, bool is_focused);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * Modifies the specified class, which must be a subclass of `NSWindow`,
  * to include an `accessibilityFocusedUIElement` method that calls
@@ -2732,7 +2946,7 @@ void accesskit_macos_add_focus_forwarder_to_window_class(
     const char *class_name);
 #endif
 
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
 /**
  * Modifies the specified class, which must be a subclass of `NSWindow`,
  * to include an `accessibilityFocusedUIElement` method that calls
