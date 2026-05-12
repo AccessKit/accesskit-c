@@ -59,6 +59,211 @@
 #endif /* __APPLE__ */
 
 /**
+ * An action to be taken on an accessibility node.
+ */
+enum accesskit_action
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  /**
+   * Do the equivalent of a single click or tap.
+   */
+  ACCESSKIT_ACTION_CLICK,
+  ACCESSKIT_ACTION_FOCUS,
+  ACCESSKIT_ACTION_BLUR,
+  ACCESSKIT_ACTION_COLLAPSE,
+  ACCESSKIT_ACTION_EXPAND,
+  /**
+   * Requires [`ActionRequest::data`] to be set to [`ActionData::CustomAction`].
+   */
+  ACCESSKIT_ACTION_CUSTOM_ACTION,
+  /**
+   * Decrement a numeric value by one step.
+   */
+  ACCESSKIT_ACTION_DECREMENT,
+  /**
+   * Increment a numeric value by one step.
+   */
+  ACCESSKIT_ACTION_INCREMENT,
+  ACCESSKIT_ACTION_HIDE_TOOLTIP,
+  ACCESSKIT_ACTION_SHOW_TOOLTIP,
+  /**
+   * Delete any selected text in the control's text value and
+   * insert the specified value in its place, like when typing or pasting.
+   * Requires [`ActionRequest::data`] to be set to [`ActionData::Value`].
+   */
+  ACCESSKIT_ACTION_REPLACE_SELECTED_TEXT,
+  /**
+   * Scroll down by the specified unit.
+   */
+  ACCESSKIT_ACTION_SCROLL_DOWN,
+  /**
+   * Scroll left by the specified unit.
+   */
+  ACCESSKIT_ACTION_SCROLL_LEFT,
+  /**
+   * Scroll right by the specified unit.
+   */
+  ACCESSKIT_ACTION_SCROLL_RIGHT,
+  /**
+   * Scroll up by the specified unit.
+   */
+  ACCESSKIT_ACTION_SCROLL_UP,
+  /**
+   * Scroll any scrollable containers to make the target node visible.
+   * Optionally set [`ActionRequest::data`] to [`ActionData::ScrollHint`].
+   */
+  ACCESSKIT_ACTION_SCROLL_INTO_VIEW,
+  /**
+   * Scroll the given object to a specified point in the tree's container
+   * (e.g. window). Requires [`ActionRequest::data`] to be set to
+   * [`ActionData::ScrollToPoint`].
+   */
+  ACCESSKIT_ACTION_SCROLL_TO_POINT,
+  /**
+   * Requires [`ActionRequest::data`] to be set to
+   * [`ActionData::SetScrollOffset`].
+   */
+  ACCESSKIT_ACTION_SET_SCROLL_OFFSET,
+  /**
+   * Requires [`ActionRequest::data`] to be set to
+   * [`ActionData::SetTextSelection`].
+   */
+  ACCESSKIT_ACTION_SET_TEXT_SELECTION,
+  /**
+   * Don't focus this node, but set it as the sequential focus navigation
+   * starting point, so that pressing Tab moves to the next element
+   * following this one, for example.
+   */
+  ACCESSKIT_ACTION_SET_SEQUENTIAL_FOCUS_NAVIGATION_STARTING_POINT,
+  /**
+   * Replace the value of the control with the specified value and
+   * reset the selection, if applicable. Requires [`ActionRequest::data`]
+   * to be set to [`ActionData::Value`] or [`ActionData::NumericValue`].
+   */
+  ACCESSKIT_ACTION_SET_VALUE,
+  ACCESSKIT_ACTION_SHOW_CONTEXT_MENU,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_action;
+#endif  // __cplusplus
+
+enum accesskit_aria_current
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_ARIA_CURRENT_FALSE,
+  ACCESSKIT_ARIA_CURRENT_TRUE,
+  ACCESSKIT_ARIA_CURRENT_PAGE,
+  ACCESSKIT_ARIA_CURRENT_STEP,
+  ACCESSKIT_ARIA_CURRENT_LOCATION,
+  ACCESSKIT_ARIA_CURRENT_DATE,
+  ACCESSKIT_ARIA_CURRENT_TIME,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_aria_current;
+#endif  // __cplusplus
+
+enum accesskit_auto_complete
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_AUTO_COMPLETE_INLINE,
+  ACCESSKIT_AUTO_COMPLETE_LIST,
+  ACCESSKIT_AUTO_COMPLETE_BOTH,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_auto_complete;
+#endif  // __cplusplus
+
+enum accesskit_has_popup
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_HAS_POPUP_MENU,
+  ACCESSKIT_HAS_POPUP_LISTBOX,
+  ACCESSKIT_HAS_POPUP_TREE,
+  ACCESSKIT_HAS_POPUP_GRID,
+  ACCESSKIT_HAS_POPUP_DIALOG,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_has_popup;
+#endif  // __cplusplus
+
+/**
+ * Indicates if a form control has invalid input or if a web DOM element has an
+ * [`aria-invalid`] attribute.
+ *
+ * [`aria-invalid`]: https://www.w3.org/TR/wai-aria-1.1/#aria-invalid
+ */
+enum accesskit_invalid
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_INVALID_TRUE,
+  ACCESSKIT_INVALID_GRAMMAR,
+  ACCESSKIT_INVALID_SPELLING,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_invalid;
+#endif  // __cplusplus
+
+enum accesskit_list_style
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_LIST_STYLE_CIRCLE,
+  ACCESSKIT_LIST_STYLE_DISC,
+  ACCESSKIT_LIST_STYLE_IMAGE,
+  ACCESSKIT_LIST_STYLE_NUMERIC,
+  ACCESSKIT_LIST_STYLE_SQUARE,
+  /**
+   * Language specific ordering (alpha, roman, cjk-ideographic, etc...)
+   */
+  ACCESSKIT_LIST_STYLE_OTHER,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_list_style;
+#endif  // __cplusplus
+
+enum accesskit_live
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_LIVE_OFF,
+  ACCESSKIT_LIVE_POLITE,
+  ACCESSKIT_LIVE_ASSERTIVE,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_live;
+#endif  // __cplusplus
+
+enum accesskit_orientation
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  /**
+   * E.g. most toolbars and separators.
+   */
+  ACCESSKIT_ORIENTATION_HORIZONTAL,
+  /**
+   * E.g. menu or combo box.
+   */
+  ACCESSKIT_ORIENTATION_VERTICAL,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_orientation;
+#endif  // __cplusplus
+
+/**
  * The type of an accessibility node.
  *
  * The majority of these roles come from the ARIA specification. Reference
@@ -281,289 +486,23 @@ typedef uint8_t accesskit_role;
 #endif  // __cplusplus
 
 /**
- * An action to be taken on an accessibility node.
+ * A suggestion about where the node being scrolled into view should be
+ * positioned relative to the edges of the scrollable container.
  */
-enum accesskit_action
+enum accesskit_scroll_hint
 #ifdef __cplusplus
     : uint8_t
 #endif  // __cplusplus
 {
-  /**
-   * Do the equivalent of a single click or tap.
-   */
-  ACCESSKIT_ACTION_CLICK,
-  ACCESSKIT_ACTION_FOCUS,
-  ACCESSKIT_ACTION_BLUR,
-  ACCESSKIT_ACTION_COLLAPSE,
-  ACCESSKIT_ACTION_EXPAND,
-  /**
-   * Requires [`ActionRequest::data`] to be set to [`ActionData::CustomAction`].
-   */
-  ACCESSKIT_ACTION_CUSTOM_ACTION,
-  /**
-   * Decrement a numeric value by one step.
-   */
-  ACCESSKIT_ACTION_DECREMENT,
-  /**
-   * Increment a numeric value by one step.
-   */
-  ACCESSKIT_ACTION_INCREMENT,
-  ACCESSKIT_ACTION_HIDE_TOOLTIP,
-  ACCESSKIT_ACTION_SHOW_TOOLTIP,
-  /**
-   * Delete any selected text in the control's text value and
-   * insert the specified value in its place, like when typing or pasting.
-   * Requires [`ActionRequest::data`] to be set to [`ActionData::Value`].
-   */
-  ACCESSKIT_ACTION_REPLACE_SELECTED_TEXT,
-  /**
-   * Scroll down by the specified unit.
-   */
-  ACCESSKIT_ACTION_SCROLL_DOWN,
-  /**
-   * Scroll left by the specified unit.
-   */
-  ACCESSKIT_ACTION_SCROLL_LEFT,
-  /**
-   * Scroll right by the specified unit.
-   */
-  ACCESSKIT_ACTION_SCROLL_RIGHT,
-  /**
-   * Scroll up by the specified unit.
-   */
-  ACCESSKIT_ACTION_SCROLL_UP,
-  /**
-   * Scroll any scrollable containers to make the target node visible.
-   * Optionally set [`ActionRequest::data`] to [`ActionData::ScrollHint`].
-   */
-  ACCESSKIT_ACTION_SCROLL_INTO_VIEW,
-  /**
-   * Scroll the given object to a specified point in the tree's container
-   * (e.g. window). Requires [`ActionRequest::data`] to be set to
-   * [`ActionData::ScrollToPoint`].
-   */
-  ACCESSKIT_ACTION_SCROLL_TO_POINT,
-  /**
-   * Requires [`ActionRequest::data`] to be set to
-   * [`ActionData::SetScrollOffset`].
-   */
-  ACCESSKIT_ACTION_SET_SCROLL_OFFSET,
-  /**
-   * Requires [`ActionRequest::data`] to be set to
-   * [`ActionData::SetTextSelection`].
-   */
-  ACCESSKIT_ACTION_SET_TEXT_SELECTION,
-  /**
-   * Don't focus this node, but set it as the sequential focus navigation
-   * starting point, so that pressing Tab moves to the next element
-   * following this one, for example.
-   */
-  ACCESSKIT_ACTION_SET_SEQUENTIAL_FOCUS_NAVIGATION_STARTING_POINT,
-  /**
-   * Replace the value of the control with the specified value and
-   * reset the selection, if applicable. Requires [`ActionRequest::data`]
-   * to be set to [`ActionData::Value`] or [`ActionData::NumericValue`].
-   */
-  ACCESSKIT_ACTION_SET_VALUE,
-  ACCESSKIT_ACTION_SHOW_CONTEXT_MENU,
+  ACCESSKIT_SCROLL_HINT_TOP_LEFT,
+  ACCESSKIT_SCROLL_HINT_BOTTOM_RIGHT,
+  ACCESSKIT_SCROLL_HINT_TOP_EDGE,
+  ACCESSKIT_SCROLL_HINT_BOTTOM_EDGE,
+  ACCESSKIT_SCROLL_HINT_LEFT_EDGE,
+  ACCESSKIT_SCROLL_HINT_RIGHT_EDGE,
 };
 #ifndef __cplusplus
-typedef uint8_t accesskit_action;
-#endif  // __cplusplus
-
-enum accesskit_text_decoration_style
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_TEXT_DECORATION_STYLE_SOLID,
-  ACCESSKIT_TEXT_DECORATION_STYLE_DOTTED,
-  ACCESSKIT_TEXT_DECORATION_STYLE_DASHED,
-  ACCESSKIT_TEXT_DECORATION_STYLE_DOUBLE,
-  ACCESSKIT_TEXT_DECORATION_STYLE_WAVY,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_text_decoration_style;
-#endif  // __cplusplus
-
-/**
- * Indicates if a form control has invalid input or if a web DOM element has an
- * [`aria-invalid`] attribute.
- *
- * [`aria-invalid`]: https://www.w3.org/TR/wai-aria-1.1/#aria-invalid
- */
-enum accesskit_invalid
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_INVALID_TRUE,
-  ACCESSKIT_INVALID_GRAMMAR,
-  ACCESSKIT_INVALID_SPELLING,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_invalid;
-#endif  // __cplusplus
-
-enum accesskit_toggled
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_TOGGLED_FALSE,
-  ACCESSKIT_TOGGLED_TRUE,
-  ACCESSKIT_TOGGLED_MIXED,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_toggled;
-#endif  // __cplusplus
-
-enum accesskit_live
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_LIVE_OFF,
-  ACCESSKIT_LIVE_POLITE,
-  ACCESSKIT_LIVE_ASSERTIVE,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_live;
-#endif  // __cplusplus
-
-enum accesskit_text_direction
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_TEXT_DIRECTION_LEFT_TO_RIGHT,
-  ACCESSKIT_TEXT_DIRECTION_RIGHT_TO_LEFT,
-  ACCESSKIT_TEXT_DIRECTION_TOP_TO_BOTTOM,
-  ACCESSKIT_TEXT_DIRECTION_BOTTOM_TO_TOP,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_text_direction;
-#endif  // __cplusplus
-
-enum accesskit_orientation
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  /**
-   * E.g. most toolbars and separators.
-   */
-  ACCESSKIT_ORIENTATION_HORIZONTAL,
-  /**
-   * E.g. menu or combo box.
-   */
-  ACCESSKIT_ORIENTATION_VERTICAL,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_orientation;
-#endif  // __cplusplus
-
-enum accesskit_sort_direction
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_SORT_DIRECTION_ASCENDING,
-  ACCESSKIT_SORT_DIRECTION_DESCENDING,
-  ACCESSKIT_SORT_DIRECTION_OTHER,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_sort_direction;
-#endif  // __cplusplus
-
-enum accesskit_aria_current
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_ARIA_CURRENT_FALSE,
-  ACCESSKIT_ARIA_CURRENT_TRUE,
-  ACCESSKIT_ARIA_CURRENT_PAGE,
-  ACCESSKIT_ARIA_CURRENT_STEP,
-  ACCESSKIT_ARIA_CURRENT_LOCATION,
-  ACCESSKIT_ARIA_CURRENT_DATE,
-  ACCESSKIT_ARIA_CURRENT_TIME,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_aria_current;
-#endif  // __cplusplus
-
-enum accesskit_auto_complete
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_AUTO_COMPLETE_INLINE,
-  ACCESSKIT_AUTO_COMPLETE_LIST,
-  ACCESSKIT_AUTO_COMPLETE_BOTH,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_auto_complete;
-#endif  // __cplusplus
-
-enum accesskit_has_popup
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_HAS_POPUP_MENU,
-  ACCESSKIT_HAS_POPUP_LISTBOX,
-  ACCESSKIT_HAS_POPUP_TREE,
-  ACCESSKIT_HAS_POPUP_GRID,
-  ACCESSKIT_HAS_POPUP_DIALOG,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_has_popup;
-#endif  // __cplusplus
-
-enum accesskit_list_style
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_LIST_STYLE_CIRCLE,
-  ACCESSKIT_LIST_STYLE_DISC,
-  ACCESSKIT_LIST_STYLE_IMAGE,
-  ACCESSKIT_LIST_STYLE_NUMERIC,
-  ACCESSKIT_LIST_STYLE_SQUARE,
-  /**
-   * Language specific ordering (alpha, roman, cjk-ideographic, etc...)
-   */
-  ACCESSKIT_LIST_STYLE_OTHER,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_list_style;
-#endif  // __cplusplus
-
-enum accesskit_text_align
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_TEXT_ALIGN_LEFT,
-  ACCESSKIT_TEXT_ALIGN_RIGHT,
-  ACCESSKIT_TEXT_ALIGN_CENTER,
-  ACCESSKIT_TEXT_ALIGN_JUSTIFY,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_text_align;
-#endif  // __cplusplus
-
-enum accesskit_vertical_offset
-#ifdef __cplusplus
-    : uint8_t
-#endif  // __cplusplus
-{
-  ACCESSKIT_VERTICAL_OFFSET_SUBSCRIPT,
-  ACCESSKIT_VERTICAL_OFFSET_SUPERSCRIPT,
-};
-#ifndef __cplusplus
-typedef uint8_t accesskit_vertical_offset;
+typedef uint8_t accesskit_scroll_hint;
 #endif  // __cplusplus
 
 /**
@@ -590,24 +529,85 @@ enum accesskit_scroll_unit
 typedef uint8_t accesskit_scroll_unit;
 #endif  // __cplusplus
 
-/**
- * A suggestion about where the node being scrolled into view should be
- * positioned relative to the edges of the scrollable container.
- */
-enum accesskit_scroll_hint
+enum accesskit_sort_direction
 #ifdef __cplusplus
     : uint8_t
 #endif  // __cplusplus
 {
-  ACCESSKIT_SCROLL_HINT_TOP_LEFT,
-  ACCESSKIT_SCROLL_HINT_BOTTOM_RIGHT,
-  ACCESSKIT_SCROLL_HINT_TOP_EDGE,
-  ACCESSKIT_SCROLL_HINT_BOTTOM_EDGE,
-  ACCESSKIT_SCROLL_HINT_LEFT_EDGE,
-  ACCESSKIT_SCROLL_HINT_RIGHT_EDGE,
+  ACCESSKIT_SORT_DIRECTION_ASCENDING,
+  ACCESSKIT_SORT_DIRECTION_DESCENDING,
+  ACCESSKIT_SORT_DIRECTION_OTHER,
 };
 #ifndef __cplusplus
-typedef uint8_t accesskit_scroll_hint;
+typedef uint8_t accesskit_sort_direction;
+#endif  // __cplusplus
+
+enum accesskit_text_align
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_TEXT_ALIGN_LEFT,
+  ACCESSKIT_TEXT_ALIGN_RIGHT,
+  ACCESSKIT_TEXT_ALIGN_CENTER,
+  ACCESSKIT_TEXT_ALIGN_JUSTIFY,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_text_align;
+#endif  // __cplusplus
+
+enum accesskit_text_decoration_style
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_TEXT_DECORATION_STYLE_SOLID,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DOTTED,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DASHED,
+  ACCESSKIT_TEXT_DECORATION_STYLE_DOUBLE,
+  ACCESSKIT_TEXT_DECORATION_STYLE_WAVY,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_text_decoration_style;
+#endif  // __cplusplus
+
+enum accesskit_text_direction
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_TEXT_DIRECTION_LEFT_TO_RIGHT,
+  ACCESSKIT_TEXT_DIRECTION_RIGHT_TO_LEFT,
+  ACCESSKIT_TEXT_DIRECTION_TOP_TO_BOTTOM,
+  ACCESSKIT_TEXT_DIRECTION_BOTTOM_TO_TOP,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_text_direction;
+#endif  // __cplusplus
+
+enum accesskit_toggled
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_TOGGLED_FALSE,
+  ACCESSKIT_TOGGLED_TRUE,
+  ACCESSKIT_TOGGLED_MIXED,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_toggled;
+#endif  // __cplusplus
+
+enum accesskit_vertical_offset
+#ifdef __cplusplus
+    : uint8_t
+#endif  // __cplusplus
+{
+  ACCESSKIT_VERTICAL_OFFSET_SUBSCRIPT,
+  ACCESSKIT_VERTICAL_OFFSET_SUPERSCRIPT,
+};
+#ifndef __cplusplus
+typedef uint8_t accesskit_vertical_offset;
 #endif  // __cplusplus
 
 #if defined(__ANDROID__)

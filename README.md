@@ -84,7 +84,7 @@ meson compile -C build
 If you modify the C bindings, you need to regenerate the header file and commit it. To do this, in addition to the above requirements, you will need:
 
 - A specific nightly Rust toolchain: `rustup install nightly-2025-03-27`
-- [cbindgen](https://github.com/mozilla/cbindgen): `cargo install cbindgen`
+- [cbindgen](https://github.com/mozilla/cbindgen): `cargo install cbindgen --version 0.28.0`
 - [clang-format](https://releases.llvm.org/14.0.0/tools/clang/docs/ClangFormat.html), version 14 or higher
 
 Once you have these requirements, the process of regenerating the header file is similar to building and installing from source with CMake, but using different configuration options:
