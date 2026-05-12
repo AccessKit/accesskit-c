@@ -201,6 +201,8 @@ unsafe fn string_from_c_slice(value: *const c_char, length: usize) -> String {
     if length == 0 {
         String::new()
     } else {
-        String::from_utf8_lossy(slice::from_raw_parts(value as *const u8, length)).into_owned()
+        #[allow(clippy::unnecessary_cast)]
+        let bytes = slice::from_raw_parts(value as *const u8, length);
+        String::from_utf8_lossy(bytes).into_owned()
     }
 }
