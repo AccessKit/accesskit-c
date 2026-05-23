@@ -19,6 +19,18 @@ jobs:
             target: x86_64-apple-darwin
             cmake-options: -DCMAKE_OSX_ARCHITECTURES=x86_64
             path: macos/x86_64
+          - os: macOS-latest
+            target: aarch64-apple-ios
+            cmake-options: -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_SYSROOT=iphoneos
+            path: ios/arm64
+          - os: macOS-latest
+            target: aarch64-apple-ios-sim
+            cmake-options: -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_SYSROOT=iphonesimulator
+            path: ios-simulator/arm64
+          - os: macOS-latest
+            target: x86_64-apple-ios
+            cmake-options: -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_SYSROOT=iphonesimulator
+            path: ios-simulator/x86_64
           - os: windows-2025
             target: aarch64-pc-windows-msvc
             setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsamd64_x86.bat" `& powershell'

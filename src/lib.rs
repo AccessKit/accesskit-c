@@ -18,6 +18,14 @@ mod geometry;
 
 #[cfg(any(target_os = "android", feature = "cbindgen"))]
 mod android;
+#[cfg(any(
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "visionos",
+    target_os = "watchos",
+    feature = "cbindgen"
+))]
+mod ios;
 #[cfg(any(target_os = "macos", feature = "cbindgen"))]
 mod macos;
 #[cfg(any(
@@ -42,6 +50,14 @@ use std::{
 pub use android::*;
 pub use common::*;
 pub use geometry::*;
+#[cfg(any(
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "visionos",
+    target_os = "watchos",
+    feature = "cbindgen"
+))]
+pub use ios::*;
 #[cfg(any(target_os = "macos", feature = "cbindgen"))]
 pub use macos::*;
 #[cfg(any(
