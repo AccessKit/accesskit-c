@@ -76,6 +76,19 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.22.0](https://github.com/AccessKit/accesskit-c/compare/0.21.2...0.22.0) (2026-05-23)
+
+
+### Features
+
+* Add iOS adapters ([#94](https://github.com/AccessKit/accesskit-c/issues/94)) ([854f123](https://github.com/AccessKit/accesskit-c/commit/854f123477cdd7e378c4f055cbc1d3bf6d87296d))
+
+
+### Bug Fixes
+
+* bump the rust-crates group with 4 updates ([#92](https://github.com/AccessKit/accesskit-c/issues/92)) ([f81c006](https://github.com/AccessKit/accesskit-c/commit/f81c00651e99207d0b5a500ccbe783a2706a4e13))
+* Ignore a clippy warning on Android ([#95](https://github.com/AccessKit/accesskit-c/issues/95)) ([5d4a5c9](https://github.com/AccessKit/accesskit-c/commit/5d4a5c94549f46bb1852058ad9390d66b4cbd795))
+
 ## [0.21.2](https://github.com/AccessKit/accesskit-c/compare/0.21.1...0.21.2) (2026-03-11)
 
 
