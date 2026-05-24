@@ -76,6 +76,13 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.22.1](https://github.com/AccessKit/accesskit-c/compare/0.22.0...0.22.1) (2026-05-24)
+
+
+### Bug Fixes
+
+* Fix Windows binary publishing jobs ([#98](https://github.com/AccessKit/accesskit-c/issues/98)) ([27960b1](https://github.com/AccessKit/accesskit-c/commit/27960b19f9dcdad2c6d706fb09adad77ee3fd116))
+
 ## [0.22.0](https://github.com/AccessKit/accesskit-c/compare/0.21.2...0.22.0) (2026-05-23)
 
 
