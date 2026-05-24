@@ -59,7 +59,7 @@ if (ACCESSKIT_BUILD_LIBRARIES)
 
     install(FILES
         "$<TARGET_PROPERTY:accesskit-shared,IMPORTED_LOCATION>"
-        "$<$<STREQUAL:${_accesskit_toolchain},msvc>:${CMAKE_CURRENT_BINARY_DIR}/accesskit.pdb>"
+        "$<$<STREQUAL:${_accesskit_toolchain},msvc>:$<TARGET_FILE_DIR:accesskit-shared>/accesskit.pdb>"
         DESTINATION "${ACCESSKIT_LIBRARIES_DIR}/shared"
     )
     install(FILES
