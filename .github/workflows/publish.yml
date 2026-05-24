@@ -34,16 +34,17 @@ jobs:
           - os: windows-2025
             target: aarch64-pc-windows-msvc
             setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsamd64_x86.bat" `& powershell'
-            cmake-options: -A ARM64
+            cmake-options: -A ARM64 -DCMAKE_CONFIGURATION_TYPES=Release
             path: windows/arm64/msvc
           - os: windows-2025
             target: i686-pc-windows-msvc
             setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat" `& powershell'
-            cmake-options: -A Win32
+            cmake-options: -A Win32 -DCMAKE_CONFIGURATION_TYPES=Release
             path: windows/x86/msvc
           - os: windows-2025
             target: x86_64-pc-windows-msvc
             setup-step: 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" `& powershell'
+            cmake-options: -DCMAKE_CONFIGURATION_TYPES=Release
             path: windows/x86_64/msvc
           - os: ubuntu-latest
             target: i686-pc-windows-gnu
