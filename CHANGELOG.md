@@ -76,6 +76,13 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.22.1](https://github.com/AccessKit/accesskit-c/compare/0.22.0...0.22.1) (2026-05-24)
+
+
+### Bug Fixes
+
+* Constrain MSVC release builds to a single Release configuration ([#96](https://github.com/AccessKit/accesskit-c/issues/96)) ([5e4c9a2](https://github.com/AccessKit/accesskit-c/commit/5e4c9a291aa533bf66c240e7455195ce74d71c2c))
+
 ## [0.22.0](https://github.com/AccessKit/accesskit-c/compare/0.21.2...0.22.0) (2026-05-23)
 
 
