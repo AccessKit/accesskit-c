@@ -76,6 +76,14 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.22.3](https://github.com/AccessKit/accesskit-c/compare/0.22.2...0.22.3) (2026-07-14)
+
+
+### Bug Fixes
+
+* bump the rust-crates group with 5 updates ([#106](https://github.com/AccessKit/accesskit-c/issues/106)) ([eb20b92](https://github.com/AccessKit/accesskit-c/commit/eb20b92592490f09026c8310bee90c6257d3df02))
+* Ignore vulnerabilities on build dependency quick-xml ([#104](https://github.com/AccessKit/accesskit-c/issues/104)) ([1b777c0](https://github.com/AccessKit/accesskit-c/commit/1b777c05d745a4d85770ae4bc645038897750279))
+
 ## [0.22.2](https://github.com/AccessKit/accesskit-c/compare/0.22.1...0.22.2) (2026-06-15)
 
 
