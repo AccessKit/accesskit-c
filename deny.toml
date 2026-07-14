@@ -17,7 +17,10 @@ all-features = true
 [advisories]
 db-path = "~/.cargo/advisory-db"
 db-urls = ["https://github.com/rustsec/advisory-db"]
-ignore = []
+ignore = [
+    { id = "RUSTSEC-2026-0194", reason = "quick-xml DoS on untrusted XML; only used at build time by zbus-lockstep on trusted protocol files, and zbus-lockstep requires quick-xml 0.36.2; doesn't execute on end-users system" },
+    { id = "RUSTSEC-2026-0195", reason = "same quick-xml build-time usage as RUSTSEC-2026-0194; doesn't execute on end-users system" },
+]
 
 [licenses]
 allow = [
