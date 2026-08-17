@@ -45,7 +45,9 @@ wildcards = "deny"
 highlight = "all"
 allow = []
 deny = []
-skip = []
+skip = [
+    "winnow:<1.0.4",
+]
 skip-tree = []
 
 [sources]
