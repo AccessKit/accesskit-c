@@ -701,7 +701,7 @@ impl custom_action {
     pub extern "C" fn accesskit_custom_action_new(id: i32) -> *mut custom_action {
         let action = CustomAction {
             id,
-            description: String::new().into(),
+            description: String::new(),
         };
         BoxCastPtr::to_mut_ptr(action)
     }
@@ -752,7 +752,7 @@ impl custom_action {
         length: usize,
     ) {
         let action = mut_from_ptr(action);
-        action.description = unsafe { string_from_c_slice(description, length) }.into();
+        action.description = unsafe { string_from_c_slice(description, length) };
     }
 }
 
