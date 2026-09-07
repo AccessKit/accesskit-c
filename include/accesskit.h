@@ -1609,6 +1609,24 @@ void accesskit_node_clear_font_family(struct accesskit_node *node);
 /**
  * Caller must call `accesskit_string_free` with the return value.
  */
+char *accesskit_node_html_id(const struct accesskit_node *node);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_html_id(struct accesskit_node *node, const char *value);
+
+/**
+ * Caller is responsible for freeing the memory pointed by `value`.
+ */
+void accesskit_node_set_html_id_with_length(struct accesskit_node *node,
+                                            const char *value, size_t length);
+
+void accesskit_node_clear_html_id(struct accesskit_node *node);
+
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
 char *accesskit_node_html_tag(const struct accesskit_node *node);
 
 /**

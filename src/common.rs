@@ -521,6 +521,7 @@ string_property_methods! {
     (accesskit_node_author_id, author_id, accesskit_node_set_author_id, accesskit_node_set_author_id_with_length, set_author_id, accesskit_node_clear_author_id, clear_author_id),
     (accesskit_node_class_name, class_name, accesskit_node_set_class_name, accesskit_node_set_class_name_with_length, set_class_name, accesskit_node_clear_class_name, clear_class_name),
     (accesskit_node_font_family, font_family, accesskit_node_set_font_family, accesskit_node_set_font_family_with_length, set_font_family, accesskit_node_clear_font_family, clear_font_family),
+    (accesskit_node_html_id, html_id, accesskit_node_set_html_id, accesskit_node_set_html_id_with_length, set_html_id, accesskit_node_clear_html_id, clear_html_id),
     (accesskit_node_html_tag, html_tag, accesskit_node_set_html_tag, accesskit_node_set_html_tag_with_length, set_html_tag, accesskit_node_clear_html_tag, clear_html_tag),
     (accesskit_node_inner_html, inner_html, accesskit_node_set_inner_html, accesskit_node_set_inner_html_with_length, set_inner_html, accesskit_node_clear_inner_html, clear_inner_html),
     (accesskit_node_keyboard_shortcut, keyboard_shortcut, accesskit_node_set_keyboard_shortcut, accesskit_node_set_keyboard_shortcut_with_length, set_keyboard_shortcut, accesskit_node_clear_keyboard_shortcut, clear_keyboard_shortcut),
