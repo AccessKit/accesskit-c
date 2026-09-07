@@ -521,6 +521,7 @@ string_property_methods! {
     (accesskit_node_author_id, author_id, accesskit_node_set_author_id, accesskit_node_set_author_id_with_length, set_author_id, accesskit_node_clear_author_id, clear_author_id),
     (accesskit_node_class_name, class_name, accesskit_node_set_class_name, accesskit_node_set_class_name_with_length, set_class_name, accesskit_node_clear_class_name, clear_class_name),
     (accesskit_node_font_family, font_family, accesskit_node_set_font_family, accesskit_node_set_font_family_with_length, set_font_family, accesskit_node_clear_font_family, clear_font_family),
+    (accesskit_node_html_id, html_id, accesskit_node_set_html_id, accesskit_node_set_html_id_with_length, set_html_id, accesskit_node_clear_html_id, clear_html_id),
     (accesskit_node_html_tag, html_tag, accesskit_node_set_html_tag, accesskit_node_set_html_tag_with_length, set_html_tag, accesskit_node_clear_html_tag, clear_html_tag),
     (accesskit_node_inner_html, inner_html, accesskit_node_set_inner_html, accesskit_node_set_inner_html_with_length, set_inner_html, accesskit_node_clear_inner_html, clear_inner_html),
     (accesskit_node_keyboard_shortcut, keyboard_shortcut, accesskit_node_set_keyboard_shortcut, accesskit_node_set_keyboard_shortcut_with_length, set_keyboard_shortcut, accesskit_node_clear_keyboard_shortcut, clear_keyboard_shortcut),
@@ -700,7 +701,7 @@ impl custom_action {
     pub extern "C" fn accesskit_custom_action_new(id: i32) -> *mut custom_action {
         let action = CustomAction {
             id,
-            description: String::new().into(),
+            description: String::new(),
         };
         BoxCastPtr::to_mut_ptr(action)
     }
@@ -751,7 +752,7 @@ impl custom_action {
         length: usize,
     ) {
         let action = mut_from_ptr(action);
-        action.description = unsafe { string_from_c_slice(description, length) }.into();
+        action.description = unsafe { string_from_c_slice(description, length) };
     }
 }
 
@@ -859,31 +860,31 @@ impl node {
     }
 }
 
-pub struct tree {
+pub struct tree_info {
     _private: [u8; 0],
 }
 
-impl CastPtr for tree {
-    type RustType = Tree;
+impl CastPtr for tree_info {
+    type RustType = TreeInfo;
 }
 
-impl BoxCastPtr for tree {}
+impl BoxCastPtr for tree_info {}
 
-impl tree {
+impl tree_info {
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_new(root: node_id) -> *mut tree {
-        let tree = Tree::new(root.into());
+    pub extern "C" fn accesskit_tree_info_new(root: node_id) -> *mut tree_info {
+        let tree = TreeInfo::new(root.into());
         BoxCastPtr::to_mut_ptr(tree)
     }
 
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_free(tree: *mut tree) {
+    pub extern "C" fn accesskit_tree_info_free(tree: *mut tree_info) {
         drop(box_from_ptr(tree));
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_get_toolkit_name(tree: *const tree) -> *mut c_char {
+    pub extern "C" fn accesskit_tree_info_get_toolkit_name(tree: *const tree_info) -> *mut c_char {
         let tree = ref_from_ptr(tree);
         match tree.toolkit_name.as_ref() {
             Some(value) => CString::new(value.clone()).unwrap().into_raw(),
@@ -893,8 +894,8 @@ impl tree {
 
     /// Caller is responsible for freeing the memory pointed by `toolkit_name`
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_set_toolkit_name(
-        tree: *mut tree,
+    pub extern "C" fn accesskit_tree_info_set_toolkit_name(
+        tree: *mut tree_info,
         toolkit_name: *const c_char,
     ) {
         let tree = mut_from_ptr(tree);
@@ -905,8 +906,8 @@ impl tree {
 
     /// Caller is responsible for freeing the memory pointed by `toolkit_name`
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_set_toolkit_name_with_length(
-        tree: *mut tree,
+    pub extern "C" fn accesskit_tree_info_set_toolkit_name_with_length(
+        tree: *mut tree_info,
         toolkit_name: *const c_char,
         length: usize,
     ) {
@@ -915,14 +916,16 @@ impl tree {
     }
 
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_clear_toolkit_name(tree: *mut tree) {
+    pub extern "C" fn accesskit_tree_info_clear_toolkit_name(tree: *mut tree_info) {
         let tree = mut_from_ptr(tree);
         tree.toolkit_name = None;
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_get_toolkit_version(tree: *const tree) -> *mut c_char {
+    pub extern "C" fn accesskit_tree_info_get_toolkit_version(
+        tree: *const tree_info,
+    ) -> *mut c_char {
         let tree = ref_from_ptr(tree);
         match tree.toolkit_version.as_ref() {
             Some(value) => CString::new(value.clone()).unwrap().into_raw(),
@@ -932,8 +935,8 @@ impl tree {
 
     /// Caller is responsible for freeing the memory pointed by `toolkit_version`
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_set_toolkit_version(
-        tree: *mut tree,
+    pub extern "C" fn accesskit_tree_info_set_toolkit_version(
+        tree: *mut tree_info,
         toolkit_version: *const c_char,
     ) {
         let tree = mut_from_ptr(tree);
@@ -944,8 +947,8 @@ impl tree {
 
     /// Caller is responsible for freeing the memory pointed by `toolkit_version`
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_set_toolkit_version_with_length(
-        tree: *mut tree,
+    pub extern "C" fn accesskit_tree_info_set_toolkit_version_with_length(
+        tree: *mut tree_info,
         toolkit_version: *const c_char,
         length: usize,
     ) {
@@ -954,14 +957,14 @@ impl tree {
     }
 
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_clear_toolkit_version(tree: *mut tree) {
+    pub extern "C" fn accesskit_tree_info_clear_toolkit_version(tree: *mut tree_info) {
         let tree = mut_from_ptr(tree);
         tree.toolkit_version = None;
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_debug(tree: *const tree) -> *mut c_char {
+    pub extern "C" fn accesskit_tree_info_debug(tree: *const tree_info) -> *mut c_char {
         debug_repr_from_ptr(tree)
     }
 }
@@ -1021,13 +1024,16 @@ impl tree_update {
     }
 
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_update_set_tree(update: *mut tree_update, tree: *mut tree) {
+    pub extern "C" fn accesskit_tree_update_set_tree_info(
+        update: *mut tree_update,
+        tree: *mut tree_info,
+    ) {
         let update = mut_from_ptr(update);
         update.tree = Some(*box_from_ptr(tree));
     }
 
     #[no_mangle]
-    pub extern "C" fn accesskit_tree_update_clear_tree(update: *mut tree_update) {
+    pub extern "C" fn accesskit_tree_update_clear_tree_info(update: *mut tree_update) {
         let update = mut_from_ptr(update);
         update.tree = None;
     }

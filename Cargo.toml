@@ -17,22 +17,22 @@ cbindgen = []
 android-embedded-dex = ["accesskit_android/embedded-dex"]
 
 [dependencies]
-accesskit = "0.24.0"
+accesskit = "0.25.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-accesskit_windows = "0.34.0"
+accesskit_windows = "0.35.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-accesskit_macos = "0.26.1"
+accesskit_macos = "0.27.0"
 
 [target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
-accesskit_unix = "0.22.0"
+accesskit_unix = "0.23.0"
 
 [target.'cfg(target_os = "android")'.dependencies]
-accesskit_android = "0.7.3"
+accesskit_android = "0.8.0"
 
 [target.'cfg(any(target_os = "ios", target_os = "tvos", target_os = "visionos", target_os = "watchos"))'.dependencies]
-accesskit_ios = "0.1.0"
+accesskit_ios = "0.2.0"
 
 [profile.release]
 lto = true
