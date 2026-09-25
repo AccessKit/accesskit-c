@@ -7,10 +7,10 @@ use accesskit_ios::{Adapter, CGPoint, QueuedEvents, SubclassingAdapter};
 use std::ffi::{c_char, c_void};
 
 use crate::{
+    ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr,
+    DeactivationHandlerCallback, FfiActionHandler, FfiActivationHandler, FfiDeactivationHandler,
     box_from_ptr, debug_repr_from_ptr, mut_from_ptr, tree_update_factory,
-    tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
-    CastPtr, DeactivationHandlerCallback, FfiActionHandler, FfiActivationHandler,
-    FfiDeactivationHandler,
+    tree_update_factory_userdata,
 };
 
 pub struct ios_queued_events {
@@ -25,7 +25,7 @@ impl BoxCastPtr for ios_queued_events {}
 
 impl ios_queued_events {
     /// Memory is also freed when calling this function.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_queued_events_raise(events: *mut ios_queued_events) {
         let events = box_from_ptr(events);
         events.raise();
@@ -49,7 +49,7 @@ impl ios_adapter {
     /// # Safety
     ///
     /// `view` must be a valid, unreleased pointer to a `UIView`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub unsafe extern "C" fn accesskit_ios_adapter_new(
         view: *mut c_void,
         activation_handler: ActivationHandlerCallback,
@@ -64,22 +64,24 @@ impl ios_adapter {
         let action_handler = FfiActionHandler::new(action_handler, action_handler_userdata);
         let deactivation_handler =
             FfiDeactivationHandler::new(deactivation_handler, deactivation_handler_userdata);
-        let adapter = Adapter::new(
-            view,
-            activation_handler,
-            action_handler,
-            deactivation_handler,
-        );
+        let adapter = unsafe {
+            Adapter::new(
+                view,
+                activation_handler,
+                action_handler,
+                deactivation_handler,
+            )
+        };
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_adapter_free(adapter: *mut ios_adapter) {
         drop(box_from_ptr(adapter));
     }
 
     /// You must call `accesskit_ios_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_adapter_update_if_active(
         adapter: *mut ios_adapter,
         update_factory: tree_update_factory,
@@ -98,7 +100,7 @@ impl ios_adapter {
     /// accessibility tree.
     ///
     /// You must call `accesskit_ios_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_adapter_view_did_appear(
         adapter: *mut ios_adapter,
     ) -> *mut ios_queued_events {
@@ -109,7 +111,7 @@ impl ios_adapter {
 
     /// Returns whether the view itself is an accessibility element.
     /// This corresponds to `isAccessibilityElement`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_adapter_is_accessibility_element(
         adapter: *mut ios_adapter,
     ) -> bool {
@@ -120,7 +122,7 @@ impl ios_adapter {
     /// Returns a pointer to an `NSArray` of accessibility elements
     /// contained in the view. Ownership of the pointer is not transferred.
     /// This corresponds to `accessibilityElements`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_adapter_accessibility_elements(
         adapter: *mut ios_adapter,
     ) -> *mut c_void {
@@ -131,7 +133,7 @@ impl ios_adapter {
     /// Returns a pointer to the accessibility element at the specified point,
     /// or null if none. Ownership of the pointer is not transferred.
     /// This corresponds to `accessibilityHitTest:`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_adapter_hit_test(
         adapter: *mut ios_adapter,
         x: f64,
@@ -142,7 +144,7 @@ impl ios_adapter {
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_adapter_debug(adapter: *const ios_adapter) -> *mut c_char {
         debug_repr_from_ptr(adapter)
     }
@@ -164,7 +166,7 @@ impl ios_subclassing_adapter {
     /// # Safety
     ///
     /// `view` must be a valid, unreleased pointer to a `UIView`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub unsafe extern "C" fn accesskit_ios_subclassing_adapter_new(
         view: *mut c_void,
         activation_handler: ActivationHandlerCallback,
@@ -179,12 +181,14 @@ impl ios_subclassing_adapter {
         let action_handler = FfiActionHandler::new(action_handler, action_handler_userdata);
         let deactivation_handler =
             FfiDeactivationHandler::new(deactivation_handler, deactivation_handler_userdata);
-        let adapter = SubclassingAdapter::new(
-            view,
-            activation_handler,
-            action_handler,
-            deactivation_handler,
-        );
+        let adapter = unsafe {
+            SubclassingAdapter::new(
+                view,
+                activation_handler,
+                action_handler,
+                deactivation_handler,
+            )
+        };
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
@@ -198,7 +202,7 @@ impl ios_subclassing_adapter {
     ///
     /// This function panics if the specified window doesn't currently have
     /// a root view controller with a view.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub unsafe extern "C" fn accesskit_ios_subclassing_adapter_for_window(
         window: *mut c_void,
         activation_handler: ActivationHandlerCallback,
@@ -213,16 +217,18 @@ impl ios_subclassing_adapter {
         let action_handler = FfiActionHandler::new(action_handler, action_handler_userdata);
         let deactivation_handler =
             FfiDeactivationHandler::new(deactivation_handler, deactivation_handler_userdata);
-        let adapter = SubclassingAdapter::for_window(
-            window,
-            activation_handler,
-            action_handler,
-            deactivation_handler,
-        );
+        let adapter = unsafe {
+            SubclassingAdapter::for_window(
+                window,
+                activation_handler,
+                action_handler,
+                deactivation_handler,
+            )
+        };
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_subclassing_adapter_free(
         adapter: *mut ios_subclassing_adapter,
     ) {
@@ -230,7 +236,7 @@ impl ios_subclassing_adapter {
     }
 
     /// You must call `accesskit_ios_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_ios_subclassing_adapter_update_if_active(
         adapter: *mut ios_subclassing_adapter,
         update_factory: tree_update_factory,

@@ -12,8 +12,8 @@ use std::{
 };
 
 use crate::{
-    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr, string_from_c_slice,
-    BoxCastPtr, CastPtr,
+    BoxCastPtr, CastPtr, box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, ref_from_ptr,
+    string_from_c_slice,
 };
 
 pub struct node {
@@ -29,7 +29,7 @@ impl BoxCastPtr for node {}
 macro_rules! clearer {
     ($c_clearer:ident, $clearer:ident) => {
         impl node {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_clearer(node: *mut node) {
                 let node = mut_from_ptr(node);
                 node.$clearer()
@@ -41,12 +41,12 @@ macro_rules! clearer {
 macro_rules! flag_methods {
     ($(($c_getter:ident, $getter:ident, $c_setter:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         $(impl node {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_getter(node: *const node) -> bool {
                 let node = ref_from_ptr(node);
                 node.$getter()
             }
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_setter(node: *mut node) {
                 let node = mut_from_ptr(node);
                 node.$setter()
@@ -60,7 +60,7 @@ macro_rules! array_setter {
     ($c_setter:ident, $setter:ident, $ffi_type:ty, $rust_type:ty) => {
         impl node {
             /// Caller is responsible for freeing `values`.
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_setter(node: *mut node, length: usize, values: *const $ffi_type) {
                 let node = mut_from_ptr(node);
                 let values = if length == 0 {
@@ -83,7 +83,7 @@ macro_rules! array_setter {
 macro_rules! property_getters {
     ($c_getter:ident, $getter:ident, *const $getter_result:tt) => {
         impl node {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_getter(node: *const node) -> *const $getter_result {
                 let node = ref_from_ptr(node);
                 match node.$getter() {
@@ -105,7 +105,7 @@ macro_rules! property_getters {
     };
     ($c_getter:ident, $getter:ident, $getter_result:tt) => {
         impl node {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_getter(node: *const node) -> $getter_result {
                 let node = ref_from_ptr(node);
                 node.$getter().into()
@@ -118,7 +118,7 @@ macro_rules! simple_property_methods {
     ($c_getter:ident, $getter:ident, $getter_result:tt, $c_setter:ident, $setter:ident, $setter_param:tt, $c_clearer:ident, $clearer:ident) => {
         property_getters! { $c_getter, $getter, $getter_result }
         impl node {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_setter(node: *mut node, value: $setter_param) {
                 let node = mut_from_ptr(node);
                 node.$setter(value.into());
@@ -129,7 +129,7 @@ macro_rules! simple_property_methods {
     ($c_getter:ident, $getter:ident, *const $getter_result:tt, $c_setter:ident, $setter:ident, $setter_param:tt, $c_clearer:ident, $clearer:ident) => {
         property_getters! { $c_getter, $getter, *const $getter_result }
         impl node {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_setter(node: *mut node, value: $setter_param) {
                 let node = mut_from_ptr(node);
                 node.$setter(Box::new(value));
@@ -191,7 +191,7 @@ macro_rules! vec_property_methods {
         $(property_getters! { $c_getter, $getter, $getter_result }
         array_setter! { $c_setter, $setter, $setter_param, $item_type }
         impl node {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_pusher(node: *mut node, item: $setter_param) {
                 let node = mut_from_ptr(node);
                 node.$pusher(item.into());
@@ -223,7 +223,7 @@ impl From<tree_id> for TreeId {
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub static ACCESSKIT_TREE_ID_ROOT: tree_id = tree_id { bytes: [0; 16] };
 
 slice_struct! { node_ids, NodeId, node_id }
@@ -249,7 +249,7 @@ macro_rules! string_property_methods {
     ($(($c_getter:ident, $getter:ident, $c_setter:ident, $c_setter_with_length:ident, $setter:ident, $c_clearer:ident, $clearer:ident)),+) => {
         $(impl node {
             /// Caller must call `accesskit_string_free` with the return value.
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_getter(node: *const node) -> *mut c_char {
                 let node = ref_from_ptr(node);
                 match node.$getter() {
@@ -258,14 +258,14 @@ macro_rules! string_property_methods {
                 }
             }
             /// Caller is responsible for freeing the memory pointed by `value`.
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_setter(node: *mut node, value: *const c_char) {
                 let node = mut_from_ptr(node);
                 let value = unsafe { CStr::from_ptr(value) };
                 node.$setter(value.to_string_lossy());
             }
             /// Caller is responsible for freeing the memory pointed by `value`.
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             pub extern "C" fn $c_setter_with_length(node: *mut node, value: *const c_char, length: usize) {
                 let node = mut_from_ptr(node);
                 node.$setter(unsafe { string_from_c_slice(value, length) });
@@ -390,7 +390,7 @@ macro_rules! unique_enum_property_methods {
 
 property_getters! { accesskit_node_role, role, Role }
 impl node {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_set_role(node: *mut node, value: Role) {
         let node = mut_from_ptr(node);
         node.set_role(value);
@@ -398,25 +398,25 @@ impl node {
 }
 
 impl node {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_supports_action(node: *const node, action: Action) -> bool {
         let node = ref_from_ptr(node);
         node.supports_action(action)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_add_action(node: *mut node, action: Action) {
         let node = mut_from_ptr(node);
         node.add_action(action);
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_remove_action(node: *mut node, action: Action) {
         let node = mut_from_ptr(node);
         node.remove_action(action);
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_clear_actions(node: *mut node) {
         let node = mut_from_ptr(node);
         node.clear_actions();
@@ -424,7 +424,7 @@ impl node {
 
     /// Return whether the specified action is in the set supported on this node's
     /// direct children in the filtered tree.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_child_supports_action(
         node: *const node,
         action: Action,
@@ -435,7 +435,7 @@ impl node {
 
     /// Add the specified action to the set supported on this node's direct
     /// children in the filtered tree.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_add_child_action(node: *mut node, action: Action) {
         let node = mut_from_ptr(node);
         node.add_child_action(action);
@@ -443,7 +443,7 @@ impl node {
 
     /// Remove the specified action from the set supported on this node's direct
     /// children in the filtered tree.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_remove_child_action(node: *mut node, action: Action) {
         let node = mut_from_ptr(node);
         node.remove_child_action(action);
@@ -451,7 +451,7 @@ impl node {
 
     /// Clear the set of actions supported on this node's direct children in the
     /// filtered tree.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_clear_child_actions(node: *mut node) {
         let node = mut_from_ptr(node);
         node.clear_child_actions();
@@ -507,7 +507,7 @@ simple_property_methods! {
 }
 
 /// Only call this function with a string that originated from AccessKit.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn accesskit_string_free(string: *mut c_char) {
     assert!(!string.is_null());
     drop(unsafe { CString::from_raw(string) });
@@ -678,7 +678,7 @@ impl From<&TextSelection> for text_selection {
 opt_struct! { opt_text_selection, text_selection }
 property_getters! { accesskit_node_text_selection, text_selection, opt_text_selection }
 impl node {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_set_text_selection(node: *mut node, value: text_selection) {
         let node = mut_from_ptr(node);
         node.set_text_selection(Box::new(value.into()));
@@ -697,7 +697,7 @@ impl CastPtr for custom_action {
 impl BoxCastPtr for custom_action {}
 
 impl custom_action {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_custom_action_new(id: i32) -> *mut custom_action {
         let action = CustomAction {
             id,
@@ -706,25 +706,25 @@ impl custom_action {
         BoxCastPtr::to_mut_ptr(action)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_custom_action_free(action: *mut custom_action) {
         drop(box_from_ptr(action));
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_custom_action_id(action: *const custom_action) -> i32 {
         let action = ref_from_ptr(action);
         action.id
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_custom_action_set_id(action: *mut custom_action, id: i32) {
         let action = mut_from_ptr(action);
         action.id = id;
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_custom_action_description(
         action: *const custom_action,
     ) -> *mut c_char {
@@ -733,7 +733,7 @@ impl custom_action {
     }
 
     /// Caller is responsible for freeing the memory pointed by `description`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_custom_action_set_description(
         action: *mut custom_action,
         description: *const c_char,
@@ -745,7 +745,7 @@ impl custom_action {
     }
 
     /// Caller is responsible for freeing the memory pointed by `description`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_custom_action_set_description_with_length(
         action: *mut custom_action,
         description: *const c_char,
@@ -769,7 +769,7 @@ impl CastPtr for custom_actions {
 impl BoxCastPtr for custom_actions {}
 
 impl custom_actions {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_custom_actions_free(value: *mut custom_actions) {
         let array = box_from_ptr(value);
         let values = unsafe { Vec::from_raw_parts(array.values, array.length, array.length) };
@@ -799,7 +799,7 @@ impl From<&[CustomAction]> for custom_actions {
 
 impl node {
     /// Caller must call `accesskit_custom_actions_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_custom_actions(node: *const node) -> *mut custom_actions {
         let node = ref_from_ptr(node);
         BoxCastPtr::to_mut_ptr(node.custom_actions().into())
@@ -807,7 +807,7 @@ impl node {
 
     /// Caller is responsible for freeing each `custom_action` in the array
     /// as well as the `values` array itself.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_set_custom_actions(
         node: *mut node,
         length: usize,
@@ -828,7 +828,7 @@ impl node {
     }
 
     /// Takes ownership of `action`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_push_custom_action(
         node: *mut node,
         action: *mut custom_action,
@@ -842,19 +842,19 @@ impl node {
 clearer! { accesskit_node_clear_custom_actions, clear_custom_actions }
 
 impl node {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_new(role: Role) -> *mut node {
         let node = Node::new(role);
         BoxCastPtr::to_mut_ptr(node)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_free(node: *mut node) {
         drop(box_from_ptr(node));
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_node_debug(node: *const node) -> *mut c_char {
         debug_repr_from_ptr(node)
     }
@@ -871,19 +871,19 @@ impl CastPtr for tree_info {
 impl BoxCastPtr for tree_info {}
 
 impl tree_info {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_new(root: node_id) -> *mut tree_info {
         let tree = TreeInfo::new(root.into());
         BoxCastPtr::to_mut_ptr(tree)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_free(tree: *mut tree_info) {
         drop(box_from_ptr(tree));
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_get_toolkit_name(tree: *const tree_info) -> *mut c_char {
         let tree = ref_from_ptr(tree);
         match tree.toolkit_name.as_ref() {
@@ -893,7 +893,7 @@ impl tree_info {
     }
 
     /// Caller is responsible for freeing the memory pointed by `toolkit_name`
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_set_toolkit_name(
         tree: *mut tree_info,
         toolkit_name: *const c_char,
@@ -905,7 +905,7 @@ impl tree_info {
     }
 
     /// Caller is responsible for freeing the memory pointed by `toolkit_name`
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_set_toolkit_name_with_length(
         tree: *mut tree_info,
         toolkit_name: *const c_char,
@@ -915,14 +915,14 @@ impl tree_info {
         tree.toolkit_name = Some(unsafe { string_from_c_slice(toolkit_name, length) })
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_clear_toolkit_name(tree: *mut tree_info) {
         let tree = mut_from_ptr(tree);
         tree.toolkit_name = None;
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_get_toolkit_version(
         tree: *const tree_info,
     ) -> *mut c_char {
@@ -934,7 +934,7 @@ impl tree_info {
     }
 
     /// Caller is responsible for freeing the memory pointed by `toolkit_version`
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_set_toolkit_version(
         tree: *mut tree_info,
         toolkit_version: *const c_char,
@@ -946,7 +946,7 @@ impl tree_info {
     }
 
     /// Caller is responsible for freeing the memory pointed by `toolkit_version`
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_set_toolkit_version_with_length(
         tree: *mut tree_info,
         toolkit_version: *const c_char,
@@ -956,14 +956,14 @@ impl tree_info {
         tree.toolkit_version = Some(unsafe { string_from_c_slice(toolkit_version, length) });
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_clear_toolkit_version(tree: *mut tree_info) {
         let tree = mut_from_ptr(tree);
         tree.toolkit_version = None;
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_info_debug(tree: *const tree_info) -> *mut c_char {
         debug_repr_from_ptr(tree)
     }
@@ -980,7 +980,7 @@ impl CastPtr for tree_update {
 impl BoxCastPtr for tree_update {}
 
 impl tree_update {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_with_focus(focus: node_id) -> *mut tree_update {
         let update = TreeUpdate {
             nodes: vec![],
@@ -991,7 +991,7 @@ impl tree_update {
         BoxCastPtr::to_mut_ptr(update)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_with_capacity_and_focus(
         capacity: usize,
         focus: node_id,
@@ -1005,14 +1005,14 @@ impl tree_update {
         BoxCastPtr::to_mut_ptr(update)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_free(update: *mut tree_update) {
         drop(box_from_ptr(update));
     }
 
     /// Appends the provided node to the tree update's list of nodes.
     /// Takes ownership of `node`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_push_node(
         update: *mut tree_update,
         id: node_id,
@@ -1023,7 +1023,7 @@ impl tree_update {
         update.nodes.push((id.into(), *node));
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_set_tree_info(
         update: *mut tree_update,
         tree: *mut tree_info,
@@ -1032,25 +1032,25 @@ impl tree_update {
         update.tree = Some(*box_from_ptr(tree));
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_clear_tree_info(update: *mut tree_update) {
         let update = mut_from_ptr(update);
         update.tree = None;
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_set_focus(update: *mut tree_update, focus: node_id) {
         let update = mut_from_ptr(update);
         update.focus = focus.into();
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_get_tree_id(update: *const tree_update) -> tree_id {
         let update = ref_from_ptr(update);
         update.tree_id.into()
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_set_tree_id(
         update: *mut tree_update,
         tree_id: tree_id,
@@ -1060,7 +1060,7 @@ impl tree_update {
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_tree_update_debug(tree_update: *const tree_update) -> *mut c_char {
         debug_repr_from_ptr(tree_update)
     }
@@ -1125,7 +1125,7 @@ impl From<ActionRequest> for action_request {
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn accesskit_action_request_free(request: *mut action_request) {
     drop(unsafe { Box::from_raw(request) });
 }

@@ -4,14 +4,14 @@
 // the LICENSE-MIT file), at your option.
 
 use accesskit_macos::{
-    add_focus_forwarder_to_window_class, Adapter, NSPoint, QueuedEvents, SubclassingAdapter,
+    Adapter, NSPoint, QueuedEvents, SubclassingAdapter, add_focus_forwarder_to_window_class,
 };
-use std::ffi::{c_char, c_void, CStr};
+use std::ffi::{CStr, c_char, c_void};
 
 use crate::{
-    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, string_from_c_slice, tree_update_factory,
-    tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
-    CastPtr, FfiActionHandler, FfiActivationHandler,
+    ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr, FfiActionHandler,
+    FfiActivationHandler, box_from_ptr, debug_repr_from_ptr, mut_from_ptr, string_from_c_slice,
+    tree_update_factory, tree_update_factory_userdata,
 };
 
 pub struct macos_queued_events {
@@ -26,7 +26,7 @@ impl BoxCastPtr for macos_queued_events {}
 
 impl macos_queued_events {
     /// Memory is also freed when calling this function.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_queued_events_raise(events: *mut macos_queued_events) {
         let events = box_from_ptr(events);
         events.raise();
@@ -47,7 +47,7 @@ impl macos_adapter {
     /// # Safety
     ///
     /// `view` must be a valid, unreleased pointer to an `NSView`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub unsafe extern "C" fn accesskit_macos_adapter_new(
         view: *mut c_void,
         is_view_focused: bool,
@@ -55,17 +55,17 @@ impl macos_adapter {
         action_handler_userdata: *mut c_void,
     ) -> *mut macos_adapter {
         let action_handler = FfiActionHandler::new(action_handler, action_handler_userdata);
-        let adapter = Adapter::new(view, is_view_focused, action_handler);
+        let adapter = unsafe { Adapter::new(view, is_view_focused, action_handler) };
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_adapter_free(adapter: *mut macos_adapter) {
         drop(box_from_ptr(adapter));
     }
 
     /// You must call `accesskit_macos_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_adapter_update_if_active(
         adapter: *mut macos_adapter,
         update_factory: tree_update_factory,
@@ -82,7 +82,7 @@ impl macos_adapter {
     /// Update the tree state based on whether the window is focused.
     ///
     /// You must call `accesskit_macos_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_adapter_update_view_focus_state(
         adapter: *mut macos_adapter,
         is_focused: bool,
@@ -93,7 +93,7 @@ impl macos_adapter {
     }
 
     /// Returns a pointer to an `NSArray`. Ownership of the pointer is not transferred.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_adapter_view_children(
         adapter: *mut macos_adapter,
         activation_handler: ActivationHandlerCallback,
@@ -106,7 +106,7 @@ impl macos_adapter {
     }
 
     /// Returns a pointer to an `NSObject`. Ownership of the pointer is not transferred.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_adapter_focus(
         adapter: *mut macos_adapter,
         activation_handler: ActivationHandlerCallback,
@@ -119,7 +119,7 @@ impl macos_adapter {
     }
 
     /// Returns a pointer to an `NSObject`. Ownership of the pointer is not transferred.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_adapter_hit_test(
         adapter: *mut macos_adapter,
         x: f64,
@@ -134,7 +134,7 @@ impl macos_adapter {
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_adapter_debug(adapter: *const macos_adapter) -> *mut c_char {
         debug_repr_from_ptr(adapter)
     }
@@ -154,7 +154,7 @@ impl macos_subclassing_adapter {
     /// # Safety
     ///
     /// `view` must be a valid, unreleased pointer to an `NSView`.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub unsafe extern "C" fn accesskit_macos_subclassing_adapter_new(
         view: *mut c_void,
         activation_handler: ActivationHandlerCallback,
@@ -165,7 +165,7 @@ impl macos_subclassing_adapter {
         let activation_handler =
             FfiActivationHandler::new(activation_handler, activation_handler_userdata);
         let action_handler = FfiActionHandler::new(action_handler, action_handler_userdata);
-        let adapter = SubclassingAdapter::new(view, activation_handler, action_handler);
+        let adapter = unsafe { SubclassingAdapter::new(view, activation_handler, action_handler) };
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
@@ -177,7 +177,7 @@ impl macos_subclassing_adapter {
     ///
     /// This function panics if the specified window doesn't currently have
     /// a content view.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub unsafe extern "C" fn accesskit_macos_subclassing_adapter_for_window(
         window: *mut c_void,
         activation_handler: ActivationHandlerCallback,
@@ -188,11 +188,12 @@ impl macos_subclassing_adapter {
         let activation_handler =
             FfiActivationHandler::new(activation_handler, activation_handler_userdata);
         let action_handler = FfiActionHandler::new(action_handler, action_handler_userdata);
-        let adapter = SubclassingAdapter::for_window(window, activation_handler, action_handler);
+        let adapter =
+            unsafe { SubclassingAdapter::for_window(window, activation_handler, action_handler) };
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_subclassing_adapter_free(
         adapter: *mut macos_subclassing_adapter,
     ) {
@@ -200,7 +201,7 @@ impl macos_subclassing_adapter {
     }
 
     /// You must call `accesskit_macos_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_subclassing_adapter_update_if_active(
         adapter: *mut macos_subclassing_adapter,
         update_factory: tree_update_factory,
@@ -217,7 +218,7 @@ impl macos_subclassing_adapter {
     /// Update the tree state based on whether the window is focused.
     ///
     /// You must call `accesskit_macos_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_macos_subclassing_adapter_update_view_focus_state(
         adapter: *mut macos_subclassing_adapter,
         is_focused: bool,
@@ -242,12 +243,12 @@ impl macos_subclassing_adapter {
 /// if this library is statically linked into the application's main executable.
 /// Also, this function assumes that the specified class is a subclass
 /// of `NSWindow`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class(
     class_name: *const c_char,
 ) {
     let class_name = unsafe { CStr::from_ptr(class_name).to_string_lossy() };
-    add_focus_forwarder_to_window_class(&class_name);
+    unsafe { add_focus_forwarder_to_window_class(&class_name) };
 }
 
 /// Modifies the specified class, which must be a subclass of `NSWindow`,
@@ -265,11 +266,11 @@ pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class(
 /// if this library is statically linked into the application's main executable.
 /// Also, this function assumes that the specified class is a subclass
 /// of `NSWindow`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn accesskit_macos_add_focus_forwarder_to_window_class_with_length(
     class_name: *const c_char,
     length: usize,
 ) {
-    let class_name = string_from_c_slice(class_name, length);
-    add_focus_forwarder_to_window_class(&class_name);
+    let class_name = unsafe { string_from_c_slice(class_name, length) };
+    unsafe { add_focus_forwarder_to_window_class(&class_name) };
 }

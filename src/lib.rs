@@ -41,7 +41,7 @@ mod unix;
 mod windows;
 
 use std::{
-    ffi::{c_char, CString},
+    ffi::{CString, c_char},
     fmt::Debug,
     slice,
 };
@@ -218,7 +218,7 @@ unsafe fn string_from_c_slice(value: *const c_char, length: usize) -> String {
         String::new()
     } else {
         #[allow(clippy::unnecessary_cast)]
-        let bytes = slice::from_raw_parts(value as *const u8, length);
+        let bytes = unsafe { slice::from_raw_parts(value as *const u8, length) };
         String::from_utf8_lossy(bytes).into_owned()
     }
 }
