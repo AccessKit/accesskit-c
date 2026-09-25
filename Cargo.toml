@@ -4,7 +4,7 @@ version = "0.23.0"
 authors = ["The AccessKit contributors"]
 license = "MIT OR Apache-2.0"
 publish = false
-edition = "2021"
+edition = "2024"
 rust-version = "1.87"
 
 [lib]

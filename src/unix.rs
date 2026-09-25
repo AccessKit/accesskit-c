@@ -8,10 +8,10 @@ use accesskit_unix::Adapter;
 use std::ffi::{c_char, c_void};
 
 use crate::{
+    ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr,
+    DeactivationHandlerCallback, FfiActionHandler, FfiActivationHandler, FfiDeactivationHandler,
     box_from_ptr, debug_repr_from_ptr, mut_from_ptr, tree_update_factory,
-    tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
-    CastPtr, DeactivationHandlerCallback, FfiActionHandler, FfiActivationHandler,
-    FfiDeactivationHandler,
+    tree_update_factory_userdata,
 };
 
 pub struct unix_adapter {
@@ -26,7 +26,7 @@ impl BoxCastPtr for unix_adapter {}
 
 impl unix_adapter {
     /// All of the handlers will always be called from another thread.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_unix_adapter_new(
         activation_handler: ActivationHandlerCallback,
         activation_handler_userdata: *mut c_void,
@@ -44,7 +44,7 @@ impl unix_adapter {
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_unix_adapter_free(adapter: *mut unix_adapter) {
         drop(box_from_ptr(adapter));
     }
@@ -56,7 +56,7 @@ impl unix_adapter {
     ///
     /// Since an application can not get the position of its window under
     /// Wayland, calling this method only makes sense under X11.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_unix_adapter_set_root_window_bounds(
         adapter: *mut unix_adapter,
         outer: Rect,
@@ -66,7 +66,7 @@ impl unix_adapter {
         adapter.set_root_window_bounds(outer, inner);
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_unix_adapter_update_if_active(
         adapter: *mut unix_adapter,
         update_factory: tree_update_factory,
@@ -79,7 +79,7 @@ impl unix_adapter {
     }
 
     /// Update the tree state based on whether the window is focused.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_unix_adapter_update_window_focus_state(
         adapter: *mut unix_adapter,
         is_focused: bool,
@@ -89,7 +89,7 @@ impl unix_adapter {
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_unix_adapter_debug(adapter: *const unix_adapter) -> *mut c_char {
         debug_repr_from_ptr(adapter)
     }

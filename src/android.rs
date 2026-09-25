@@ -7,9 +7,9 @@ use accesskit_android::*;
 use std::os::raw::c_void;
 
 use crate::{
-    box_from_ptr, mut_from_ptr, ref_from_ptr, tree_update_factory, tree_update_factory_userdata,
     ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr, FfiActionHandler,
-    FfiActivationHandler,
+    FfiActivationHandler, box_from_ptr, mut_from_ptr, ref_from_ptr, tree_update_factory,
+    tree_update_factory_userdata,
 };
 
 pub struct android_platform_action {
@@ -23,7 +23,7 @@ impl CastPtr for android_platform_action {
 impl BoxCastPtr for android_platform_action {}
 
 impl android_platform_action {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_platform_action_from_java(
         env: *mut jni::sys::JNIEnv,
         action: jni::sys::jint,
@@ -35,7 +35,7 @@ impl android_platform_action {
         BoxCastPtr::to_nullable_mut_ptr(platform_action)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_platform_action_free(action: *mut android_platform_action) {
         drop(box_from_ptr(action));
     }
@@ -53,7 +53,7 @@ impl BoxCastPtr for android_queued_events {}
 
 impl android_queued_events {
     /// Memory is also freed when calling this function.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_queued_events_raise(
         events: *mut android_queued_events,
         env: *mut jni::sys::JNIEnv,
@@ -77,19 +77,19 @@ impl CastPtr for android_adapter {
 impl BoxCastPtr for android_adapter {}
 
 impl android_adapter {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_adapter_new() -> *mut android_adapter {
         let adapter = Adapter::default();
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_adapter_free(adapter: *mut android_adapter) {
         drop(box_from_ptr(adapter));
     }
 
     /// You must call `accesskit_android_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_adapter_update_if_active(
         adapter: *mut android_adapter,
         update_factory: tree_update_factory,
@@ -103,7 +103,7 @@ impl android_adapter {
         BoxCastPtr::to_nullable_mut_ptr(events)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_adapter_create_accessibility_node_info(
         adapter: *mut android_adapter,
         activation_handler: ActivationHandlerCallback,
@@ -127,7 +127,7 @@ impl android_adapter {
             .into_raw()
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_adapter_find_focus(
         adapter: *mut android_adapter,
         activation_handler: ActivationHandlerCallback,
@@ -147,7 +147,7 @@ impl android_adapter {
     }
 
     /// You must call `accesskit_android_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_adapter_perform_action(
         adapter: *mut android_adapter,
         action_handler: ActionHandlerCallback,
@@ -163,7 +163,7 @@ impl android_adapter {
     }
 
     /// You must call `accesskit_android_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_adapter_on_hover_event(
         adapter: *mut android_adapter,
         activation_handler: ActivationHandlerCallback,
@@ -191,7 +191,7 @@ impl CastPtr for android_injecting_adapter {
 impl BoxCastPtr for android_injecting_adapter {}
 
 impl android_injecting_adapter {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_injecting_adapter_new(
         env: *mut jni::sys::JNIEnv,
         host: jni::sys::jobject,
@@ -209,14 +209,14 @@ impl android_injecting_adapter {
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_injecting_adapter_free(
         adapter: *mut android_injecting_adapter,
     ) {
         drop(box_from_ptr(adapter));
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_android_injecting_adapter_update_if_active(
         adapter: *mut android_injecting_adapter,
         update_factory: tree_update_factory,

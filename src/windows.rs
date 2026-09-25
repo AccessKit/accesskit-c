@@ -7,9 +7,9 @@ use accesskit_windows::*;
 use std::ffi::{c_char, c_void};
 
 use crate::{
-    box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct, tree_update_factory,
-    tree_update_factory_userdata, ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr,
-    CastPtr, FfiActionHandler, FfiActivationHandler,
+    ActionHandlerCallback, ActivationHandlerCallback, BoxCastPtr, CastPtr, FfiActionHandler,
+    FfiActivationHandler, box_from_ptr, debug_repr_from_ptr, mut_from_ptr, opt_struct,
+    tree_update_factory, tree_update_factory_userdata,
 };
 
 pub struct windows_queued_events {
@@ -24,7 +24,7 @@ impl BoxCastPtr for windows_queued_events {}
 
 impl windows_queued_events {
     /// Memory is also freed when calling this function.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_queued_events_raise(events: *mut windows_queued_events) {
         let events = box_from_ptr(events);
         events.raise();
@@ -44,7 +44,7 @@ impl CastPtr for windows_adapter {
 impl BoxCastPtr for windows_adapter {}
 
 impl windows_adapter {
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_adapter_new(
         hwnd: HWND,
         is_window_focused: bool,
@@ -56,13 +56,13 @@ impl windows_adapter {
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_adapter_free(adapter: *mut windows_adapter) {
         drop(box_from_ptr(adapter));
     }
 
     /// You must call `accesskit_windows_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_adapter_update_if_active(
         adapter: *mut windows_adapter,
         update_factory: tree_update_factory,
@@ -79,7 +79,7 @@ impl windows_adapter {
     /// Update the tree state based on whether the window is focused.
     ///
     /// You must call `accesskit_windows_queued_events_raise` on the returned pointer.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_adapter_update_window_focus_state(
         adapter: *mut windows_adapter,
         is_focused: bool,
@@ -89,7 +89,7 @@ impl windows_adapter {
         BoxCastPtr::to_nullable_mut_ptr(events)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_adapter_handle_wm_getobject(
         adapter: *mut windows_adapter,
         wparam: WPARAM,
@@ -105,7 +105,7 @@ impl windows_adapter {
     }
 
     /// Caller must call `accesskit_string_free` with the return value.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_adapter_debug(
         adapter: *const windows_adapter,
     ) -> *mut c_char {
@@ -135,7 +135,7 @@ impl windows_subclassing_adapter {
     /// # Panics
     ///
     /// Panics if the window is already visible.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_subclassing_adapter_new(
         hwnd: HWND,
         activation_handler: ActivationHandlerCallback,
@@ -150,7 +150,7 @@ impl windows_subclassing_adapter {
         BoxCastPtr::to_mut_ptr(adapter)
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_subclassing_adapter_free(
         adapter: *mut windows_subclassing_adapter,
     ) {
@@ -158,7 +158,7 @@ impl windows_subclassing_adapter {
     }
 
     /// You must call `accesskit_windows_queued_events_raise` on the returned pointer. It can be null if the adapter is not active.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     pub extern "C" fn accesskit_windows_subclassing_adapter_update_if_active(
         adapter: *mut windows_subclassing_adapter,
         update_factory: tree_update_factory,
