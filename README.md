@@ -28,7 +28,7 @@ See [the `examples` directory](https://github.com/AccessKit/accesskit-c/tree/mai
 
 Prerequisites:
 
-- [Rust](https://rustup.rs/)
+- [Rust](https://rustup.rs/), version 1.87 or higher
 - [CMake](https://cmake.org/), version 3.20 or higher
 
 In the root directory of this repository, CMake can be used like this to build the project:
