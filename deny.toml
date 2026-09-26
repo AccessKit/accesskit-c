@@ -43,7 +43,7 @@ highlight = "all"
 allow = []
 deny = []
 skip = [
-    "winnow:<1.0.4",
+    "syn:<3",
 ]
 skip-tree = []
 
