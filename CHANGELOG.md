@@ -76,6 +76,14 @@
   * dependencies
     * accesskit_unix bumped from 0.11.0 to 0.11.1
 
+## [0.23.1](https://github.com/AccessKit/accesskit-c/compare/0.23.0...0.23.1) (2026-09-26)
+
+
+### Bug Fixes
+
+* Update minimum supported Rust version to 1.87 ([#111](https://github.com/AccessKit/accesskit-c/issues/111)) ([82dbc6d](https://github.com/AccessKit/accesskit-c/commit/82dbc6da9c3d0d39ce0a1cdc1895a7d04318aeea))
+* Update zbus_xml to 5.2 ([#103](https://github.com/AccessKit/accesskit-c/issues/103)) ([2f95fad](https://github.com/AccessKit/accesskit-c/commit/2f95fad4ad07afaa4b62c8698ba7dc21be8a278f))
+
 ## [0.23.0](https://github.com/AccessKit/accesskit-c/compare/0.22.3...0.23.0) (2026-09-07)
 
 
