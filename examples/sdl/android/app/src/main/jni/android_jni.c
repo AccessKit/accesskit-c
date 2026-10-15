@@ -1,4 +1,4 @@
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <accesskit.h>
 #include <jni.h>
 #include <stdbool.h>
@@ -11,7 +11,7 @@ extern void *get_action_handler_state(void);
 extern accesskit_tree_update *get_pending_update(void);
 
 void android_request_accessibility_update(void) {
-  JNIEnv *env = SDL_AndroidGetJNIEnv();
+  JNIEnv *env = (JNIEnv *)SDL_GetAndroidJNIEnv();
   if (env != NULL) {
     jclass cls = (*env)->FindClass(
         env, "dev/accesskit/sdl_example/AccessKitSDLActivity");

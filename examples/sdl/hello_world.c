@@ -1,5 +1,5 @@
-#include <SDL.h>
-#include <SDL_syswm.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,7 +19,7 @@ extern void android_request_accessibility_update(void);
 /* Android-specific globals for marshaling updates to UI thread */
 static accesskit_tree_update_factory g_pending_update_factory = NULL;
 static void *g_pending_update_userdata = NULL;
-static SDL_mutex *g_update_mutex = NULL;
+static SDL_Mutex *g_update_mutex = NULL;
 #endif
 
 const char WINDOW_TITLE[] = "Hello world";
@@ -83,25 +83,25 @@ void accesskit_sdl_adapter_init(
     accesskit_deactivation_handler_callback deactivation_handler,
     void *deactivation_handler_userdata) {
 #if defined(__APPLE__)
-  accesskit_macos_add_focus_forwarder_to_window_class("SDLWindow");
-  SDL_SysWMinfo wmInfo;
-  SDL_VERSION(&wmInfo.version);
-  SDL_GetWindowWMInfo(window, &wmInfo);
+  accesskit_macos_add_focus_forwarder_to_window_class("SDL3Window");
+  void *ns_window =
+      SDL_GetPointerProperty(SDL_GetWindowProperties(window),
+                             SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, NULL);
   adapter->adapter = accesskit_macos_subclassing_adapter_for_window(
-      (void *)wmInfo.info.cocoa.window, activation_handler,
-      activation_handler_userdata, action_handler, action_handler_userdata);
+      ns_window, activation_handler, activation_handler_userdata,
+      action_handler, action_handler_userdata);
 #elif defined(UNIX)
+  (void)window;
   adapter->adapter = accesskit_unix_adapter_new(
       activation_handler, activation_handler_userdata, action_handler,
       action_handler_userdata, deactivation_handler,
       deactivation_handler_userdata);
 #elif defined(_WIN32)
-  SDL_SysWMinfo wmInfo;
-  SDL_VERSION(&wmInfo.version);
-  SDL_GetWindowWMInfo(window, &wmInfo);
+  HWND hwnd = SDL_GetPointerProperty(SDL_GetWindowProperties(window),
+                                     SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
   adapter->adapter = accesskit_windows_subclassing_adapter_new(
-      wmInfo.info.win.window, activation_handler, activation_handler_userdata,
-      action_handler, action_handler_userdata);
+      hwnd, activation_handler, activation_handler_userdata, action_handler,
+      action_handler_userdata);
 #elif defined(__ANDROID__)
   (void)adapter;
   (void)window;
@@ -211,7 +211,7 @@ void accesskit_sdl_adapter_update_root_window_bounds(
 struct window_state {
   accesskit_node_id focus;
   const char *announcement;
-  SDL_mutex *mutex;
+  SDL_Mutex *mutex;
 };
 
 void window_state_init(struct window_state *state) {
@@ -304,7 +304,7 @@ void window_state_set_focus(struct window_state *state,
 
 struct action_handler_state {
   Uint32 event_type;
-  Uint32 window_id;
+  SDL_WindowID window_id;
 };
 
 void do_action(accesskit_action_request *request, void *userdata) {
@@ -333,6 +333,7 @@ accesskit_tree_update *build_initial_tree(void *userdata) {
 }
 
 void deactivate_accessibility(void *userdata) {
+  (void)userdata;
   /* There's nothing in the state that depends on whether the adapter
      is active, so there's nothing to do here. */
 }
@@ -358,9 +359,6 @@ accesskit_tree_update *get_pending_update(void) {
   SDL_UnlockMutex(g_update_mutex);
   return update;
 }
-
-/* SDL uses SDL_main on Android */
-#define main SDL_main
 #endif
 
 int main(int argc, char *argv[]) {
@@ -380,12 +378,12 @@ int main(int argc, char *argv[]) {
   printf("Enable Orca with [Super]+[Alt]+[S].\n");
 #endif
 #endif /* !__ANDROID__ */
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
     fprintf(stderr, "SDL initialization failed: (%s)\n", SDL_GetError());
     return -1;
   }
   Uint32 user_event = SDL_RegisterEvents(1);
-  if (user_event == (Uint32)-1) {
+  if (user_event == 0) {
     fprintf(stderr, "Couldn't register user event: (%s)\n", SDL_GetError());
     return -1;
   }
@@ -393,10 +391,9 @@ int main(int argc, char *argv[]) {
   struct window_state state;
   window_state_init(&state);
   SDL_Window *window =
-      SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED,
-                       SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_HIDDEN);
+      SDL_CreateWindow(WINDOW_TITLE, 800, 600, SDL_WINDOW_HIDDEN);
   SDL_Surface *screen_surface = SDL_GetWindowSurface(window);
-  Uint32 window_id = SDL_GetWindowID(window);
+  SDL_WindowID window_id = SDL_GetWindowID(window);
   struct action_handler_state action_handler = {user_event, window_id};
 #if defined(__ANDROID__)
   g_window_state = &state;
@@ -411,28 +408,29 @@ int main(int argc, char *argv[]) {
 
   SDL_Event event;
   while (SDL_WaitEvent(&event)) {
-    if (event.type == SDL_QUIT) {
+    if (event.type == SDL_EVENT_QUIT) {
       break;
-    } else if (event.type == SDL_WINDOWEVENT &&
+    } else if (event.type >= SDL_EVENT_WINDOW_FIRST &&
+               event.type <= SDL_EVENT_WINDOW_LAST &&
                event.window.windowID == window_id) {
-      switch (event.window.event) {
-        case SDL_WINDOWEVENT_FOCUS_GAINED:
+      switch (event.type) {
+        case SDL_EVENT_WINDOW_FOCUS_GAINED:
           accesskit_sdl_adapter_update_window_focus_state(&adapter, true);
           break;
-        case SDL_WINDOWEVENT_FOCUS_LOST:
+        case SDL_EVENT_WINDOW_FOCUS_LOST:
           accesskit_sdl_adapter_update_window_focus_state(&adapter, false);
           break;
-        case SDL_WINDOWEVENT_MAXIMIZED:
-        case SDL_WINDOWEVENT_MOVED:
-        case SDL_WINDOWEVENT_RESIZED:
-        case SDL_WINDOWEVENT_RESTORED:
-        case SDL_WINDOWEVENT_SIZE_CHANGED:
-        case SDL_WINDOWEVENT_SHOWN:
+        case SDL_EVENT_WINDOW_MAXIMIZED:
+        case SDL_EVENT_WINDOW_MOVED:
+        case SDL_EVENT_WINDOW_RESIZED:
+        case SDL_EVENT_WINDOW_RESTORED:
+        case SDL_EVENT_WINDOW_SHOWN:
           accesskit_sdl_adapter_update_root_window_bounds(&adapter, window);
           break;
       }
-    } else if (event.type == SDL_KEYDOWN && event.key.windowID == window_id) {
-      switch (event.key.keysym.sym) {
+    } else if (event.type == SDL_EVENT_KEY_DOWN &&
+               event.key.windowID == window_id) {
+      switch (event.key.key) {
         case SDLK_TAB:
           window_state_lock(&state);
           accesskit_node_id new_focus =
@@ -460,8 +458,8 @@ int main(int argc, char *argv[]) {
         window_state_unlock(&state);
       }
     }
-    SDL_FillRect(screen_surface, NULL,
-                 SDL_MapRGB(&(*screen_surface->format), 0x00, 0x00, 0x00));
+    SDL_FillSurfaceRect(screen_surface, NULL,
+                        SDL_MapSurfaceRGB(screen_surface, 0x00, 0x00, 0x00));
     SDL_UpdateWindowSurface(window);
   }
 
