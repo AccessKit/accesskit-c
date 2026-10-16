@@ -35,7 +35,7 @@ public class AccessKitSDLActivity extends SDLActivity {
 
     @Override
     protected String[] getLibraries() {
-        return new String[] {"SDL2", "hello_world"};
+        return new String[] {"SDL3", "hello_world"};
     }
 
     @Override

@@ -8,18 +8,18 @@ The process will vary based on your operating system.
 
 ### Windows:
 
-First download an SDL2 development package from the project's [GitHub release page](https://github.com/libsdl-org/SDL/releases) (SDL2-devel-2.x.y-VC.zip for MSVC) and extract it.
+First download an SDL3 development package from the project's [GitHub release page](https://github.com/libsdl-org/SDL/releases) (SDL3-devel-3.x.y-VC.zip for MSVC) and extract it.
 
 ```bash
-cmake -S . -B build -DACCESSKIT_DIR="../.." -DSDL2_DIR="<PATH_TO_SDL2_PACKAGE>/cmake"
+cmake -S . -B build -DACCESSKIT_DIR="../.." -DSDL3_DIR="<PATH_TO_SDL3_PACKAGE>/cmake"
 cmake --build build --config Release
 ```
 
-You will then need to copy `SDL2.dll` into the `build/Release` folder.
+You will then need to copy `SDL3.dll` into the `build/Release` folder.
 
 ### Linux
 
-Make sure to install SDL2 and its development package.
+Make sure to install SDL3 and its development package.
 
 ```bash
 cmake -S . -B build -DACCESSKIT_DIR="../.." -DCMAKE_BUILD_TYPE=Release
@@ -28,7 +28,7 @@ cmake --build build
 
 ### macOS
 
-First download an SDL2 package from the project's [GitHub release page](https://github.com/libsdl-org/SDL/releases) (SDL2-2.x.y.dmg) and copy `SDL2.framework` to `/Library/Frameworks`.
+First download an SDL3 package from the project's [GitHub release page](https://github.com/libsdl-org/SDL/releases) (SDL3-3.x.y.dmg) and copy both `SDL3.xcframework` and `share` to `~/Library/Frameworks`.
 
 ```bash
 cmake -S . -B build -DACCESSKIT_DIR="../.." -DCMAKE_BUILD_TYPE=Release
@@ -37,7 +37,7 @@ cmake --build build
 
 ### Android
 
-You will need to build SDL2 for Android (see [SDL Android README](https://github.com/libsdl-org/SDL/blob/main/docs/README-android.md)).
+You will need to build SDL3 for Android (see [SDL Android README](https://github.com/libsdl-org/SDL/blob/main/docs/README-android.md)).
 
 #### Building the Example APK
 
@@ -45,11 +45,11 @@ You will need to build SDL2 for Android (see [SDL Android README](https://github
 2. Configure `android/local.properties`:
    ```properties
    sdk.dir=/path/to/Android/Sdk
-   sdl2.dir=/path/to/SDL2-source
+   sdl3.dir=/path/to/SDL3-source
    accesskit.dir=/path/to/accesskit-c
    ```
 
-   - `sdl2.dir`: Path to SDL2 source directory containing `include/SDL.h`
+   - `sdl3.dir`: Path to SDL3 source directory containing `include/SDL3/SDL.h`
    - `accesskit.dir`: Path to accesskit-c root directory containing `include/accesskit.h`
 
 3. Build and install:
