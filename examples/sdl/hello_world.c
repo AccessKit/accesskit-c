@@ -30,12 +30,29 @@ const accesskit_node_id BUTTON_2_ID = 2;
 const accesskit_node_id ANNOUNCEMENT_ID = 3;
 #define INITIAL_FOCUS BUTTON_1_ID
 
-const accesskit_rect BUTTON_1_RECT = {20.0, 50.0, 400.0, 200.0};
+const accesskit_rect WINDOW_RECT = {0.0, 0.0, 393.0, 759.0};
 
-const accesskit_rect BUTTON_2_RECT = {20.0, 250.0, 400.0, 400.0};
+const accesskit_rect BUTTON_1_RECT = {20.0, 20.0, 200.0, 64.0};
+
+const accesskit_rect BUTTON_2_RECT = {20.0, 84.0, 200.0, 128.0};
 
 const Sint32 SET_FOCUS_MSG = 0;
 const Sint32 DO_DEFAULT_ACTION_MSG = 1;
+
+accesskit_vec2 safe_area_inset(SDL_Window *window) {
+  accesskit_vec2 inset = {0.0, 0.0};
+#if defined(ACCESSKIT_IOS)
+  SDL_Rect safe_area;
+  if (SDL_GetWindowSafeArea(window, &safe_area)) {
+    float density = SDL_GetWindowPixelDensity(window);
+    inset.x = safe_area.x * density;
+    inset.y = safe_area.y * density;
+  }
+#else
+  (void)window;
+#endif
+  return inset;
+}
 
 accesskit_node *build_button(accesskit_node_id id, const char *label) {
   accesskit_rect rect;
@@ -61,8 +78,10 @@ accesskit_node *build_announcement(const char *text) {
 }
 
 struct accesskit_sdl_adapter {
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
   accesskit_macos_subclassing_adapter *adapter;
+#elif defined(ACCESSKIT_IOS)
+  accesskit_ios_subclassing_adapter *adapter;
 #elif defined(UNIX)
   accesskit_unix_adapter *adapter;
 #elif defined(_WIN32)
@@ -82,7 +101,7 @@ void accesskit_sdl_adapter_init(
     void *action_handler_userdata,
     accesskit_deactivation_handler_callback deactivation_handler,
     void *deactivation_handler_userdata) {
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
   accesskit_macos_add_focus_forwarder_to_window_class("SDL3Window");
   void *ns_window =
       SDL_GetPointerProperty(SDL_GetWindowProperties(window),
@@ -90,6 +109,18 @@ void accesskit_sdl_adapter_init(
   adapter->adapter = accesskit_macos_subclassing_adapter_for_window(
       ns_window, activation_handler, activation_handler_userdata,
       action_handler, action_handler_userdata);
+#elif defined(ACCESSKIT_IOS)
+  /* This subclasses the view of the window's root view controller. SDL
+     replaces that view when it attaches a new one (for instance when a
+     renderer or a window surface is created), so the adapter must be
+     created afterwards. */
+  void *ui_window =
+      SDL_GetPointerProperty(SDL_GetWindowProperties(window),
+                             SDL_PROP_WINDOW_UIKIT_WINDOW_POINTER, NULL);
+  adapter->adapter = accesskit_ios_subclassing_adapter_for_window(
+      ui_window, activation_handler, activation_handler_userdata,
+      action_handler, action_handler_userdata, deactivation_handler,
+      deactivation_handler_userdata);
 #elif defined(UNIX)
   (void)window;
   adapter->adapter = accesskit_unix_adapter_new(
@@ -117,9 +148,13 @@ void accesskit_sdl_adapter_init(
 }
 
 void accesskit_sdl_adapter_destroy(struct accesskit_sdl_adapter *adapter) {
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
   if (adapter->adapter != NULL) {
     accesskit_macos_subclassing_adapter_free(adapter->adapter);
+  }
+#elif defined(ACCESSKIT_IOS)
+  if (adapter->adapter != NULL) {
+    accesskit_ios_subclassing_adapter_free(adapter->adapter);
   }
 #elif defined(UNIX)
   if (adapter->adapter != NULL) {
@@ -140,12 +175,19 @@ void accesskit_sdl_adapter_update_if_active(
     struct accesskit_sdl_adapter *adapter,
     accesskit_tree_update_factory update_factory,
     void *update_factory_userdata) {
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
   accesskit_macos_queued_events *events =
       accesskit_macos_subclassing_adapter_update_if_active(
           adapter->adapter, update_factory, update_factory_userdata);
   if (events != NULL) {
     accesskit_macos_queued_events_raise(events);
+  }
+#elif defined(ACCESSKIT_IOS)
+  accesskit_ios_queued_events *events =
+      accesskit_ios_subclassing_adapter_update_if_active(
+          adapter->adapter, update_factory, update_factory_userdata);
+  if (events != NULL) {
+    accesskit_ios_queued_events_raise(events);
   }
 #elif defined(UNIX)
   accesskit_unix_adapter_update_if_active(adapter->adapter, update_factory,
@@ -170,7 +212,7 @@ void accesskit_sdl_adapter_update_if_active(
 
 void accesskit_sdl_adapter_update_window_focus_state(
     struct accesskit_sdl_adapter *adapter, bool is_focused) {
-#if defined(__APPLE__)
+#if defined(ACCESSKIT_MACOS)
   accesskit_macos_queued_events *events =
       accesskit_macos_subclassing_adapter_update_view_focus_state(
           adapter->adapter, is_focused);
@@ -180,8 +222,8 @@ void accesskit_sdl_adapter_update_window_focus_state(
 #elif defined(UNIX)
   accesskit_unix_adapter_update_window_focus_state(adapter->adapter,
                                                    is_focused);
-#elif defined(__ANDROID__)
-  /* On Android, focus is handled by the system */
+#elif defined(__ANDROID__) || defined(ACCESSKIT_IOS)
+  /* On Android and iOS, focus is handled by the system */
   (void)adapter;
   (void)is_focused;
 #endif
@@ -201,22 +243,33 @@ void accesskit_sdl_adapter_update_root_window_bounds(
   accesskit_rect inner_bounds = {x, y, x + width, y + height};
   accesskit_unix_adapter_set_root_window_bounds(adapter->adapter, outer_bounds,
                                                 inner_bounds);
-#elif defined(__ANDROID__)
-  /* On Android, bounds are managed by the system */
+#else
+  /* On other platforms, bounds are managed by the system */
   (void)adapter;
   (void)window;
 #endif
 }
 
+#define ANNOUNCEMENT_DELAY_MS 150
+
 struct window_state {
   accesskit_node_id focus;
   const char *announcement;
+  const char *pending_announcement;
+  Uint64 pending_announcement_queued_at;
+  double scale_factor;
+  accesskit_vec2 inset;
   SDL_Mutex *mutex;
 };
 
-void window_state_init(struct window_state *state) {
+void window_state_init(struct window_state *state, double scale_factor,
+                       accesskit_vec2 inset) {
   state->focus = INITIAL_FOCUS;
   state->announcement = NULL;
+  state->pending_announcement = NULL;
+  state->pending_announcement_queued_at = 0;
+  state->scale_factor = scale_factor;
+  state->inset = inset;
   state->mutex = SDL_CreateMutex();
 }
 
@@ -234,6 +287,10 @@ void window_state_unlock(struct window_state *state) {
 
 accesskit_node *window_state_build_root(const struct window_state *state) {
   accesskit_node *node = accesskit_node_new(ACCESSKIT_ROLE_WINDOW);
+  accesskit_node_set_bounds(node, WINDOW_RECT);
+  accesskit_node_set_transform(
+      node, accesskit_affine_mul(accesskit_affine_translate(state->inset),
+                                 accesskit_affine_scale(state->scale_factor)));
   accesskit_node_push_child(node, BUTTON_1_ID);
   accesskit_node_push_child(node, BUTTON_2_ID);
   if (state->announcement != NULL) {
@@ -274,7 +331,6 @@ accesskit_tree_update *build_tree_update_for_button_press(void *userdata) {
 }
 
 void window_state_press_button(struct window_state *state,
-                               struct accesskit_sdl_adapter *adapter,
                                accesskit_node_id id) {
   const char *text;
   if (id == BUTTON_1_ID) {
@@ -282,9 +338,26 @@ void window_state_press_button(struct window_state *state,
   } else {
     text = "You pressed button 2";
   }
-  state->announcement = text;
+  /* On iOS, VoiceOver announces the label of the activated button.
+     Postpone the live region update so the messages don't overlap. */
+  state->pending_announcement = text;
+  state->pending_announcement_queued_at = SDL_GetTicks();
+}
+
+bool window_state_flush_announcement(struct window_state *state,
+                                     struct accesskit_sdl_adapter *adapter) {
+  if (state->pending_announcement == NULL) {
+    return false;
+  }
+  if (SDL_GetTicks() - state->pending_announcement_queued_at <
+      ANNOUNCEMENT_DELAY_MS) {
+    return true;
+  }
+  state->announcement = state->pending_announcement;
+  state->pending_announcement = NULL;
   accesskit_sdl_adapter_update_if_active(
       adapter, build_tree_update_for_button_press, state);
+  return false;
 }
 
 accesskit_tree_update *build_tree_update_for_focus_update(void *userdata) {
@@ -330,6 +403,14 @@ accesskit_tree_update *build_initial_tree(void *userdata) {
   accesskit_tree_update *update = window_state_build_initial_tree(state);
   window_state_unlock(state);
   return update;
+}
+
+void window_state_resize(struct window_state *state,
+                         struct accesskit_sdl_adapter *adapter,
+                         SDL_Window *window) {
+  state->scale_factor = SDL_GetWindowDisplayScale(window);
+  state->inset = safe_area_inset(window);
+  accesskit_sdl_adapter_update_if_active(adapter, build_initial_tree, state);
 }
 
 void deactivate_accessibility(void *userdata) {
@@ -388,11 +469,18 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  /* AccessKit coordinates are in physical pixels. With a high pixel density
+     window, SDL's display scale matches the screen's scale factor on every
+     platform, and on iOS, the view's content scale factor does too. */
+  SDL_Window *window = SDL_CreateWindow(
+      WINDOW_TITLE, 800, 600,
+      SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_RESIZABLE);
+  /* On iOS, this replaces the window's view, so it must happen before the
+     adapter is created. */
+  SDL_GetWindowSurface(window);
   struct window_state state;
-  window_state_init(&state);
-  SDL_Window *window =
-      SDL_CreateWindow(WINDOW_TITLE, 800, 600, SDL_WINDOW_HIDDEN);
-  SDL_Surface *screen_surface = SDL_GetWindowSurface(window);
+  window_state_init(&state, SDL_GetWindowDisplayScale(window),
+                    safe_area_inset(window));
   SDL_WindowID window_id = SDL_GetWindowID(window);
   struct action_handler_state action_handler = {user_event, window_id};
 #if defined(__ANDROID__)
@@ -407,7 +495,18 @@ int main(int argc, char *argv[]) {
   SDL_ShowWindow(window);
 
   SDL_Event event;
-  while (SDL_WaitEvent(&event)) {
+  for (;;) {
+    window_state_lock(&state);
+    bool announcement_pending =
+        window_state_flush_announcement(&state, &adapter);
+    window_state_unlock(&state);
+    if (announcement_pending) {
+      if (!SDL_WaitEventTimeout(&event, ANNOUNCEMENT_DELAY_MS)) {
+        continue;
+      }
+    } else if (!SDL_WaitEvent(&event)) {
+      break;
+    }
     if (event.type == SDL_EVENT_QUIT) {
       break;
     } else if (event.type >= SDL_EVENT_WINDOW_FIRST &&
@@ -420,9 +519,20 @@ int main(int argc, char *argv[]) {
         case SDL_EVENT_WINDOW_FOCUS_LOST:
           accesskit_sdl_adapter_update_window_focus_state(&adapter, false);
           break;
+        case SDL_EVENT_WINDOW_RESIZED:
+          window_state_lock(&state);
+          window_state_resize(&state, &adapter, window);
+          window_state_unlock(&state);
+          accesskit_sdl_adapter_update_root_window_bounds(&adapter, window);
+          break;
+        case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+        case SDL_EVENT_WINDOW_SAFE_AREA_CHANGED:
+          window_state_lock(&state);
+          window_state_resize(&state, &adapter, window);
+          window_state_unlock(&state);
+          break;
         case SDL_EVENT_WINDOW_MAXIMIZED:
         case SDL_EVENT_WINDOW_MOVED:
-        case SDL_EVENT_WINDOW_RESIZED:
         case SDL_EVENT_WINDOW_RESTORED:
         case SDL_EVENT_WINDOW_SHOWN:
           accesskit_sdl_adapter_update_root_window_bounds(&adapter, window);
@@ -441,7 +551,7 @@ int main(int argc, char *argv[]) {
         case SDLK_SPACE:
           window_state_lock(&state);
           accesskit_node_id id = state.focus;
-          window_state_press_button(&state, &adapter, id);
+          window_state_press_button(&state, id);
           window_state_unlock(&state);
           break;
       }
@@ -453,11 +563,13 @@ int main(int argc, char *argv[]) {
         if (event.user.code == SET_FOCUS_MSG) {
           window_state_set_focus(&state, &adapter, target);
         } else if (event.user.code == DO_DEFAULT_ACTION_MSG) {
-          window_state_press_button(&state, &adapter, target);
+          window_state_press_button(&state, target);
         }
         window_state_unlock(&state);
       }
     }
+    /* The surface is recreated when the window is resized. */
+    SDL_Surface *screen_surface = SDL_GetWindowSurface(window);
     SDL_FillSurfaceRect(screen_surface, NULL,
                         SDL_MapSurfaceRGB(screen_surface, 0x00, 0x00, 0x00));
     SDL_UpdateWindowSurface(window);

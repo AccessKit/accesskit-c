@@ -3,7 +3,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/accesskit.cmake")
 add_library(accesskit INTERFACE)
 
 add_library(accesskit-static STATIC IMPORTED GLOBAL)
-find_library(_accesskit_static_lib accesskit "${ACCESSKIT_LIBRARIES_DIR}/static")
+find_library(_accesskit_static_lib NAMES accesskit PATHS "${ACCESSKIT_LIBRARIES_DIR}/static" NO_CMAKE_FIND_ROOT_PATH)
 set_property(
     TARGET accesskit-static
     PROPERTY IMPORTED_LOCATION "${_accesskit_static_lib}"
@@ -26,7 +26,7 @@ endif()
 
 add_library(accesskit-shared SHARED IMPORTED GLOBAL)
 if (_accesskit_os STREQUAL "windows")
-    find_library(_accesskit_implib accesskit "${ACCESSKIT_LIBRARIES_DIR}/shared")
+    find_library(_accesskit_implib NAMES accesskit PATHS "${ACCESSKIT_LIBRARIES_DIR}/shared" NO_CMAKE_FIND_ROOT_PATH)
     set_property(
         TARGET accesskit-shared
         PROPERTY IMPORTED_IMPLIB "${_accesskit_implib}"
