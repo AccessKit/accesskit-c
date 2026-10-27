@@ -28,8 +28,10 @@ mod android;
 mod ios;
 #[cfg(any(target_os = "macos", feature = "cbindgen"))]
 mod macos;
+#[cfg(any(target_env = "ohos", feature = "cbindgen"))]
+mod ohos;
 #[cfg(any(
-    target_os = "linux",
+    all(target_os = "linux", not(target_env = "ohos")),
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "netbsd",
@@ -60,8 +62,10 @@ pub use geometry::*;
 pub use ios::*;
 #[cfg(any(target_os = "macos", feature = "cbindgen"))]
 pub use macos::*;
+#[cfg(any(target_env = "ohos", feature = "cbindgen"))]
+pub use ohos::*;
 #[cfg(any(
-    target_os = "linux",
+    all(target_os = "linux", not(target_env = "ohos")),
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "netbsd",

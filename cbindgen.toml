@@ -62,6 +62,7 @@ renaming_overrides_prefixing = true
 
 [defines]
 "target_os = android" = "__ANDROID__"
+"target_env = ohos" = "__OHOS__"
 "target_os = linux" = "__linux__"
 "target_os = dragonfly" = "__DragonFly__"
 "target_os = freebsd" = "__FreeBSD__"

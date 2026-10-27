@@ -278,6 +278,7 @@ library_sources = files(
   'src/ios.rs',
   'src/lib.rs',
   'src/macos.rs',
+  'src/ohos.rs',
   'src/unix.rs',
   'src/windows.rs',
 )

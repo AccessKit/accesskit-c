@@ -661,12 +661,16 @@ typedef struct accesskit_macos_subclassing_adapter
 
 typedef struct accesskit_node accesskit_node;
 
+#if defined(__OHOS__)
+typedef struct accesskit_ohos_adapter accesskit_ohos_adapter;
+#endif
+
 typedef struct accesskit_tree_info accesskit_tree_info;
 
 typedef struct accesskit_tree_update accesskit_tree_update;
 
-#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
-     defined(__NetBSD__) || defined(__OpenBSD__))
+#if ((defined(__linux__) && !defined(__OHOS__)) || defined(__DragonFly__) || \
+     defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
 typedef struct accesskit_unix_adapter accesskit_unix_adapter;
 #endif
 
@@ -2989,8 +2993,72 @@ void accesskit_macos_add_focus_forwarder_to_window_class_with_length(
     const char *class_name, size_t length);
 #endif
 
-#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
-     defined(__NetBSD__) || defined(__OpenBSD__))
+#if defined(__OHOS__)
+/**
+ * Wrap an `ArkUI_AccessibilityProvider*` and register the single-instance
+ * callback table.
+ *
+ * Returns null if `provider` is null or if a single-instance callback table
+ * is already registered in this process.
+ *
+ * # Safety
+ *
+ * `provider` must be a valid `ArkUI_AccessibilityProvider*` pointer that
+ * remains alive until `accesskit_ohos_adapter_free` is called.
+ */
+struct accesskit_ohos_adapter *accesskit_ohos_adapter_new(
+    void *provider, accesskit_activation_handler_callback activation_handler,
+    void *activation_handler_userdata,
+    accesskit_action_handler_callback action_handler,
+    void *action_handler_userdata);
+#endif
+
+#if defined(__OHOS__)
+void accesskit_ohos_adapter_free(struct accesskit_ohos_adapter *adapter);
+#endif
+
+#if defined(__OHOS__)
+void accesskit_ohos_adapter_update_if_active(
+    struct accesskit_ohos_adapter *adapter,
+    accesskit_tree_update_factory update_factory,
+    void *update_factory_userdata);
+#endif
+
+#if defined(__OHOS__)
+/**
+ * Update the tree state based on whether the host XComponent or window is
+ * focused.
+ */
+void accesskit_ohos_adapter_update_window_focus_state(
+    struct accesskit_ohos_adapter *adapter, bool is_focused);
+#endif
+
+#if defined(__OHOS__)
+/**
+ * Apply an additional provider-local pixel offset to AccessKit bounds.
+ */
+void accesskit_ohos_adapter_set_screen_offset(
+    struct accesskit_ohos_adapter *adapter, int32_t x, int32_t y);
+#endif
+
+#if defined(__OHOS__)
+/**
+ * Drop the retained tree so it will be requested again on the next native
+ * accessibility query.
+ */
+void accesskit_ohos_adapter_deactivate(struct accesskit_ohos_adapter *adapter);
+#endif
+
+#if defined(__OHOS__)
+/**
+ * Caller must call `accesskit_string_free` with the return value.
+ */
+char *accesskit_ohos_adapter_debug(
+    const struct accesskit_ohos_adapter *adapter);
+#endif
+
+#if ((defined(__linux__) && !defined(__OHOS__)) || defined(__DragonFly__) || \
+     defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
 /**
  * All of the handlers will always be called from another thread.
  */
@@ -3003,13 +3071,13 @@ struct accesskit_unix_adapter *accesskit_unix_adapter_new(
     void *deactivation_handler_userdata);
 #endif
 
-#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
-     defined(__NetBSD__) || defined(__OpenBSD__))
+#if ((defined(__linux__) && !defined(__OHOS__)) || defined(__DragonFly__) || \
+     defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
 void accesskit_unix_adapter_free(struct accesskit_unix_adapter *adapter);
 #endif
 
-#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
-     defined(__NetBSD__) || defined(__OpenBSD__))
+#if ((defined(__linux__) && !defined(__OHOS__)) || defined(__DragonFly__) || \
+     defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
 /**
  * Set the bounds of the top-level window. The outer bounds contain any
  * window decoration and borders.
@@ -3024,16 +3092,16 @@ void accesskit_unix_adapter_set_root_window_bounds(
     struct accesskit_rect inner);
 #endif
 
-#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
-     defined(__NetBSD__) || defined(__OpenBSD__))
+#if ((defined(__linux__) && !defined(__OHOS__)) || defined(__DragonFly__) || \
+     defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
 void accesskit_unix_adapter_update_if_active(
     struct accesskit_unix_adapter *adapter,
     accesskit_tree_update_factory update_factory,
     void *update_factory_userdata);
 #endif
 
-#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
-     defined(__NetBSD__) || defined(__OpenBSD__))
+#if ((defined(__linux__) && !defined(__OHOS__)) || defined(__DragonFly__) || \
+     defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
 /**
  * Update the tree state based on whether the window is focused.
  */
@@ -3041,8 +3109,8 @@ void accesskit_unix_adapter_update_window_focus_state(
     struct accesskit_unix_adapter *adapter, bool is_focused);
 #endif
 
-#if (defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
-     defined(__NetBSD__) || defined(__OpenBSD__))
+#if ((defined(__linux__) && !defined(__OHOS__)) || defined(__DragonFly__) || \
+     defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
 /**
  * Caller must call `accesskit_string_free` with the return value.
  */
