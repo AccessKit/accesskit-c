@@ -57,3 +57,47 @@ You will need to build SDL3 for Android (see [SDL Android README](https://github
    cd android
    ./gradlew installDebug
    ```
+
+### OpenHarmony
+
+For general HarmonyOS / OpenHarmony application development and DevEco Studio setup, see the [HarmonyOS Application Development Overview](https://developer.huawei.com/consumer/en/doc/harmonyos-guides/start-overview).
+
+1. Build `accesskit-c` for OpenHarmony (`arm64-v8a` or `x86_64`):
+
+   ```bash
+   rustup target add aarch64-unknown-linux-ohos x86_64-unknown-linux-ohos
+   cargo install ohrs
+   ohrs build --release
+   ```
+
+2. Build SDL3 for OpenHarmony using the OpenHarmony NDK toolchain (see [SDL OpenHarmony README](https://github.com/libsdl-org/SDL/blob/main/docs/README-ohos.md)), and pass the OpenHarmony CMake toolchain file (`ohos.toolchain.cmake`) along with `OHOS_ARCH` (`arm64-v8a` or `x86_64`):
+
+   ```bash
+   cmake -S . -B build \
+     -DCMAKE_TOOLCHAIN_FILE="$OHOS_NDK_HOME/native/build/cmake/ohos.toolchain.cmake" \
+     -DOHOS_ARCH=arm64-v8a \
+     -DACCESSKIT_DIR="../.." \
+     -DSDL3_DIR="<PATH_TO_SDL3_OHOS_BUILD>" \
+     -DCMAKE_BUILD_TYPE=Release
+   cmake --build build
+   ```
+
+3. When embedding into an OpenHarmony `XComponent` host, either expose `SDL_PROP_WINDOW_OHOS_ACCESSIBILITY_PROVIDER_POINTER` on the `SDL_Window` properties or implement `void *ohos_get_accessibility_provider(SDL_Window *window)` to return the `ArkUI_AccessibilityProvider*` obtained via `OH_NativeXComponent_GetNativeAccessibilityProvider`.
+
+4. **Packaging, Signing, and Running on OpenHarmony QEMU**:
+   - Note that the official DevEco Studio emulator does not currently include the accessibility subsystem. To test accessibility without a physical device, use the OpenHarmony QEMU images from [`harmony-contrib/ohos-qemu`](https://github.com/harmony-contrib/ohos-qemu).
+   - Package the host `.hap` via DevEco Studio or `hvigorw default@PackageHap --mode module -p module=entry@default --no-daemon`, then sign it using [`hapsigner`](https://github.com/harmony-contrib/hapsigner):
+
+     ```bash
+     cargo install --git https://github.com/harmony-contrib/hapsigner
+     hap-sign sign entry-default-unsigned.hap --output entry-signed.hap --bundle-name <BUNDLE_NAME> --force
+     ```
+
+   - Connect to the running `ohos-qemu` instance and install/verify:
+
+     ```bash
+     hdc tconn 127.0.0.1:5558
+     hdc -t 127.0.0.1:5558 install entry-signed.hap
+     hdc -t 127.0.0.1:5558 shell aa start -b <BUNDLE_NAME> -a EntryAbility
+     hdc -t 127.0.0.1:5558 shell uitest dumpLayout -p /data/local/tmp/layout.json
+     ```

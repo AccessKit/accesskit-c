@@ -9,9 +9,17 @@
 extern void android_request_accessibility_update(void);
 #endif
 
+#if defined(__OHOS__)
+__attribute__((weak)) void *ohos_get_accessibility_provider(
+    SDL_Window *window) {
+  (void)window;
+  return NULL;
+}
+#endif
+
 #if ((defined(__linux__) || defined(__DragonFly__) || defined(__FreeBSD__) || \
       defined(__NetBSD__) || defined(__OpenBSD__)) &&                         \
-     !defined(__ANDROID__))
+     !defined(__ANDROID__) && !defined(__OHOS__))
 #define UNIX
 #endif
 
@@ -71,6 +79,8 @@ struct accesskit_sdl_adapter {
   /* On Android, the adapter is owned by the UI thread (JNI side).
      This struct only exists for API compatibility. */
   int dummy;
+#elif defined(__OHOS__)
+  accesskit_ohos_adapter *adapter;
 #endif
 };
 
@@ -113,6 +123,13 @@ void accesskit_sdl_adapter_init(
   (void)deactivation_handler_userdata;
   /* On Android, the adapter is owned by the UI thread (JNI side).
      Nothing to do here. */
+#elif defined(__OHOS__)
+  (void)deactivation_handler;
+  (void)deactivation_handler_userdata;
+  void *provider = ohos_get_accessibility_provider(window);
+  adapter->adapter = accesskit_ohos_adapter_new(
+      provider, activation_handler, activation_handler_userdata, action_handler,
+      action_handler_userdata);
 #endif
 }
 
@@ -133,6 +150,10 @@ void accesskit_sdl_adapter_destroy(struct accesskit_sdl_adapter *adapter) {
   /* On Android, the adapter is owned by the UI thread (JNI side).
      Nothing to do here. */
   (void)adapter;
+#elif defined(__OHOS__)
+  if (adapter->adapter != NULL) {
+    accesskit_ohos_adapter_free(adapter->adapter);
+  }
 #endif
 }
 
@@ -165,6 +186,11 @@ void accesskit_sdl_adapter_update_if_active(
   SDL_UnlockMutex(g_update_mutex);
 
   android_request_accessibility_update();
+#elif defined(__OHOS__)
+  if (adapter->adapter != NULL) {
+    accesskit_ohos_adapter_update_if_active(adapter->adapter, update_factory,
+                                            update_factory_userdata);
+  }
 #endif
 }
 
@@ -184,6 +210,11 @@ void accesskit_sdl_adapter_update_window_focus_state(
   /* On Android, focus is handled by the system */
   (void)adapter;
   (void)is_focused;
+#elif defined(__OHOS__)
+  if (adapter->adapter != NULL) {
+    accesskit_ohos_adapter_update_window_focus_state(adapter->adapter,
+                                                     is_focused);
+  }
 #endif
   /* On Windows, the subclassing adapter takes care of this. */
 }
@@ -201,8 +232,8 @@ void accesskit_sdl_adapter_update_root_window_bounds(
   accesskit_rect inner_bounds = {x, y, x + width, y + height};
   accesskit_unix_adapter_set_root_window_bounds(adapter->adapter, outer_bounds,
                                                 inner_bounds);
-#elif defined(__ANDROID__)
-  /* On Android, bounds are managed by the system */
+#elif defined(__ANDROID__) || defined(__OHOS__)
+  /* On Android and OpenHarmony, bounds are managed by the system */
   (void)adapter;
   (void)window;
 #endif
