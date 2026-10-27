@@ -57,3 +57,19 @@ You will need to build SDL3 for Android (see [SDL Android README](https://github
    cd android
    ./gradlew installDebug
    ```
+
+### OpenHarmony
+
+Build SDL3 for OpenHarmony using the OpenHarmony NDK toolchain (see [SDL OpenHarmony README](https://github.com/libsdl-org/SDL/blob/main/docs/README-ohos.md)), and pass the OpenHarmony CMake toolchain file (`ohos.toolchain.cmake`) along with `OHOS_ARCH` (`arm64-v8a` or `x86_64`):
+
+```bash
+cmake -S . -B build \
+  -DCMAKE_TOOLCHAIN_FILE="$OHOS_NDK_HOME/native/build/cmake/ohos.toolchain.cmake" \
+  -DOHOS_ARCH=arm64-v8a \
+  -DACCESSKIT_DIR="../.." \
+  -DSDL3_DIR="<PATH_TO_SDL3_OHOS_BUILD>" \
+  -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+When embedding into an OpenHarmony `XComponent` host, implement `void *ohos_get_accessibility_provider(SDL_Window *window)` to return the `ArkUI_AccessibilityProvider*` obtained via `OH_NativeXComponent_GetNativeAccessibilityProvider`.

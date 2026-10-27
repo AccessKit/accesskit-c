@@ -11,6 +11,8 @@ targets = [
   { triple = "x86_64-pc-windows-msvc" },
   { triple = "x86_64-unknown-linux-gnu" },
   { triple = "x86_64-unknown-linux-musl" },
+  { triple = "aarch64-unknown-linux-ohos" },
+  { triple = "x86_64-unknown-linux-ohos" },
 ]
 all-features = true
 
