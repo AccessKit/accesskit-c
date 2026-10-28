@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Check formatting
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: install stable toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: stable
           components: rustfmt
@@ -23,17 +23,17 @@ jobs:
         run: cargo fmt -- --check
 
       - name: clang-format
-        uses: jidicula/clang-format-action@v4.18.0
+        uses: jidicula/clang-format-action@654a770daa28443dd111d133e4083e21c1075674 # v4.18.0
         with:
           clang-format-version: 15
 
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: 'temurin'
           java-version: '21'
 
       - name: check Java formatting
-        uses: axel-op/googlejavaformat-action@v4
+        uses: axel-op/googlejavaformat-action@c1134ebd196c4cbffb077f9476585b0be8b6afcd # v4.0.0
         with:
           args: "--aosp --set-exit-if-changed"
 
@@ -57,16 +57,17 @@ jobs:
             target: aarch64-apple-ios-sim
     name: cargo clippy (${{ matrix.name }})
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: install stable toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
+          toolchain: stable
           components: clippy
           targets: ${{ matrix.target }}
 
       - name: restore cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       - name: cargo clippy
         run: cargo clippy ${{ matrix.target && format('--target {0}', matrix.target) }} --all-targets -- -D warnings
@@ -76,7 +77,7 @@ jobs:
     outputs:
       version: ${{ steps.step2.outputs.version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: step2
         run: echo "version=`cat Cargo.toml | sed -n 's/rust-version = "\(.*\)"/\1/p'`" >> "$GITHUB_OUTPUT"
 
@@ -102,8 +103,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: find-msrv
     steps:
-      - uses: actions/checkout@v7
-      - uses: EmbarkStudios/cargo-deny-action@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
         with:
           rust-version: ${{ needs.find-msrv.outputs.version }}
           log-level: error
@@ -118,15 +119,15 @@ jobs:
         os: [macOS-latest, windows-2025, ubuntu-latest]
     name: cargo test
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: install stable toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: ${{ needs.find-msrv.outputs.version }}
 
       - name: restore cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       - name: cargo test
         run: cargo test
@@ -135,18 +136,18 @@ jobs:
     runs-on: ubuntu-latest
     name: Check committed C header
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - uses: actions/setup-python@v7
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
     - run: pip install meson ninja
 
     - name: install nightly Rust toolchain
-      uses: dtolnay/rust-toolchain@master
+      uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
       with:
         toolchain: nightly-2025-03-27
 
     - name: install cbindgen
-      uses: dtolnay/install@master
+      uses: dtolnay/install@a75ae3c3a13004d4d2db69b04946c7f7687bda91 # master
       with:
         crate: cbindgen
 
