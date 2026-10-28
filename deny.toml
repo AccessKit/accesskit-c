@@ -17,7 +17,11 @@ all-features = true
 [advisories]
 db-path = "~/.cargo/advisory-db"
 db-urls = ["https://github.com/rustsec/advisory-db"]
-ignore = []
+ignore = [
+    { id = "RUSTSEC-2026-0370", reason = "zvariant is unmaintained and merged into zbus 6; we can't upgrade to zbus 6 yet" },
+    { id = "RUSTSEC-2026-0371", reason = "zbus_names is unmaintained and merged into zbus 6; we can't upgrade to zbus 6 yet" },
+    { id = "RUSTSEC-2026-0372", reason = "zvariant_derive is unmaintained and merged into zbus 6; we can't upgrade to zbus 6 yet" },
+]
 
 [licenses]
 allow = [
